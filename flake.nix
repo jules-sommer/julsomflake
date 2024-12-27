@@ -2,16 +2,14 @@
   inputs = {
     master.url = "github:nixos/nixpkgs/master";
     unstable.url = "github:nixos/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     unfree.url = "github:numtide/nixpkgs-unfree?ref=nixos-unstable";
+
+    sops-nix.url = "github:Mic92/sops-nix";
 
     home-manager = {
       url = "github:nix-community/home-manager/master";
       inputs.nixpkgs.follows = "unstable";
-    };
-
-    systems = {
-      url = "path:./flake.systems.nix";
-      flake = false;
     };
 
     utils.url = "github:numtide/flake-utils";
@@ -37,39 +35,31 @@
     }@inputs:
     let
       inherit (utils.lib) eachSystem system;
-      inherit (self.lib) makeChannelEachSystem makeChannel;
+      inherit (self.lib) makeChannel;
 
       supportedSystems = import ./flake.systems.nix;
 
-      channels = (
-        eachSystem supportedSystems (
-          system:
-          let
-            makeChannelWithSystem = makeChannel system;
-          in
-          {
-            master = makeChannelWithSystem inputs.master;
-            unfree = makeChannelWithSystem inputs.unfree;
-            unstable = makeChannelWithSystem inputs.unstable;
-          }
-        )
+      channels = eachSystem supportedSystems (
+        system:
+        let
+          makeChannelWithSystem = makeChannel system;
+        in
+        {
+          master = makeChannelWithSystem inputs.master;
+          unfree = makeChannelWithSystem inputs.unfree;
+          unstable = makeChannelWithSystem inputs.unstable;
+        }
       );
     in
     {
       inherit channels;
 
       lib = import ./lib/default.nix {
-        inherit (channels.unstable) lib;
-        inherit eachSystem;
+        inherit (inputs.unstable) lib;
+        inherit self inputs eachSystem;
       };
 
-      nixosModules.default =
-        { ... }:
-        {
-          imports = [
-            ./modules/default.nix
-          ];
-        };
+      nixosModules = import ./modules/default.nix;
 
       nixosConfigurations =
         let
@@ -77,24 +67,40 @@
           filterChannelsForSystem =
             system: channels: builtins.mapAttrs (name: channelSystems: channelSystems.${system}) channels;
 
-          sharedModules = [
+          sharedModules = with inputs; [
             self.nixosModules.default
-            inputs.home-manager.nixosModules.home-manager
+            home-manager.nixosModules.home-manager
+            sops-nix.nixosModules.sops
           ];
+
+          overlays = [
+            self.overlays.default
+            (final: prev: { neovim = inputs.nixvim.packages.${prev.system}.default; })
+          ];
+
         in
         {
           estradiol =
             let
               systemChannels = filterChannelsForSystem x86_64-linux channels;
               defaultChannel = systemChannels.unstable;
+              lib = self.lib.extendLib defaultChannel self.lib;
+
               pkgs = import defaultChannel._input {
                 system = x86_64-linux;
-                inherit (self) overlays;
+                inherit overlays;
               };
-              inherit (defaultChannel) lib;
             in
             lib.nixosSystem {
               system = x86_64-linux;
+              specialArgs = {
+                inherit
+                  pkgs
+                  lib
+                  self
+                  inputs
+                  ;
+              };
               modules = [
                 (_: {
                   _module.args = lib.mkDefault {
@@ -110,24 +116,45 @@
                     inputs.nixvim.packages.${x86_64-linux}.default
                   ];
                 })
-                inputs.home-manager.nixosModules.home-manager
-                ./modules/default.nix
+                inputs.stylix.nixosModules.stylix
+                self.nixosModules.stylix
                 ./hosts/estradiol
-              ];
+                (_: {
+                  home-manager = {
+                    useGlobalPkgs = true;
+                    useUserPackages = true;
+                    backupFileExtension = "backup";
+                    users.jules = import ./hosts/estradiol/home/default.nix;
+                  };
+                })
+              ] ++ sharedModules;
             };
 
           progesterone =
             let
               systemChannels = filterChannelsForSystem aarch64-linux channels;
               defaultChannel = systemChannels.unstable;
+              lib = self.lib.extendLib defaultChannel self.lib;
               pkgs = import defaultChannel._input {
                 system = aarch64-linux;
-                inherit (self) overlays;
+                overlays = [
+                  (_: prev: {
+                    lib = self.lib.extendLib prev self.lib;
+                  })
+
+                ] ++ overlays;
               };
-              inherit (defaultChannel) lib;
             in
             lib.nixosSystem {
               system = aarch64-linux;
+              specialArgs = {
+                inherit
+                  pkgs
+                  lib
+                  self
+                  inputs
+                  ;
+              };
               modules = [
                 (_: {
                   _module.args = lib.mkDefault {
@@ -138,11 +165,13 @@
                       inputs
                       ;
                   };
+
+                  environment.systemPackages = [
+                    inputs.nixvim.packages.${x86_64-linux}.default
+                  ];
                 })
-                inputs.home-manager.nixosModules.home-manager
-                ./modules/default.nix
                 ./hosts/progesterone
-              ];
+              ] ++ sharedModules;
             };
         };
       overlays = import ./overlays { inherit inputs channels; };

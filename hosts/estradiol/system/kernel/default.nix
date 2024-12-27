@@ -6,7 +6,6 @@
     package = pkgs.appimage-run.override {
       extraPkgs = pkgs: [
         pkgs.ffmpeg
-        pkgs.imagemagick
       ];
     };
   };
@@ -16,9 +15,6 @@
   ];
 
   boot = {
-    loader.systemd-boot.enable = true;
-    loader.efi.canTouchEfiVariables = true;
-
     kernelPackages = pkgs.linuxPackages_xanmod_latest;
     kernelParams = [ ];
     kernel = {

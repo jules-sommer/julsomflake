@@ -26,7 +26,9 @@ in
         friture
         sonic-visualiser
         pavucontrol
+        pwvucontrol
         helvum
+        coppwr
       ]
     );
 
@@ -36,6 +38,9 @@ in
 
     services.pipewire = {
       inherit (cfg.pipewire) enable;
+      wireplumber = {
+        inherit (cfg.pipewire) enable;
+      };
       alsa.enable = cfg.pipewire.enableBackCompat;
       alsa.support32Bit = cfg.pipewire.enableBackCompat;
       pulse.enable = cfg.pipewire.enableBackCompat;

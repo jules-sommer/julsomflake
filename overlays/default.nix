@@ -1,10 +1,15 @@
 { inputs, channels }:
 let
-  importOverlay = name: import ./${name} { inherit inputs channels; };
+  importOverlay = path: import path { inherit inputs channels; };
+  overlayIncludes = [
+    ./zig
+    ./zen-browser
+    ./unfree-pkgs
+  ];
 
-  zig = importOverlay "zig";
-  zen-browser = importOverlay "zen-browser";
-  unfree-pkgs = importOverlay "unfree-pkgs";
+  zig = importOverlay ./zig;
+  zen-browser = importOverlay ./zen-browser;
+  unfree-pkgs = importOverlay ./unfree-pkgs;
 
   # Combine all overlays
   allOverlays = [

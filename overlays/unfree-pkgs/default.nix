@@ -1,6 +1,6 @@
 { channels, ... }:
-_: _: {
-  inherit (channels.unfree.pkgs)
+_: prev: {
+  inherit (channels.unfree.${prev.system}.pkgs)
     masterpdfeditor
     graphite-cli
     steam
