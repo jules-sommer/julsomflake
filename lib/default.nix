@@ -5,9 +5,47 @@
   ...
 }:
 let
-  inherit (lib) types mkOption;
+  inherit (lib)
+    types
+    mkOption
+    filterAttrs
+    hasAttr
+    ;
 in
 rec {
+  # Returns a filtered attrset of users that are "normal users", i.e have key `isNormalUser = true;`
+  # all-users argument is the value of `config.users.users`
+  getNormalUsers = users: filterAttrs (_: userAttrs: userAttrs.isNormalUser or false) users;
+
+  getUserHomeDir = user: user.home or "/home/${user.name}";
+
+  getUserHomeDirFromStr =
+    users: user: if hasAttr user users then users.${user}.home else "/home/${user}";
+
+  getAllUserHomeDirs = users: lib.mapAttrs (_: getUserHomeDir) users;
+
+  enabled = {
+    enable = true;
+  };
+
+  disabled = {
+    enable = false;
+  };
+
+  enabled' =
+    cfg:
+    {
+      enable = true;
+    }
+    // cfg;
+
+  disabled' =
+    cfg:
+    {
+      enable = false;
+    }
+    // cfg;
+
   makeChannel = system: input: {
     inherit system;
     inherit (input) lib;

@@ -3,6 +3,7 @@
     master.url = "github:nixos/nixpkgs/master";
     unstable.url = "github:nixos/nixpkgs/nixos-unstable";
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    stable.url = "github:nixos/nixpkgs/nixos-24.11-small";
     unfree.url = "github:numtide/nixpkgs-unfree?ref=nixos-unstable";
 
     sops-nix.url = "github:Mic92/sops-nix";
@@ -20,12 +21,22 @@
       inputs.nixpkgs.follows = "unstable";
     };
 
-    nixvim.url = "github:jules-sommer/nixvim_flake";
+    nixvim = {
+      url = "github:jules-sommer/nixvim_flake";
+      inputs.zls.follows = "zls";
+    };
+
+    ghostty.url = "github:ghostty-org/ghostty";
 
     zls.url = "github:zigtools/zls";
     zig-overlay.url = "github:mitchellh/zig-overlay";
 
-    zen-browser.url = "github:MarceColl/zen-browser-flake";
+    emoji.url = "/home/jules/000_dev/000_nix/emoji-picker";
+
+    zen-browser = {
+      url = "github:MarceColl/zen-browser-flake";
+      inputs.nixpkgs.follows = "unstable";
+    };
   };
   outputs =
     {
@@ -48,6 +59,7 @@
           master = makeChannelWithSystem inputs.master;
           unfree = makeChannelWithSystem inputs.unfree;
           unstable = makeChannelWithSystem inputs.unstable;
+          stable = makeChannelWithSystem inputs.stable;
         }
       );
     in
@@ -65,7 +77,7 @@
         let
           inherit (system) x86_64-linux aarch64-linux;
           filterChannelsForSystem =
-            system: channels: builtins.mapAttrs (name: channelSystems: channelSystems.${system}) channels;
+            system: channels: builtins.mapAttrs (_: channelSystems: channelSystems.${system}) channels;
 
           sharedModules = with inputs; [
             self.nixosModules.default
@@ -75,7 +87,11 @@
 
           overlays = [
             self.overlays.default
-            (final: prev: { neovim = inputs.nixvim.packages.${prev.system}.default; })
+            (_: prev: { neovim = inputs.nixvim.packages.${prev.system}.default; })
+            (_: prev: { ghostty = inputs.ghostty.packages.${prev.system}.default; })
+            (_: prev: { emoji-picker = inputs.emoji.packages.${prev.system}.script; })
+            (_: prev: { inherit (channels.stable.${prev.system}.pkgs) sonic-visualiser wbg; })
+            (_: prev: { inherit (channels.master.${prev.system}.pkgs) jan; })
           ];
 
         in
@@ -102,20 +118,24 @@
                   ;
               };
               modules = [
-                (_: {
-                  _module.args = lib.mkDefault {
-                    inherit
-                      pkgs
-                      lib
-                      self
-                      inputs
-                      ;
-                  };
+                (
+                  { modulesPath, ... }:
+                  {
+                    _module.args = lib.mkDefault {
+                      inherit
+                        pkgs
+                        lib
+                        self
+                        inputs
+                        ;
+                    };
 
-                  environment.systemPackages = [
-                    inputs.nixvim.packages.${x86_64-linux}.default
-                  ];
-                })
+                    nixpkgs = { inherit pkgs; };
+                    environment.systemPackages = [
+                      inputs.nixvim.packages.${x86_64-linux}.default
+                    ];
+                  }
+                )
                 inputs.stylix.nixosModules.stylix
                 self.nixosModules.stylix
                 ./hosts/estradiol

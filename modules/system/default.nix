@@ -1,12 +1,7 @@
 {
   pkgs,
-  lib,
-  config,
   ...
 }:
-let
-  inherit (lib) mkIf;
-in
 {
   imports = [
     ./audio
@@ -18,6 +13,7 @@ in
     ./river
     ./users
     ./xanmod_kernel
+    ./fonts
   ];
 
   environment = {
@@ -32,6 +28,7 @@ in
 
     systemPackages = with pkgs; [
       tmux
+      gh
       protonvpn-cli
       radeontop
       nixfmt-rfc-style
@@ -45,23 +42,14 @@ in
     ];
   };
 
-  services.evremap = {
-    enable = false;
-    settings = {
-      device_name = "Evision RGB Keyboard";
-      dual_role = [
-        {
-          input = "KEY_CAPSLOCK";
-          hold = [ "KEY_LEFTCTRL" ];
-          tap = [ "KEY_ESC" ];
-        }
-      ];
-    };
-  };
-
-  xdg.icons.enable = true;
-
   programs = {
+    fuse = {
+      userAllowOther = true;
+      mountMax = 1000;
+    };
+    wireshark = {
+      enable = true;
+    };
     wshowkeys.enable = true;
     waybar.enable = true;
     git = {
@@ -86,48 +74,31 @@ in
     };
   };
 
-  fonts = {
-    fontDir.enable = true;
-    enableDefaultPackages = true;
-    fontconfig = {
+  services = {
+    evremap = {
       enable = true;
-      subpixel.rgba = "rgb";
-      includeUserConf = true;
-      antialias = true;
-      hinting = {
-        enable = true;
-        style = "full";
+      settings = {
+        device_name = "Evision RGB Keyboard";
+        dual_role = [
+          {
+            input = "KEY_CAPSLOCK";
+            hold = [ "KEY_CAPSLOCK" ];
+            tap = [ "KEY_GRAVE" ];
+          }
+        ];
       };
     };
-    packages =
-      (with pkgs.nerd-fonts; [
-        jetbrains-mono
-        fira-code
-        zed-mono
-        iosevka
-        victor-mono
-        sauce-code-pro
-        open-dyslexic
-        lilex
-        hack
-      ])
-      ++ (with pkgs; [
-        #   fira-code
-        #   jetbrains-mono
-        #   roboto-mono
-        #   roboto-slab
-        #   roboto-serif
-        #   fira-sans
-        #   source-sans
-        #   source-serif
-        #   source-code-pro
-        #   hack-font
-        #   noto-fonts
-        #   open-dyslexic
-        #   font-awesome
-        #   noto-fonts-emoji
-      ]);
+
+    protonmail-bridge = {
+      enable = true;
+      path = with pkgs; [
+        pass
+        gnome-keyring
+      ];
+    };
   };
+
+  xdg.icons.enable = true;
 
   time.timeZone = "America/Toronto";
   i18n.defaultLocale = "en_CA.UTF-8";

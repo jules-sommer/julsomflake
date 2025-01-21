@@ -19,13 +19,27 @@ in
   };
 
   config = {
+    programs.appimage = {
+      enable = true;
+      binfmt = true;
+      package = pkgs.appimage-run.override {
+        extraPkgs = pkgs: [
+          pkgs.ffmpeg
+        ];
+      };
+    };
+
+    systemd.tmpfiles.rules = [
+      "L /lib - - - - /run/current/system/lib"
+    ];
+
     boot =
       (mkIf cfg.zfs.enable {
         supportedFilesystems = [ "zfs" ];
         zfs.forceImportRoot = false;
       })
       // {
-
+        plymouth.enable = true;
         kernelPackages = pkgs.linuxPackages_xanmod_latest;
         kernelModules = with kernelModules; [
           v4l2loopback

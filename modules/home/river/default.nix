@@ -1,7 +1,38 @@
-{ lib, config, ... }:
+{
+  lib,
+  config,
+  pkgs,
+  ...
+}:
 let
-  inherit (lib) mkEnableOption;
+  inherit (lib)
+    mkEnableOption
+    foldr
+    ;
+  inherit (builtins)
+    head
+    zipAttrsWith
+    ;
   cfg = config.local.river;
+
+  modes = config.wayland.windowManager.river.settings.declare-mode;
+
+  mergeWithFn =
+    sets: fn:
+    foldr (
+      x: y:
+      zipAttrsWith fn [
+        x
+        y
+      ]
+    ) { } sets;
+
+  mergePriority = sets: mergeWithFn sets (name: head);
+
+  home = "/home/jules";
+  wallpaperFile = "${home}/060_media/010_wallpapers/zoe-love-bg/zoe-love-4k.png";
+  screenshotDir = "${home}/home/jules/060_media/005_screenshots";
+  screenshotCmd = ''grim -g "$(slurp -d)" - | tee ${screenshotDir}$(date +%Y-%m-%d_%H-%M-%S).png | wl-copy -t image/png'';
 in
 {
   options.local.river = {
@@ -9,12 +40,21 @@ in
   };
 
   config = {
+    xdg.portal.xdgOpenUsePortal = true;
+
     wayland.windowManager.river = {
       inherit (cfg) enable;
-      systemd.variables = [
-        "-all"
-      ];
-      systemd.enable = true;
+      systemd = {
+        enable = true;
+        variables = [
+          "DISPLAY"
+          "WAYLAND_DISPLAY"
+          "XDG_CURRENT_DESKTOP"
+          "NIXOS_OZONE_WL"
+          "XCURSOR_THEME"
+          "XCURSOR_SIZE"
+        ];
+      };
       xwayland.enable = true;
       extraSessionVariables = {
         MOZ_ENABLE_WAYLAND = "1";
@@ -23,6 +63,8 @@ in
         declare-mode = [
           "locked"
           "normal"
+          "launch"
+          "resize"
           "passthrough"
         ];
         input = {
@@ -31,92 +73,103 @@ in
             tap = false;
             events = true;
             accel-profile = "adaptive";
-            natural-scroll = true;
           };
         };
-        map = {
-          normal = {
-            "Super Return" = "spawn kitty";
-            "Super+Shift Return" = "spawn fuzzel";
-            "Super Z" = "spawn zen";
+        map = mergePriority [
+          {
+            normal = {
+              "Super bracketright" = "focus-view next";
+              "Super bracketleft" = "focus-view previous";
 
-            "Super C" = "close";
-            "Super Shift E" = "exit";
+              "Super+Shift bracketright" = "focus-output next";
+              "Super+Shift bracketleft" = "focus-output previous";
 
-            # Super+J and Super+K to focus the next/previous view in the layout stack
-            "Super N" = "focus-view next";
-            "Super P" = "focus-view previous";
+              "Super Return" = "spawn kitty";
+              "Super+Shift Return" = "spawn fuzzel";
+              "Super Z" = "spawn zen";
 
-            # Super+Shift+J and Super+Shift+K to swap the focused view with the next/previous
-            # view in the layout stack
-            "Super+Shift J" = "swap next";
-            "Super+Shift K" = "swap previous";
+              "Super S" = screenshotCmd;
+              "Alt+Shift E" = "spawn ${pkgs.emoji-picker}/emoji.sh";
 
-            # Super+Period and Super+Comma to focus the next/previous output
-            "Super Period" = "focus-output next";
-            "Super Comma" = "focus-output previous";
-            "Super H" = "focus-view left";
-            "Super J" = "focus-view down";
-            "Super K" = "focus-view up";
-            "Super L" = "focus-view right";
+              "Super C" = "close";
+              "Super+Shift E" = "exit";
 
-            # Super+Shift+{Period,Comma} to send the focused view to the next/previous output
-            "Super+Shift Period" = "send-to-output next";
-            "Super+Shift Comma" = "send-to-output previous";
+              "Super N" = "focus-view next";
+              "Super P" = "focus-view previous";
 
-            # Super+Return to bump the focused view to the top of the layout stack
-            "Super Space" = "zoom";
+              "Super+Shift J" = "swap next";
+              "Super+Shift K" = "swap previous";
 
-            # Super+H and Super+L to decrease/increase the main ratio of rivertile(1)
-            "Super+Shift H" = ''send-layout-cmd rivertile "main-ratio -0.05"'';
-            "Super+Shift L" = ''send-layout-cmd rivertile "main-ratio +0.05"'';
+              "Super Period" = "focus-output next";
+              "Super Comma" = "focus-output previous";
+              "Super H" = "focus-view left";
+              "Super J" = "focus-view down";
+              "Super K" = "focus-view up";
+              "Super L" = "focus-view right";
 
-            # Super+Shift+H and Super+Shift+L to increment/decrement the main count of rivertile(1)
-            # "Super+Shift H" = ''send-layout-cmd rivertile "main-count +1"'';
-            # "Super+Shift L" = ''send-layout-cmd rivertile "main-count -1"'';
+              "Super+Shift Period" = "send-to-output next";
+              "Super+Shift Comma" = "send-to-output previous";
 
-            # Super+Alt+{H,J,K,L} to move views
-            "Super+Alt H" = "move left 50";
-            "Super+Alt J" = "move down 50";
-            "Super+Alt K" = "move up 50";
-            "Super+Alt L" = "move right 50";
+              "Super Space" = "zoom";
 
-            # Super+Alt+Control+{H,J,K,L} to snap views to screen edges
-            "Super+Alt+Control H" = "snap left";
-            "Super+Alt+Control J" = "snap down";
-            "Super+Alt+Control K" = "snap up";
-            "Super+Alt+Control L" = "snap right";
+              "Super+Shift H" = ''send-layout-cmd rivertile "main-ratio -0.05"'';
+              "Super+Shift L" = ''send-layout-cmd rivertile "main-ratio +0.05"'';
 
-            # Super+Alt+Shift+{H,J,K,L} to resize views
-            "Super+Alt+Shift H" = "resize horizontal -100";
-            "Super+Alt+Shift J" = "resize vertical 100";
-            "Super+Alt+Shift K" = "resize vertical -100";
-            "Super+Alt+Shift L" = "resize horizontal 100";
-          };
-        };
+              "Super+Alt H" = "move left 50";
+              "Super+Alt J" = "move down 50";
+              "Super+Alt K" = "move up 50";
+              "Super+Alt L" = "move right 50";
+
+              "Super+Alt+Control H" = "snap left";
+              "Super+Alt+Control J" = "snap down";
+              "Super+Alt+Control K" = "snap up";
+              "Super+Alt+Control L" = "snap right";
+
+              "Super+Alt+Shift H" = "resize horizontal -100";
+              "Super+Alt+Shift J" = "resize vertical 100";
+              "Super+Alt+Shift K" = "resize vertical -100";
+              "Super+Alt+Shift L" = "resize horizontal 100";
+            };
+          }
+          {
+            launch = {
+              "None Return" = "spawn kitty";
+              "None Z" = "spawn zen";
+              "None J" = "spawn kitty -e joshuto";
+              "None Escape" = "enter-mode normal";
+            };
+            normal = {
+              "Super+Shift L" = "enter-mode launch";
+            };
+          }
+
+        ];
         rule-add = {
           "-app-id" = {
-            "'zen'" = "csd";
-            # with title `bar` give client side decorations
-            "'bar'" = "csd";
-            "'float*'" = {
+            "'zen-alpha'" = {
               "-title" = {
-                "'foo'" = "float";
+                "*" = "ssd";
+                "*Extention*" = "float";
               };
             };
+
+            "'Jan'" = "ssd";
           };
         };
         keyboard-layout = ''-options "caps:swapescape" "us"'';
         default-layout = "rivertile";
+        focus-follows-cursor = "normal";
         border-width = 10;
         set-cursor-warp = "on-output-change";
-        set-repeat = "50 300";
-        focus-follows-cursor = true;
+        # set-repeat = "50 200";
+        set-repeat = "30 130";
         spawn = [
-          "zen"
           "kitty"
+          "rivertile"
+          "wbg ${wallpaperFile}"
+          "river-bnf"
         ];
-        xcursor-theme = lib.mkDefault "Bibata-Modern-Ice 24";
+        xcursor-theme = lib.mkForce "Bibata-Modern-Ice 24";
       };
     };
   };

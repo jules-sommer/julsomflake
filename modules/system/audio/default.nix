@@ -33,18 +33,22 @@ in
     );
 
     # disable pulseaudio if pipewire is enabled
-    hardware.pulseaudio.enable = !cfg.pipewire.enable;
     security.rtkit.enable = true;
 
-    services.pipewire = {
-      inherit (cfg.pipewire) enable;
-      wireplumber = {
+    services = {
+      pulseaudio.enable = !cfg.pipewire.enable;
+      pipewire = {
         inherit (cfg.pipewire) enable;
+        wireplumber = { inherit (cfg.pipewire) enable; };
+
+        alsa = {
+          enable = cfg.pipewire.enableBackCompat;
+          support32Bit = cfg.pipewire.enableBackCompat;
+        };
+
+        pulse.enable = cfg.pipewire.enableBackCompat;
+        jack.enable = cfg.pipewire.enableBackCompat;
       };
-      alsa.enable = cfg.pipewire.enableBackCompat;
-      alsa.support32Bit = cfg.pipewire.enableBackCompat;
-      pulse.enable = cfg.pipewire.enableBackCompat;
-      jack.enable = cfg.pipewire.enableBackCompat;
     };
   };
 }

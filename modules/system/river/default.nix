@@ -18,11 +18,22 @@ in
       inherit (cfg) enable;
       xwayland.enable = true;
       extraPackages = with pkgs; [
+        wayland-protocols
+        xdg-desktop-portal-gtk
+        xdg-desktop-portal-wlr
         dunst
         scrot
+        wlr-randr
+        slurp
+        grim
+        mpv
+        river-bnf
+        river-tag-overlay
         wshowkeys
         fuzzel
         cliphist
+        lswt
+        wlrctl
         ydotool
         waylock
         wbg
@@ -43,6 +54,7 @@ in
         wlr.enable = true;
         extraPortals = [
           pkgs.xdg-desktop-portal-gtk
+          pkgs.xdg-desktop-portal-wlr
         ];
         config.river.default = lib.mkDefault [
           "wlr"
@@ -60,7 +72,7 @@ in
       };
 
       xserver = {
-        enable = true;
+        enable = false;
         autoRepeatDelay = 200;
         autoRepeatInterval = 30;
         autorun = true;
@@ -70,11 +82,6 @@ in
         };
       };
 
-    };
-    qt = {
-      enable = true;
-      style = "breeze";
-      platformTheme = "kde";
     };
   };
 }

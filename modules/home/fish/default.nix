@@ -22,19 +22,10 @@ in
         functions.fish_greeting.body = "";
         plugins = [ ];
         functions = {
-          shell = {
-            body = ''
-              if test (count $argv) -eq 0
-                  command nix shell -c $SHELL
-                else
-                  command nix shell $argv -c $SHELL
-                end
-              end
-            '';
-          };
         };
         shellAliases = {
           "ls" = "eza";
+          "targz" = "tar -czvf";
         };
       };
 
@@ -48,6 +39,5 @@ in
         enableFishIntegration = true;
       };
     };
-
   };
 }

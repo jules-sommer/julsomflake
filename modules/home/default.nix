@@ -1,4 +1,7 @@
 { pkgs, lib, ... }:
+let
+  inherit (lib) disabled enabled;
+in
 {
   imports = [
     ./btop
@@ -7,6 +10,7 @@
     ./fish
     ./river
     ./starship
+    ./helix
   ];
 
   local = {
@@ -20,17 +24,25 @@
     enable = true;
     defaultFonts = {
       emoji = [ "Noto Color Emoji" ];
-      monospace = [ "JetBrains Mono" ];
-      sansSerif = [ "Noto" ];
-      serif = [ "Iosevka" ];
+      monospace = [ "JetBrainsMono Nerd Font" ];
+      sansSerif = [ "NotoSans Nerd Font" ];
+      serif = [ "NotoSans Nerd Font" ];
     };
   };
 
   home = {
     packages = with pkgs; [
       ianny
+      jan
       eza
+      gh
+      ghostty
       just
+      vesktop
+      joshuto
+      broot
+      dust
+      chromium
     ];
 
     sessionVariables = {
@@ -39,6 +51,20 @@
     };
 
     stateVersion = "24.11";
+  };
+
+  stylix = {
+    enable = true;
+    autoEnable = true;
+    targets = {
+      kitty = enabled;
+      fuzzel = enabled;
+    };
+    iconTheme = {
+      dark = "breeze-dark";
+      light = "breeze";
+      package = pkgs.breeze-icons;
+    };
   };
 
   programs = {

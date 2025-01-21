@@ -2,6 +2,10 @@
   ...
 }:
 {
+  imports = [
+    ./registry.nix
+  ];
+
   nix = {
     settings =
       let
@@ -13,11 +17,8 @@
       {
         cores = 12;
         warn-dirty = false;
-        # Enable flakes and new 'nix' command
         experimental-features = "nix-command flakes";
-        # Deduplicate and optimize nix store
         auto-optimise-store = true;
-        # Use binary caches
         substituters = [
           "https://hyprland.cachix.org"
           "https://cache.nixos.org"

@@ -3,6 +3,9 @@
   pkgs,
   ...
 }:
+let
+  inherit (lib) enabled enabled';
+in
 {
   imports = [
     ./system
@@ -10,23 +13,21 @@
   ];
 
   local = {
-    kernel.xanmod = {
-      enable = true;
+    kernel.xanmod = enabled' {
       zfs.enable = true;
     };
-    audio.pipewire = {
-      enable = true;
+    audio.pipewire = enabled' {
       enableBackCompat = true;
     };
     programs = {
-      kmail.enable = true;
-      libreoffice.enable = true;
-      masterpdf.enable = true;
-      okular.enable = true;
+      kmail = enabled;
+      libreoffice = enabled;
+      masterpdf = enabled;
+      okular = enabled;
     };
-    river.enable = true;
-    shell.fish.enable = true;
-    stylix.enable = true;
+    river = enabled;
+    shell.fish = enabled;
+    stylix = enabled;
   };
 
   hardware.amdgpu = {
