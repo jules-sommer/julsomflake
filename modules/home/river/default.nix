@@ -161,8 +161,7 @@ in
         focus-follows-cursor = "normal";
         border-width = 10;
         set-cursor-warp = "on-output-change";
-        # set-repeat = "50 200";
-        set-repeat = "30 130";
+        set-repeat = "50 200";
         spawn = [
           "kitty"
           "rivertile"

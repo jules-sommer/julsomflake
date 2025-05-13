@@ -1,5 +1,6 @@
 {
   lib,
+  pkgs,
   config,
   ...
 }:
@@ -20,6 +21,18 @@ in
 
   config = {
     programs = {
+      # Launch fish if bash is run interactively.
+      # This is used to avoid setting Fish as the login shell due to non-posix compliance
+      # Source: https://nixos.wiki/wiki/Fish
+      bash = {
+        interactiveShellInit = ''
+          if [[ $(${pkgs.procps}/bin/ps --no-header --pid=$PPID --format=comm) != "fish" && -z ''${BASH_EXECUTION_STRING} ]]
+          then
+            shopt -q login_shell && LOGIN_OPTION='--login' || LOGIN_OPTION=""
+            exec ${pkgs.fish}/bin/fish $LOGIN_OPTION
+          fi
+        '';
+      };
       direnv = {
         enable = true;
         loadInNixShell = true;
@@ -51,8 +64,8 @@ in
           br = "broot -hips";
           yank = "wl-copy";
           put = "wl-paste";
-          sync = "rsync -avh --progress";
-          mirror_sync = "rsync -avzHAX --delete --numeric-ids --info=progress2";
+          # sync = "rsync -avh --progress";
+          # mirror_sync = "rsync -avzHAX --delete --numeric-ids --info=progress2";
           cd = "z";
           ci = "zi";
           clone = "gix clone";

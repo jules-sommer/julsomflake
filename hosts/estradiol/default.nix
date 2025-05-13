@@ -14,7 +14,7 @@ in
 
   local = {
     kernel.xanmod = enabled' {
-      zfs.enable = true;
+      zfs.enable = false;
     };
     audio.pipewire = enabled' {
       enableBackCompat = true;
@@ -30,15 +30,20 @@ in
     stylix = enabled;
   };
 
-  hardware.amdgpu = {
-    opencl.enable = true;
-    initrd.enable = true;
-    amdvlk = {
-      enable = true;
-      supportExperimental.enable = true;
-      support32Bit.enable = true;
-      settings = { };
+  hardware = {
+    cpu.amd.ryzen-smu = enabled;
+    graphics = enabled' {
+      enable32Bit = true;
+      extraPackages = with pkgs; [
+        vulkan-loader
+        vulkan-validation-layers
+        vulkan-extension-layer
+      ];
     };
+  };
+
+  services.ollama = enabled' {
+    acceleration = "rocm";
   };
 
   nix.settings.extra-system-features = lib.mkForce [
@@ -46,10 +51,11 @@ in
   ];
 
   environment.systemPackages = with pkgs; [
+    zed-editor
     zen-browser
     wl-clipboard
     wayshot
-    spectacle
+    kdePackages.spectacle
   ];
 
   programs = {
@@ -64,8 +70,8 @@ in
       enableSSHSupport = true;
     };
   };
-  networking = {
 
+  networking = {
     networkmanager.enable = true;
     firewall.enable = false;
 

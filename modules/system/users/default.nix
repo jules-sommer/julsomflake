@@ -1,26 +1,41 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 {
   config = {
     services.openssh = {
       enable = true;
       settings = {
-        # Opinionated: forbid root login through SSH.
-        PermitRootLogin = "no";
-        # Opinionated: use keys only.
-        # Remove if you want to SSH using passwords
+        PermitRootLogin = lib.mkForce "no";
+        PrintLastLog = "no";
         PasswordAuthentication = false;
+        UsePAM = false;
+        X11Forwarding = false;
       };
     };
 
+    programs.zsh.enable = true;
+
     users = {
-      defaultUserShell = pkgs.fish;
+      # defaultUserShell = pkgs.fish;
       users = {
+        bun = {
+          isNormalUser = true;
+          initialPassword = "bun";
+          useDefaultShell = true;
+          createHome = true;
+
+          shell = pkgs.zsh;
+
+          extraGroups = [
+            "users"
+            "rtkit"
+            "networkmanager"
+          ];
+        };
         jules = {
           isNormalUser = true;
           initialHashedPassword = "$y$j9T$UjcDzGjlMaK0Eq2dTB02m1$WQG.JC7aZXlDhKxx2hkHa7f.vDw8TY2GQSmCuBPne58";
           useDefaultShell = true;
           home = "/home/jules";
-          homeMode = "700";
           createHome = true;
           uid = 1000;
 

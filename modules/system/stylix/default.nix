@@ -21,6 +21,7 @@ in
     stylix = {
       enable = true;
       autoEnable = true;
+      base16Scheme = ./tokyo-night-dark-b24.yaml;
       image = builtins.elemAt wallpaperImages 2;
       polarity = "dark";
       cursor = {

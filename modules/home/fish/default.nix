@@ -19,12 +19,13 @@ in
     programs = {
       fish = {
         inherit (cfg) enable;
-        functions.fish_greeting.body = "";
-        plugins = [ ];
         functions = {
+          fish_greeting.body = "";
         };
         shellAliases = {
           "ls" = "eza";
+          "screenshot" =
+            "grim -g \"$(slurp -d)\" - | tee ~/060_media/005_screenshots/$(date +%Y-%m-%d_%H-%M-%S).png | wl-copy -t image/png";
           "targz" = "tar -czvf";
         };
       };

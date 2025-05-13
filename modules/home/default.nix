@@ -1,6 +1,6 @@
 { pkgs, lib, ... }:
 let
-  inherit (lib) disabled enabled;
+  inherit (lib) disabled enabled enabled';
 in
 {
   imports = [
@@ -11,6 +11,7 @@ in
     ./river
     ./starship
     ./helix
+    ./zls
   ];
 
   local = {
@@ -30,6 +31,13 @@ in
     };
   };
 
+  qt = enabled' (
+    lib.mkDefault {
+      platformTheme.name = "kde6";
+      style.name = "breeze";
+    }
+  );
+
   home = {
     packages = with pkgs; [
       ianny
@@ -38,11 +46,15 @@ in
       gh
       ghostty
       just
+      gimp-with-plugins
+      gitoxide
       vesktop
       joshuto
       broot
       dust
       chromium
+      heroic
+      audacity
     ];
 
     sessionVariables = {
@@ -59,6 +71,7 @@ in
     targets = {
       kitty = enabled;
       fuzzel = enabled;
+      starship = disabled;
     };
     iconTheme = {
       dark = "breeze-dark";
@@ -68,10 +81,12 @@ in
   };
 
   programs = {
+    fzf = enabled;
+    bat = enabled;
     ripgrep.enable = true;
     nh = {
       enable = true;
-      flake = ./.;
+      flake = builtins.toString ./.;
       clean = {
         enable = true;
         dates = "weekly";

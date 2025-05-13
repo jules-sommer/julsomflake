@@ -1,7 +1,11 @@
 {
   pkgs,
+  lib,
   ...
 }:
+let
+  inherit (lib) enabled enabled';
+in
 {
   imports = [
     ./audio
@@ -14,6 +18,7 @@
     ./users
     ./xanmod_kernel
     ./fonts
+    ./evremap
   ];
 
   environment = {
@@ -29,12 +34,14 @@
     systemPackages = with pkgs; [
       tmux
       gh
+      uutils-coreutils-noprefix
       protonvpn-cli
       radeontop
       nixfmt-rfc-style
       neovim
       bitwarden-cli
-      nixVersions.git # install latest (git master) version of nix pkg manager
+      nixVersions.latest
+      masterpdfeditor4
       btop
       mpv
       kitty
@@ -43,13 +50,14 @@
   };
 
   programs = {
+    starship = enabled' {
+      presets = [ "nerd-font-symbols" ];
+    };
     fuse = {
       userAllowOther = true;
       mountMax = 1000;
     };
-    wireshark = {
-      enable = true;
-    };
+    wireshark = enabled;
     wshowkeys.enable = true;
     waybar.enable = true;
     git = {
@@ -73,22 +81,26 @@
       };
     };
   };
-
-  services = {
-    evremap = {
+  xdg = {
+    mime = {
       enable = true;
-      settings = {
-        device_name = "Evision RGB Keyboard";
-        dual_role = [
-          {
-            input = "KEY_CAPSLOCK";
-            hold = [ "KEY_CAPSLOCK" ];
-            tap = [ "KEY_GRAVE" ];
-          }
-        ];
+      defaultApplications = {
+        "x-scheme-handler/http" = [ "zen.desktop" ];
+        "x-scheme-handler/https" = [ "zen.desktop" ];
+        "image/*" = [ "imv.desktop" ];
+        "video/*" = [ "mpv.desktop" ];
+        "application/pdf" = [ "okular.desktop" ];
+        "text/*" = [ "nvim.desktop" ];
       };
     };
 
+    icons.enable = true;
+  };
+
+  services = {
+    ollama = enabled' {
+      acceleration = "rocm";
+    };
     protonmail-bridge = {
       enable = true;
       path = with pkgs; [
@@ -97,8 +109,6 @@
       ];
     };
   };
-
-  xdg.icons.enable = true;
 
   time.timeZone = "America/Toronto";
   i18n.defaultLocale = "en_CA.UTF-8";

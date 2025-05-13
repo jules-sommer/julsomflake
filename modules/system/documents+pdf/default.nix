@@ -26,7 +26,7 @@ in
 
   config = mkIf (cfg.okular.enable || cfg.libreoffice.enable) {
     environment.systemPackages = with pkgs; [
-      (mkIf cfg.okular.enable okular)
+      (mkIf cfg.okular.enable kdePackages.okular)
       (mkIf cfg.libreoffice.enable libreoffice)
       (mkIf cfg.masterpdf.enable masterpdfeditor)
     ];
