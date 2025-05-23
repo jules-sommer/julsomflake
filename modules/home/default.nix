@@ -55,6 +55,8 @@ in
       chromium
       heroic
       audacity
+      rofi-rbw-wayland
+      bitwarden-desktop
     ];
 
     sessionVariables = {
@@ -81,6 +83,11 @@ in
   };
 
   programs = {
+    rbw = enabled' {
+      settings = {
+        email = "rcsrc@pm.me";
+      };
+    };
     fzf = enabled;
     bat = enabled;
     ripgrep.enable = true;
