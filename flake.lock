@@ -735,7 +735,7 @@
     "home-manager": {
       "inputs": {
         "nixpkgs": [
-          "unstable"
+          "nixpkgs"
         ]
       },
       "locked": {
@@ -827,22 +827,6 @@
       }
     },
     "master": {
-      "locked": {
-        "lastModified": 1743512690,
-        "narHash": "sha256-Too5HQt0z7pS78XOz6zZTiKFY/5v0v60n/YjXegf3aw=",
-        "owner": "nixos",
-        "repo": "nixpkgs",
-        "rev": "3ecdd5eb0ab44632c1380ba2d7937228652b525d",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nixos",
-        "ref": "master",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
-    "master_2": {
       "locked": {
         "lastModified": 1737042038,
         "narHash": "sha256-xM7cQrFjS3Zg7MthMkeCEye43SjQIbws/gZ5GyFRzEg=",
@@ -1145,7 +1129,7 @@
       "inputs": {
         "base24-themes": "base24-themes",
         "flake-parts": "flake-parts_2",
-        "master": "master_2",
+        "master": "master",
         "neovim-nightly": "neovim-nightly",
         "nixvim": "nixvim_2",
         "tokyonight-nvim": "tokyonight-nvim",
@@ -1244,7 +1228,7 @@
     "oxalica": {
       "inputs": {
         "nixpkgs": [
-          "unstable"
+          "nixpkgs"
         ]
       },
       "locked": {
@@ -1266,16 +1250,13 @@
         "emoji": "emoji",
         "ghostty": "ghostty",
         "home-manager": "home-manager",
-        "master": "master",
         "nix-init": "nix-init",
         "nixpkgs": "nixpkgs_3",
         "nixvim": "nixvim",
         "oxalica": "oxalica",
         "sops-nix": "sops-nix",
-        "stable": "stable",
         "stylix": "stylix",
         "unfree": "unfree",
-        "unstable": "unstable_2",
         "utils": "utils",
         "zen-browser": "zen-browser",
         "zig-overlay": "zig-overlay",
@@ -1297,22 +1278,6 @@
       "original": {
         "owner": "Mic92",
         "repo": "sops-nix",
-        "type": "github"
-      }
-    },
-    "stable": {
-      "locked": {
-        "lastModified": 1743445058,
-        "narHash": "sha256-jayDP/dth0BdbFGM2C0Ny7uRHwwA0ppbB+2s23QG9Vk=",
-        "owner": "nixos",
-        "repo": "nixpkgs",
-        "rev": "e4a74fd10b211a6d8f5575a85154aac0209a8e55",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nixos",
-        "ref": "nixos-24.11-small",
-        "repo": "nixpkgs",
         "type": "github"
       }
     },
@@ -1673,22 +1638,6 @@
         "type": "github"
       }
     },
-    "unstable_2": {
-      "locked": {
-        "lastModified": 1743315132,
-        "narHash": "sha256-6hl6L/tRnwubHcA4pfUUtk542wn2Om+D4UnDhlDW9BE=",
-        "owner": "nixos",
-        "repo": "nixpkgs",
-        "rev": "52faf482a3889b7619003c0daec593a1912fddc1",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nixos",
-        "ref": "nixos-unstable",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
     "utils": {
       "inputs": {
         "systems": "systems_5"
@@ -1710,7 +1659,7 @@
     "zen-browser": {
       "inputs": {
         "nixpkgs": [
-          "unstable"
+          "nixpkgs"
         ]
       },
       "locked": {

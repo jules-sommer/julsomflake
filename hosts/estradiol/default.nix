@@ -2,11 +2,9 @@
   lib,
   pkgs,
   ...
-}:
-let
+}: let
   inherit (lib) enabled enabled';
-in
-{
+in {
   imports = [
     ./system
     ./hardware
@@ -40,10 +38,6 @@ in
         vulkan-extension-layer
       ];
     };
-  };
-
-  services.ollama = enabled' {
-    acceleration = "rocm";
   };
 
   nix.settings.extra-system-features = lib.mkForce [

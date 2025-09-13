@@ -2,11 +2,9 @@
   pkgs,
   lib,
   ...
-}:
-let
+}: let
   inherit (lib) enabled enabled';
-in
-{
+in {
   imports = [
     ./audio
     ./documents+pdf
@@ -51,7 +49,7 @@ in
 
   programs = {
     starship = enabled' {
-      presets = [ "nerd-font-symbols" ];
+      presets = ["nerd-font-symbols"];
     };
     fuse = {
       userAllowOther = true;
@@ -85,12 +83,12 @@ in
     mime = {
       enable = true;
       defaultApplications = {
-        "x-scheme-handler/http" = [ "zen.desktop" ];
-        "x-scheme-handler/https" = [ "zen.desktop" ];
-        "image/*" = [ "imv.desktop" ];
-        "video/*" = [ "mpv.desktop" ];
-        "application/pdf" = [ "okular.desktop" ];
-        "text/*" = [ "nvim.desktop" ];
+        "x-scheme-handler/http" = ["zen.desktop"];
+        "x-scheme-handler/https" = ["zen.desktop"];
+        "image/*" = ["imv.desktop"];
+        "video/*" = ["mpv.desktop"];
+        "application/pdf" = ["okular.desktop"];
+        "text/*" = ["nvim.desktop"];
       };
     };
 
@@ -98,9 +96,6 @@ in
   };
 
   services = {
-    ollama = enabled' {
-      acceleration = "rocm";
-    };
     protonmail-bridge = {
       enable = true;
       path = with pkgs; [

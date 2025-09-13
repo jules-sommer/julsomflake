@@ -1,16 +1,13 @@
 {
   inputs = {
-    master.url = "github:nixos/nixpkgs/master";
-    unstable.url = "github:nixos/nixpkgs/nixos-unstable";
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    stable.url = "github:nixos/nixpkgs/nixos-24.11-small";
     unfree.url = "github:numtide/nixpkgs-unfree?ref=nixos-unstable";
 
     sops-nix.url = "github:Mic92/sops-nix";
 
     home-manager = {
       url = "github:nix-community/home-manager/master";
-      inputs.nixpkgs.follows = "unstable";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     utils.url = "github:numtide/flake-utils";
@@ -18,7 +15,7 @@
 
     oxalica = {
       url = "github:oxalica/rust-overlay";
-      inputs.nixpkgs.follows = "unstable";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     nixvim = {
@@ -37,7 +34,7 @@
 
     zen-browser = {
       url = "github:MarceColl/zen-browser-flake";
-      inputs.nixpkgs.follows = "unstable";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
   };
   outputs = {
@@ -54,17 +51,15 @@
       system: let
         makeChannelWithSystem = makeChannel system;
       in {
-        master = makeChannelWithSystem inputs.master;
+        unstable = makeChannelWithSystem inputs.nixpkgs;
         unfree = makeChannelWithSystem inputs.unfree;
-        unstable = makeChannelWithSystem inputs.unstable;
-        stable = makeChannelWithSystem inputs.stable;
       }
     );
   in {
     inherit channels;
 
     lib = import ./lib/default.nix {
-      inherit (inputs.unstable) lib;
+      inherit (inputs.nixpkgs) lib;
       inherit self inputs eachSystem;
     };
 
@@ -83,10 +78,7 @@
       overlays = [
         self.overlays.default
         (_: prev: {
-          inherit (channels.stable.${prev.system}.pkgs) sonic-visualiser wbg;
-          inherit (channels.master.${prev.system}.pkgs) jan;
           inherit (channels.unfree.${prev.system}.pkgs) masterpdfeditor4;
-
           nix-init = inputs.nix-init.packages.${prev.system}.default;
           neovim = inputs.nixvim.packages.${prev.system}.default;
           ghostty = inputs.ghostty.packages.${prev.system}.default;
