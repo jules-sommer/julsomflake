@@ -1,46 +1,62 @@
 {
-  # Default module that can be used with any host, effectively shared modules.
-  default = _: {
-    imports = [
-      ./system/default.nix
-    ];
+  lib,
+  config,
+  ...
+}: let
+  # refers to the home shortcut config option
+  inherit (config.local) home;
+  inherit (lib) enabled enabled';
+in {
+  imports = [
+    ./system/default.nix
+  ];
 
+  options.local.home = lib.mkOption {
+    description = ''
+      Shorthand for accessing home-manager via a system module, this
+      prevents having to type out `config.home-manager.users.jules.[...]`
+      all over the flake's modules, thus hard-coding the username and
+      potentially creating issues.
+    '';
+
+    type = with lib.types;
+      coercedTo anything
+      (v:
+        if builtins.isList v
+        then v
+        else [v])
+      (listOf deferredModule);
+    default = [];
+  };
+
+  config = {
     home-manager = {
-      sharedModules = [
-        ./home/default.nix
-      ];
-
-      useGlobalPkgs = true;
-      useUserPackages = true;
+      sharedModules = [./home] ++ home;
     };
-  };
 
-  nixRegistryInputs = _: {
-    imports = [
-      ./system/nix/registry.nix
-    ];
-  };
-
-  system = _: {
-    imports = [
-      ./system/default.nix
-    ];
-  };
-
-  home = _: {
-    home-manager = {
-      sharedModules = [
-        ./home/default.nix
+    local.home = {
+      manual = {
+        json = enabled;
+        html = enabled;
+        manpages = enabled;
+      };
+      home.extraOutputsToInstall = [
+        "doc"
+        "info"
+        "devdoc"
       ];
-
-      useGlobalPkgs = true;
-      useUserPackages = true;
+      services.home-manager = {
+        autoExpire = enabled' {
+          timestamp = "-7 days";
+          store = {
+            cleanup = true;
+            options = "--delete-older-than 14d";
+          };
+        };
+        autoUpgrade = enabled' {
+          frequency = "weekly";
+        };
+      };
     };
-  };
-
-  stylix = _: {
-    imports = [
-      ./system/stylix/default.nix
-    ];
   };
 }

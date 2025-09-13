@@ -55,7 +55,7 @@
         unfree = makeChannelWithSystem inputs.unfree;
       }
     );
-  in {
+  in rec {
     inherit channels;
 
     lib = import ./lib/default.nix {
@@ -63,14 +63,11 @@
       inherit self inputs eachSystem;
     };
 
-    nixosModules = import ./modules/default.nix;
-
     nixosConfigurations = let
       inherit (system) x86_64-linux aarch64-linux;
       filterChannelsForSystem = system: channels: builtins.mapAttrs (_: channelSystems: channelSystems.${system}) channels;
 
       sharedModules = with inputs; [
-        self.nixosModules.default
         home-manager.nixosModules.home-manager
         sops-nix.nixosModules.sops
       ];
@@ -126,8 +123,9 @@
                 ];
               })
               inputs.stylix.nixosModules.stylix
-              self.nixosModules.stylix
               ./hosts/estradiol
+              ./modules
+              ./modules/system/stylix
               (_: {
                 home-manager = {
                   useGlobalPkgs = true;

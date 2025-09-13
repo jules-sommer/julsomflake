@@ -3,12 +3,10 @@
   config,
   pkgs,
   ...
-}:
-let
+}: let
   inherit (lib) mkEnableOption;
   cfg = config.local.river;
-in
-{
+in {
   options.local.river = {
     enable = mkEnableOption "Enable river wm.";
   };
@@ -45,7 +43,7 @@ in
     security = {
       polkit.enable = true;
       pam = {
-        services.waylock = { };
+        services.waylock = {};
       };
     };
 
@@ -81,7 +79,6 @@ in
           options = "eurosign:e,caps:escape";
         };
       };
-
     };
   };
 }
