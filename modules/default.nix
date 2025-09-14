@@ -8,7 +8,15 @@
   inherit (lib) enabled enabled';
 in {
   imports = [
-    ./system/default.nix
+    ./audio
+    ./cli
+    ./doas
+    ./fonts
+    ./shells
+    ./ssh
+    ./terminal
+    ./wayland
+    ./users
   ];
 
   options.local.home = lib.mkOption {

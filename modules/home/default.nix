@@ -1,13 +1,13 @@
-{ pkgs, lib, ... }:
-let
-  inherit (lib) disabled enabled enabled';
-in
 {
+  pkgs,
+  lib,
+  ...
+}: let
+  inherit (lib) disabled enabled enabled';
+in {
   imports = [
     ./btop
     ./waybar
-    ./kitty
-    ./fish
     ./river
     ./starship
     ./helix
@@ -15,19 +15,17 @@ in
   ];
 
   local = {
-    kitty.enable = true;
     river.enable = true;
     starship.enable = true;
-    fish.enable = true;
   };
 
   fonts.fontconfig = {
     enable = true;
     defaultFonts = {
-      emoji = [ "Noto Color Emoji" ];
-      monospace = [ "JetBrainsMono Nerd Font" ];
-      sansSerif = [ "NotoSans Nerd Font" ];
-      serif = [ "NotoSans Nerd Font" ];
+      emoji = ["Noto Color Emoji"];
+      monospace = ["JetBrainsMono Nerd Font"];
+      sansSerif = ["NotoSans Nerd Font"];
+      serif = ["NotoSans Nerd Font"];
     };
   };
 

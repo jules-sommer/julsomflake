@@ -1,42 +1,4 @@
 {
-  inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    unfree.url = "github:numtide/nixpkgs-unfree?ref=nixos-unstable";
-
-    sops-nix.url = "github:Mic92/sops-nix";
-
-    home-manager = {
-      url = "github:nix-community/home-manager/master";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    utils.url = "github:numtide/flake-utils";
-    stylix.url = "github:danth/stylix";
-
-    oxalica = {
-      url = "github:oxalica/rust-overlay";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    nixvim = {
-      url = "github:jules-sommer/nixvim_flake";
-      inputs.zls.follows = "zls";
-    };
-
-    ghostty.url = "github:ghostty-org/ghostty";
-
-    zls.url = "github:zigtools/zls";
-    zig-overlay.url = "github:mitchellh/zig-overlay";
-
-    emoji.url = "/home/jules/000_dev/000_nix/emoji-picker";
-
-    nix-init.url = "github:nix-community/nix-init";
-
-    zen-browser = {
-      url = "github:MarceColl/zen-browser-flake";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-  };
   outputs = {
     self,
     utils,
@@ -44,6 +6,7 @@
   } @ inputs: let
     inherit (utils.lib) eachSystem system;
     inherit (self.lib) makeChannel;
+    helpers = inputs.helpers.lib;
 
     supportedSystems = import ./flake.systems.nix;
 
@@ -69,6 +32,7 @@
 
       sharedModules = with inputs; [
         home-manager.nixosModules.home-manager
+        niri-flake.nixosModules.niri
         sops-nix.nixosModules.sops
       ];
 
@@ -100,6 +64,7 @@
               pkgs
               lib
               self
+              helpers
               inputs
               ;
           };
@@ -185,5 +150,45 @@
         };
     };
     overlays = import ./overlays {inherit inputs channels;};
+  };
+
+  inputs = {
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+
+    home-manager = {
+      url = "github:nix-community/home-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    sops-nix = {
+      url = "github:Mic92/sops-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    nq.url = "github:diniamo/nq";
+    unfree.url = "github:numtide/nixpkgs-unfree?ref=nixos-unstable";
+
+    utils.url = "github:numtide/flake-utils";
+    helpers.url = "/home/jules/000_dev/000_nix/flake-helpers";
+    stylix.url = "github:danth/stylix";
+
+    niri = {
+      url = "github:YaLTeR/niri";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    niri-flake = {
+      url = "github:sodiboo/niri-flake";
+      inputs.niri-unstable.follows = "niri";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    neovim.url = "/home/jules/000_dev/000_nix/nvf_julesvim";
+    ghostty.url = "github:ghostty-org/ghostty";
+    emoji.url = "/home/jules/000_dev/000_nix/emoji-picker";
+    nix-init.url = "github:nix-community/nix-init";
+    zen-browser = {
+      url = "github:MarceColl/zen-browser-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 }

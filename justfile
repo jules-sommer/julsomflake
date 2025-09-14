@@ -2,7 +2,7 @@ set fallback
 hostname := env_var_or_default("hostname", "estradiol")
 
 repl:
-  nix repl --expr 'builtins.getFlake "/home/jules/000_dev/000_nix/nix_config_rewrite"'
+  nix repl --show-trace --file ./repl.nix
 
 build action='switch' host=hostname:
     #!/usr/bin/env fish 

@@ -11,11 +11,32 @@ in {
   ];
 
   local = {
+    wayland = {
+      river = enabled;
+
+      login = {
+        greetd = enabled;
+        settings.default_session = "river";
+      };
+    };
+    shells = {
+      fish = enabled;
+      zsh = enabled;
+
+      extras = {
+        direnv = enabled;
+        nix-index = enabled;
+      };
+    };
+
     kernel.xanmod = enabled' {
       zfs.enable = false;
     };
     audio.pipewire = enabled' {
-      enableBackCompat = true;
+      settings = {
+        compatibility = true;
+        withExtras = true;
+      };
     };
     programs = {
       kmail = enabled;
@@ -23,8 +44,6 @@ in {
       masterpdf = enabled;
       okular = enabled;
     };
-    river = enabled;
-    shell.fish = enabled;
     stylix = enabled;
   };
 

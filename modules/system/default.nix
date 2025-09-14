@@ -6,16 +6,12 @@
   inherit (lib) enabled enabled';
 in {
   imports = [
-    ./audio
     ./documents+pdf
-    ./fish
     ./kmail
     ./security
     ./nix
-    ./river
     ./users
     ./xanmod_kernel
-    ./fonts
     ./evremap
   ];
 

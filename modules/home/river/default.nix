@@ -3,13 +3,14 @@
   config,
   pkgs,
   ...
-}:
-let
-  inherit (lib)
+}: let
+  inherit
+    (lib)
     mkEnableOption
     foldr
     ;
-  inherit (builtins)
+  inherit
+    (builtins)
     head
     zipAttrsWith
     ;
@@ -17,15 +18,15 @@ let
 
   modes = config.wayland.windowManager.river.settings.declare-mode;
 
-  mergeWithFn =
-    sets: fn:
+  mergeWithFn = sets: fn:
     foldr (
       x: y:
-      zipAttrsWith fn [
-        x
-        y
-      ]
-    ) { } sets;
+        zipAttrsWith fn [
+          x
+          y
+        ]
+    ) {}
+    sets;
 
   mergePriority = sets: mergeWithFn sets (name: head);
 
@@ -33,14 +34,17 @@ let
   wallpaperFile = "${home}/060_media/010_wallpapers/zoe-love-bg/zoe-love-4k.png";
   screenshotDir = "${home}/home/jules/060_media/005_screenshots";
   screenshotCmd = ''grim -g "$(slurp -d)" - | tee ${screenshotDir}$(date +%Y-%m-%d_%H-%M-%S).png | wl-copy -t image/png'';
-in
-{
+in {
   options.local.river = {
     enable = mkEnableOption "Enable river wm.";
   };
 
   config = {
-    xdg.portal.xdgOpenUsePortal = true;
+    xdg.portal = {
+      xdgOpenUsePortal = true;
+      config = {
+      };
+    };
 
     wayland.windowManager.river = {
       inherit (cfg) enable;
@@ -142,7 +146,6 @@ in
               "Super+Shift L" = "enter-mode launch";
             };
           }
-
         ];
         rule-add = {
           "-app-id" = {
