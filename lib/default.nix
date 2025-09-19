@@ -1,26 +1,22 @@
-{
-  lib,
-  eachSystem,
-  self,
-  ...
-}:
-let
-  inherit (lib)
+{lib}: let
+  inherit
+    (lib)
     types
     mkOption
     filterAttrs
     hasAttr
     ;
-in
-rec {
+in rec {
   # Returns a filtered attrset of users that are "normal users", i.e have key `isNormalUser = true;`
   # all-users argument is the value of `config.users.users`
   getNormalUsers = users: filterAttrs (_: userAttrs: userAttrs.isNormalUser or false) users;
 
   getUserHomeDir = user: user.home or "/home/${user.name}";
 
-  getUserHomeDirFromStr =
-    users: user: if hasAttr user users then users.${user}.home else "/home/${user}";
+  getUserHomeDirFromStr = users: user:
+    if hasAttr user users
+    then users.${user}.home
+    else "/home/${user}";
 
   getAllUserHomeDirs = users: lib.mapAttrs (_: getUserHomeDir) users;
 
@@ -32,15 +28,13 @@ rec {
     enable = false;
   };
 
-  enabled' =
-    cfg:
+  enabled' = cfg:
     {
       enable = true;
     }
     // cfg;
 
-  disabled' =
-    cfg:
+  disabled' = cfg:
     {
       enable = false;
     }
@@ -54,18 +48,27 @@ rec {
     pkgs = input.legacyPackages.${system};
   };
 
-  extendLib =
-    nixpkgs: extension:
-    nixpkgs.lib.extend (
+  extendLibMany = pkgs: extensions:
+    pkgs.lib.extend (
       _: prev:
-      {
-        __extended = true;
-      }
-      // prev
-      // extension
+        lib.foldl' lib.recursiveUpdate {} ([
+            {__extended = true;}
+            prev
+          ]
+          ++ extensions)
     );
 
-  mkEnableOpt = description: { enable = lib.mkEnableOption description; };
+  extendLib = pkgs: extension:
+    pkgs.lib.extend (
+      _: prev:
+        {
+          __extended = true;
+        }
+        // prev
+        // extension
+    );
+
+  mkEnableOpt = description: {enable = lib.mkEnableOption description;};
 
   ## Create a NixOS module option without a description.
   ##
@@ -98,9 +101,8 @@ rec {
   ## ```
   ##
   #@ Type -> Any -> Optional String -> mkOption
-  mkOpt =
-    type: default: description:
-    mkOption { inherit type default description; };
+  mkOpt = type: default: description:
+    mkOption {inherit type default description;};
 
   ## Create a boolean NixOS module option without a description.
   ##

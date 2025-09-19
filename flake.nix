@@ -4,122 +4,79 @@
     utils,
     ...
   } @ inputs: let
-    inherit (utils.lib) eachSystem system;
-    inherit (self.lib) makeChannel;
-    helpers = inputs.helpers.lib;
-
+    inherit (utils.lib) eachDefaultSystemPassThrough eachDefaultSystem;
+    systems = utils.lib.system;
+    inherit (self) overlays;
     supportedSystems = import ./flake.systems.nix;
+    makePkgs = system:
+      import inputs.nixpkgs {
+        inherit system;
+        overlays = [self.overlays.default];
+      };
+  in
+    eachDefaultSystemPassThrough (system: let
+      inherit (self.lib) makeChannel;
+      helpers = inputs.helpers.lib;
+      lib = self.lib.extendLibMany inputs.nixpkgs [helpers];
 
-    channels = eachSystem supportedSystems (
-      system: let
-        makeChannelWithSystem = makeChannel system;
-      in {
-        unstable = makeChannelWithSystem inputs.nixpkgs;
-        unfree = makeChannelWithSystem inputs.unfree;
-      }
-    );
-  in rec {
-    inherit channels;
+      module.args = {
+        inherit helpers pkgs lib self inputs;
+      };
 
-    lib = import ./lib/default.nix {
-      inherit (inputs.nixpkgs) lib;
-      inherit self inputs eachSystem;
-    };
+      pkgs = makePkgs system;
 
-    nixosConfigurations = let
-      inherit (system) x86_64-linux aarch64-linux;
-      filterChannelsForSystem = system: channels: builtins.mapAttrs (_: channelSystems: channelSystems.${system}) channels;
-
-      sharedModules = with inputs; [
-        home-manager.nixosModules.home-manager
-        niri-flake.nixosModules.niri
-        sops-nix.nixosModules.sops
-      ];
-
-      overlays = [
-        self.overlays.default
-        (_: prev: {
-          inherit (channels.unfree.${prev.system}.pkgs) masterpdfeditor4;
-          nix-init = inputs.nix-init.packages.${prev.system}.default;
-          neovim = inputs.nixvim.packages.${prev.system}.default;
-          ghostty = inputs.ghostty.packages.${prev.system}.default;
-          emoji-picker = inputs.emoji.packages.${prev.system}.script;
-        })
-      ];
+      specialArgs = module.args;
     in {
-      estradiol = let
-        systemChannels = filterChannelsForSystem x86_64-linux channels;
-        defaultChannel = systemChannels.unstable;
-        lib = self.lib.extendLib defaultChannel self.lib;
+      nixosConfigurations = let
+        sharedModules = with inputs; [
+          home-manager.nixosModules.home-manager
+          niri-flake.nixosModules.niri
+          sops-nix.nixosModules.sops
+        ];
 
-        pkgs = import defaultChannel._input {
-          system = x86_64-linux;
-          inherit overlays;
-        };
-      in
-        lib.nixosSystem {
-          system = x86_64-linux;
-          specialArgs = {
-            inherit
-              pkgs
-              lib
-              self
-              helpers
-              inputs
-              ;
+        overlays = [
+          self.overlays.default
+          (_: prev: {
+            inherit (inputs.unfree.${prev.system}.pkgs) masterpdfeditor4;
+          })
+        ];
+      in {
+        estradiol = let
+          lib = self.lib.extendLibMany [helpers];
+        in
+          lib.nixosSystem {
+            system = systems.x86_64-linux;
+            specialArgs = module.args;
+            modules =
+              [
+                (_: {
+                  inherit (module) args;
+
+                  nixpkgs.pkgs = pkgs;
+                  environment.systemPackages = with pkgs; [
+                    neovim
+                    nix-init
+                    nurl
+                  ];
+                })
+                inputs.stylix.nixosModules.stylix
+                ./hosts/estradiol
+                ./modules
+                ./modules/system/stylix
+                (_: {
+                  home-manager = {
+                    useGlobalPkgs = true;
+                    useUserPackages = true;
+                    backupFileExtension = "backup";
+                    users.jules = import ./hosts/estradiol/home/default.nix;
+                  };
+                })
+              ]
+              ++ sharedModules;
           };
-          modules =
-            [
-              (_: {
-                _module.args = lib.mkDefault {
-                  inherit
-                    pkgs
-                    lib
-                    self
-                    inputs
-                    ;
-                };
 
-                nixpkgs.pkgs = pkgs;
-                environment.systemPackages = with pkgs; [
-                  neovim
-                  nix-init
-                  nurl
-                ];
-              })
-              inputs.stylix.nixosModules.stylix
-              ./hosts/estradiol
-              ./modules
-              ./modules/system/stylix
-              (_: {
-                home-manager = {
-                  useGlobalPkgs = true;
-                  useUserPackages = true;
-                  backupFileExtension = "backup";
-                  users.jules = import ./hosts/estradiol/home/default.nix;
-                };
-              })
-            ]
-            ++ sharedModules;
-        };
-
-      progesterone = let
-        systemChannels = filterChannelsForSystem aarch64-linux channels;
-        defaultChannel = systemChannels.unstable;
-        lib = self.lib.extendLib defaultChannel self.lib;
-        pkgs = import defaultChannel._input {
-          system = aarch64-linux;
-          overlays =
-            [
-              (_: prev: {
-                lib = self.lib.extendLib prev self.lib;
-              })
-            ]
-            ++ overlays;
-        };
-      in
-        lib.nixosSystem {
-          system = aarch64-linux;
+        progesterone = lib.nixosSystem {
+          system = systems.aarch64-linux;
           specialArgs = {
             inherit
               pkgs
@@ -141,16 +98,32 @@
                 };
 
                 environment.systemPackages = [
-                  inputs.nixvim.packages.${x86_64-linux}.default
+                  inputs.nixvim.packages.${system}.default
                 ];
               })
               ./hosts/progesterone
             ]
             ++ sharedModules;
         };
-    };
-    overlays = import ./overlays {inherit inputs channels;};
-  };
+      };
+
+      lib = import ./lib/default.nix {
+        inherit (inputs.nixpkgs) lib;
+      };
+
+      overlays = {
+        default = import ./overlays {
+          inherit inputs;
+          inherit (inputs.nixpkgs) lib;
+          inherit (inputs.nixpkgs.legacyPackages.${system}) callPackage;
+        };
+      };
+    })
+    // eachDefaultSystem (system: let
+      pkgs = makePkgs system;
+    in {
+      devShells = pkgs.callPackage ./devShells.nix {inherit pkgs;};
+    });
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";

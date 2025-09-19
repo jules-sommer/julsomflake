@@ -1,9 +1,9 @@
-{channels, ...}: _: prev: {
+{inputs, ...}: (_: prev: {
   inherit
-    (channels.unfree.${prev.system}.pkgs)
+    (inputs.unfree.legacyPackages.${prev.system})
     masterpdfeditor
     graphite-cli
     steam
     steam-unwrapped
     ;
-}
+})

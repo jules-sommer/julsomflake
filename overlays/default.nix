@@ -1,21 +1,13 @@
 {
+  lib,
   inputs,
-  channels,
+  callPackage,
+  ...
 }: let
-  importOverlay = path: import path {inherit inputs channels;};
-
-  zen-browser = importOverlay ./zen-browser;
-  unfree-pkgs = importOverlay ./unfree-pkgs;
-
-  allOverlays = [
-    zen-browser
-    unfree-pkgs
-  ];
-in {
-  default = final: prev: builtins.foldl' (acc: overlay: acc // (overlay final prev)) {} allOverlays;
-
-  inherit
-    zen-browser
-    unfree-pkgs
-    ;
-}
+  inherit (lib) composeManyExtensions map;
+  callOverlay = path: callPackage path {inherit inputs;};
+in
+  composeManyExtensions (map callOverlay [
+    ./unfree.nix
+    ./zen-browser
+  ])
