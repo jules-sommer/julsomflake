@@ -8,7 +8,7 @@
       download-buffer-size = 524288000;
       cores = 12;
       warn-dirty = false;
-      experimental-features = "nix-command flakes";
+      experimental-features = ["nix-command" "flakes" "pipe-operators"];
       auto-optimise-store = true;
       substituters = [
         "https://hyprland.cachix.org"

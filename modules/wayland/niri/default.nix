@@ -11,17 +11,14 @@
     enabledPred
     enabled
     ;
-  inherit (inputs) niri-flake;
   cfg = config.local.wayland.niri;
 in {
   options.local.wayland.niri = mkEnableOpt "Enable niri.";
 
   config = {
-    nixpkgs.overlays = [niri-flake.overlays.niri];
-
     # install niri package at the system level for interaction with systemd
     programs.niri = enabledPred cfg.enable {
-      package = pkgs.niri-unstable;
+      package = pkgs.niri-stable;
     };
 
     # home-manager settings for niri

@@ -25,9 +25,26 @@ in {
       };
     };
 
-    systemd.tmpfiles.rules = [
-      "L /lib - - - - /run/current/system/lib"
+    security.pam.loginLimits = [
+      {
+        domain = "*";
+        type = "soft";
+        item = "nofile";
+        value = "1048576";
+      }
+      {
+        domain = "*";
+        type = "hard";
+        item = "nofile";
+        value = "2097152";
+      }
     ];
+    systemd = {
+      tmpfiles.rules = [
+        "L /lib - - - - /run/current/system/lib"
+      ];
+      settings.Manager.DefaultLimitNOFILE = 2097152;
+    };
 
     boot = foldl' recursiveUpdate {} [
       (mkIf cfg.zfs.enable {

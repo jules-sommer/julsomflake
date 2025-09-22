@@ -37,7 +37,7 @@
       nixosConfigurations = let
         sharedModules = with inputs; [
           home-manager.nixosModules.home-manager
-          niri-flake.nixosModules.niri
+          niri.nixosModules.niri
           sops-nix.nixosModules.sops
         ];
       in {
@@ -73,12 +73,15 @@
         inherit (inputs.nixpkgs) lib;
       };
 
-      overlays = {
-        default = import ./overlays {
-          inherit inputs;
-          inherit (inputs.nixpkgs) lib;
-          inherit (inputs.nixpkgs.legacyPackages.${system}) callPackage;
+      overlays = let
+        inherit (inputs.nixpkgs) lib;
+        inherit (lib) composeManyExtensions;
+        overlays = import ./overlays {
+          inherit inputs lib;
         };
+      in {
+        default = composeManyExtensions overlays;
+        all = overlays;
       };
     })
     // eachDefaultSystem (system: let
@@ -107,13 +110,7 @@
     stylix.url = "github:danth/stylix";
 
     niri = {
-      url = "github:YaLTeR/niri";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    niri-flake = {
       url = "github:sodiboo/niri-flake";
-      inputs.niri-unstable.follows = "niri";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
