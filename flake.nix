@@ -5,102 +5,64 @@
     ...
   } @ inputs: let
     inherit (utils.lib) eachDefaultSystemPassThrough eachDefaultSystem;
-    systems = utils.lib.system;
     inherit (self) overlays;
-    supportedSystems = import ./flake.systems.nix;
+    systems = utils.lib.system;
     makePkgs = system:
       import inputs.nixpkgs {
         inherit system;
-        overlays = [self.overlays.default];
+        overlays = [overlays.default];
       };
   in
     eachDefaultSystemPassThrough (system: let
-      inherit (self.lib) makeChannel;
       helpers = inputs.helpers.lib;
-      lib = self.lib.extendLibMany inputs.nixpkgs [helpers];
 
-      module.args = {
-        inherit helpers pkgs lib self inputs;
+      _module.args = {
+        inherit helpers lib self inputs;
+        packages = self.packages.${system};
       };
 
       pkgs = makePkgs system;
+      lib = self.lib.extendLibMany pkgs.lib (with inputs; [
+        helpers
+        {utils = utils.lib;}
+        {hm = home-manager.lib;}
+        self.lib
+      ]);
 
-      specialArgs = module.args;
+      inherit (inputs.nixpkgs.lib) nixosSystem;
+
+      specialArgs = _module.args;
     in {
+      packages.${system} = import ./packages {inherit lib helpers pkgs;};
       nixosConfigurations = let
         sharedModules = with inputs; [
           home-manager.nixosModules.home-manager
           niri-flake.nixosModules.niri
           sops-nix.nixosModules.sops
         ];
-
-        overlays = [
-          self.overlays.default
-          (_: prev: {
-            inherit (inputs.unfree.${prev.system}.pkgs) masterpdfeditor4;
-          })
-        ];
       in {
-        estradiol = let
-          lib = self.lib.extendLibMany [helpers];
-        in
-          lib.nixosSystem {
-            system = systems.x86_64-linux;
-            specialArgs = module.args;
-            modules =
-              [
-                (_: {
-                  inherit (module) args;
-
-                  nixpkgs.pkgs = pkgs;
-                  environment.systemPackages = with pkgs; [
-                    neovim
-                    nix-init
-                    nurl
-                  ];
-                })
-                inputs.stylix.nixosModules.stylix
-                ./hosts/estradiol
-                ./modules
-                ./modules/system/stylix
-                (_: {
-                  home-manager = {
-                    useGlobalPkgs = true;
-                    useUserPackages = true;
-                    backupFileExtension = "backup";
-                    users.jules = import ./hosts/estradiol/home/default.nix;
-                  };
-                })
-              ]
-              ++ sharedModules;
-          };
-
-        progesterone = lib.nixosSystem {
-          system = systems.aarch64-linux;
-          specialArgs = {
-            inherit
-              pkgs
-              lib
-              self
-              inputs
-              ;
-          };
+        estradiol = nixosSystem {
+          system = systems.x86_64-linux;
+          inherit specialArgs;
           modules =
             [
               (_: {
-                _module.args = lib.mkDefault {
-                  inherit
-                    pkgs
-                    lib
-                    self
-                    inputs
-                    ;
-                };
-
-                environment.systemPackages = [
-                  inputs.nixvim.packages.${system}.default
-                ];
+                inherit _module;
+                nixpkgs = {inherit pkgs;};
               })
+              inputs.stylix.nixosModules.stylix
+              ./modules/default.nix
+              ./hosts/estradiol
+              ./modules/stylix
+            ]
+            ++ sharedModules;
+        };
+
+        progesterone = nixosSystem {
+          system = systems.aarch64-linux;
+          inherit specialArgs;
+          modules =
+            [
               ./hosts/progesterone
             ]
             ++ sharedModules;
@@ -122,7 +84,7 @@
     // eachDefaultSystem (system: let
       pkgs = makePkgs system;
     in {
-      devShells = pkgs.callPackage ./devShells.nix {inherit pkgs;};
+      devShells = import ./devShells.nix {inherit pkgs;};
     });
 
   inputs = {

@@ -2,6 +2,7 @@
   inherit
     (inputs.unfree.legacyPackages.${prev.system})
     masterpdfeditor
+    masterpdfeditor4
     graphite-cli
     steam
     steam-unwrapped

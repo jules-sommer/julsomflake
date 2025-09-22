@@ -4,7 +4,7 @@
   ...
 }: {
   config.users = {
-    mutableUsers = false;
+    mutableUsers = true;
     defaultUserShell = pkgs.fish;
     users = {
       root = {
@@ -12,6 +12,7 @@
         hashedPassword = "$y$j9T$.kN/Nal9JNqTj52joYQ6g/$aEVFLAdkc7T9rwFodCD1CN92W27G7EXEMsVIKKS2Ef5";
         useDefaultShell = true;
         createHome = false;
+        shell = lib.mkForce pkgs.fish;
       };
       jules = {
         isNormalUser = true;

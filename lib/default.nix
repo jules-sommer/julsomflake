@@ -48,10 +48,10 @@ in rec {
     pkgs = input.legacyPackages.${system};
   };
 
-  extendLibMany = pkgs: extensions:
-    pkgs.lib.extend (
+  extendLibMany = lib: extensions:
+    lib.extend (
       _: prev:
-        lib.foldl' lib.recursiveUpdate {} ([
+        lib.foldl' (acc: elem: lib.recursiveUpdate acc elem) {} ([
             {__extended = true;}
             prev
           ]

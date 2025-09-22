@@ -11,12 +11,18 @@ in {
     ./audio
     ./cli
     ./doas
+    ./documents+pdf
+    ./evremap
     ./fonts
+    ./kmail
+    ./nix
     ./shells
     ./ssh
+    ./stylix
     ./terminal
-    ./wayland
     ./users
+    ./wayland
+    ./xanmod_kernel
   ];
 
   options.local.home = lib.mkOption {
@@ -39,7 +45,11 @@ in {
 
   config = {
     home-manager = {
-      sharedModules = [./home] ++ home;
+      sharedModules = [] ++ home;
+
+      useGlobalPkgs = true;
+      useUserPackages = true;
+      backupFileExtension = "backup";
     };
 
     local.home = {

@@ -1,5 +1,5 @@
 {pkgs, ...}: {
-  bun = {
+  users.users.bun = {
     isNormalUser = true;
     initialPassword = "bun";
     useDefaultShell = false;

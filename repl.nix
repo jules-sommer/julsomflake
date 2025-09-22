@@ -2,13 +2,12 @@ let
   inherit (pkgs) callPackage;
   inherit (flake) inputs;
 
-  lib = pkgs.lib.extend (
-    _: prev:
-      prev
-      // helpers
-      // {utils = flake.inputs.utils.lib;}
-      // {hm = flake.inputs.home-manager.lib;}
-  );
+  lib = flake.lib.extendLibMany flake.inputs.nixpkgs.lib [
+    helpers
+    {utils = flake.inputs.utils.lib;}
+    {hm = flake.inputs.home-manager.lib;}
+    flake.lib
+  ];
 
   helpers = inputs.helpers.lib;
 
@@ -21,11 +20,11 @@ let
     ];
   };
 in
-  {
+  flake
+  // {
     inherit pkgs lib helpers;
     inherit (flake.inputs) nixpkgs;
     configs = {
       estradiol = flake.nixosConfigurations.estradiol.config;
     };
   }
-  // flake

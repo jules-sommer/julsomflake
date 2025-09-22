@@ -1,10 +1,4 @@
-{ ... }:
-{
-  imports = [
-    ./printing
-    ./kernel
-  ];
-
+{...}: {
   local.audio = {
     pipewire.enable = true;
   };

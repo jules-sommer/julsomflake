@@ -1,13 +1,12 @@
 {
   helpers,
   lib,
-  pkgs,
-  self,
+  packages,
   ...
 }: let
   inherit (lib) mkDefault;
   inherit (helpers) enabled';
-  inherit (self.packages.rose-pine) mako;
+  inherit (packages) rose-pine_mako;
 in {
   local.home.services.mako = enabled' {
     settings = {
@@ -17,6 +16,8 @@ in {
       anchor = "top-right";
       margin = 10;
     };
-    extraConfig = builtins.readFile "${mako}/theme/rose-pine.theme";
+    extraConfig =
+      builtins.readFile
+      "${rose-pine_mako}/theme/rose-pine.theme";
   };
 }
