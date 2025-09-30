@@ -7,8 +7,10 @@
   inherit (lib) mkOption types;
 in {
   imports = [
-    ./joshuto
     ./btop
+    ./helix
+    ./joshuto
+    ./starship
   ];
 
   options.local.cli = mkOption {
@@ -16,12 +18,16 @@ in {
       options = {
         joshuto = mkEnableOpt "Enable joshuto file-browser.";
         btop = mkEnableOpt "Enable btop TUI system monitor.";
+        helix = mkEnableOpt "Enable helix text editor.";
+        starship = mkEnableOpt "Enable starship shell prompt.";
       };
     };
 
     default = {
       joshuto = enabled;
       btop = enabled;
+      helix = enabled;
+      starship = enabled;
     };
 
     description = "Per-user toggles for misc. CLI programs/utils.";

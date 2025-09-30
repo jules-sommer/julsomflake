@@ -5,12 +5,10 @@
   helpers,
   ...
 }: let
-  inherit (helpers) mkEnableOpt enabledPred';
+  inherit (helpers) enabledPred;
   cfg = config.local.terminal.ghostty;
 in {
-  options.local.terminal.ghostty = mkEnableOpt "Enable Ghostty terminal emulator.";
-
-  config.local.home.programs.ghostty = enabledPred' cfg.enable {
+  local.home.programs.ghostty = enabledPred cfg.enable {
     package = inputs.ghostty.packages.${pkgs.system}.default;
     enableFishIntegration = true;
     enableZshIntegration = true;

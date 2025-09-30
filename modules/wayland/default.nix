@@ -4,12 +4,29 @@
   lib,
   pkgs,
   ...
-}: let
-  inherit (helpers) includeIf enabled enabledIf mkEnableOpt enabledPred mkOpt disabledIf enabled';
-  inherit (lib) types attrsets foldl';
+}:
+let
+  inherit (helpers)
+    includeIf
+    enabled
+    enabledIf
+    mkEnableOpt
+    enabledPred
+    mkOpt
+    disabledIf
+    enabled'
+    ;
+  inherit (lib)
+    mkIf
+    types
+    attrsets
+    foldl'
+    ;
   inherit (attrsets) recursiveUpdate;
   cfg = config.local.wayland;
-in {
+  isAnyWaylandCompositorEnabled = cfg.niri.enable || cfg.river.enable || cfg.plasma.enable;
+in
+{
   imports = [
     ./river
     ./waybar
@@ -19,28 +36,31 @@ in {
     ./niri
   ];
 
-  options.local.wayland =
-    (mkEnableOpt "Enable wayland support + portals.")
-    // {
-      login = {
-        greetd = mkEnableOpt "Enable greetd login manager.";
-        settings = {
-          default_session = mkOpt types.str "river" "The default command to start our session with.";
-        };
+  options.local.wayland = {
+    enable =
+      mkOpt types.bool isAnyWaylandCompositorEnabled
+        "Enable wayland support, setting this option to true configures and enables wayland-related portals and other settings. And disables xserver if not already.";
+    login = {
+      greetd = mkEnableOpt "Enable greetd login manager.";
+      settings = {
+        default_session = mkOpt types.str "river" "The default command to start our session with.";
       };
     };
+  };
 
-  config = foldl' recursiveUpdate {} [
-    (includeIf cfg.login.greetd.enable {
+  config = foldl' recursiveUpdate { } [
+    {
       security.pam.services.greetd.enableGnomeKeyring = true;
-      services.greetd = enabled' {
+      services.greetd = {
+        inherit (cfg.login.greetd) enable;
         settings.default_session.command = "${pkgs.tuigreet}/bin/tuigreet --cmd ${cfg.login.settings.default_session}";
       };
-    })
-    (includeIf cfg.enable {
-      xdg.portal = {
+    }
+    {
+      xdg.portal = mkIf cfg.enable {
         wlr = enabled;
-        extraPortals = with pkgs;
+        extraPortals =
+          with pkgs;
           [
             xdg-desktop-portal-gtk
             xdg-desktop-portal-wlr
@@ -50,26 +70,37 @@ in {
           ]);
 
         config = {
-          common.default = ["gtk"];
-          river.default = ["wlr" "gtk"];
-          niri.default = ["wlr" "gtk"];
-          hyprland.default = ["wlr" "gtk"];
-          plasma.default = ["kde" "gtk"];
+          common.default = [ "gtk" ];
+          river.default = [
+            "wlr"
+            "gtk"
+          ];
+          niri.default = [
+            "wlr"
+            "gtk"
+          ];
+          hyprland.default = [
+            "wlr"
+            "gtk"
+          ];
+          plasma.default = [
+            "kde"
+            "gtk"
+          ];
         };
       };
-    })
-    (includeIf (!cfg.enable) {
-      services.xserver =
-        (disabledIf cfg.enable)
-        // {
-          autoRepeatDelay = 200;
-          autoRepeatInterval = 30;
-          autorun = true;
-          xkb = {
-            layout = "us";
-            options = "eurosign:e,caps:escape";
-          };
+    }
+    {
+      services.xserver = {
+        enable = !cfg.enable;
+        autoRepeatDelay = 200;
+        autoRepeatInterval = 30;
+        autorun = true;
+        xkb = {
+          layout = "us";
+          options = "eurosign:e,caps:escape";
         };
-    })
+      };
+    }
   ];
 }

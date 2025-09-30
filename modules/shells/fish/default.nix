@@ -6,14 +6,13 @@
   ...
 }: let
   inherit (lib) mkIf;
-  inherit (helpers) enabledPred;
-  cfg = config.local.shells;
+  inherit (helpers) enabledPred enabled;
+  cfg = config.local.shells.fish;
 in {
-  programs.fish = enabledPred cfg.fish.enable {
-    useBabelfish = true;
-  };
-  local.home = {
-    programs.fish = {
+  config = {
+    programs.fish = enabled;
+
+    local.home.programs.fish = enabledPred cfg.enable {
       package = pkgs.fish;
       # plugins = with pkgs.fishPlugins; [
       #   fifc

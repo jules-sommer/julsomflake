@@ -6,14 +6,15 @@
   ...
 }: let
   inherit (lib) mkIf;
-  inherit (helpers) enabledPred enabled';
-  cfg = config.local.shells;
+  inherit (helpers) enabledPred enabled enabled';
+  cfg = config.local.shells.zsh;
 in {
-  programs.zsh = enabledPred cfg.zsh.enable {};
+  config = {
+    programs.zsh =
+      enabled;
 
-  local.home = {
-    programs.zsh = {
-      package = null;
+    local.home.programs.zsh = enabledPred cfg.enable {
+      package = pkgs.zsh;
       setOptions = [
         "EXTENDED_HISTORY"
         "RM_STAR_WAIT"

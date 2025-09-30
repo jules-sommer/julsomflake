@@ -30,16 +30,7 @@ in {
       autoImport = true;
       followSystem = true;
     };
-    targets = {
-      qt = disabled;
-      nixvim = enabled' {
-        plugin = "mini.hues";
-        transparentBackground = {
-          main = true;
-          signColumn = true;
-        };
-      };
-    };
+    targets = {};
     opacity = {
       terminal = 0.85;
       popups = 0.85;

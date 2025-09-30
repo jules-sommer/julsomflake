@@ -6,19 +6,27 @@
   ...
 }: let
   inherit (helpers) enabled' enabled enabledPred mkEnableOpt;
-  cfg = config.local.wayland.river;
-
   inherit
     (lib)
+    isString
+    isList
+    isDerivation
+    isPath
+    escapeShellArg
+    escapeShellArgs
+    mapAttrsToList
+    concatStringsSep
+    optionalString
+    typeOf
     foldl'
     foldr
-    ;
-  inherit (lib.attrsets) recursiveUpdate;
-  inherit
-    (builtins)
     head
     zipAttrsWith
     ;
+
+  cfg = config.local.wayland.river;
+
+  inherit (lib.attrsets) recursiveUpdate;
 
   mergeWithFn = sets: fn:
     foldr (
@@ -42,52 +50,49 @@
       else throw "Can't determine binary name for package: ${drv}";
   in "${lib.getBin drv}/bin/${name}";
 
+  traceSpawn = args: let s = spawn args; in builtins.trace s s;
+
   spawn = command: let
-    inherit (lib) isString isList isDerivation isPath concatStringsSep mapAttrsToList;
-
-    escape = str: "'${lib.replaceStrings ["'"] ["'\\''"] str}'";
-
     resolveProgram = prog:
       if isDerivation prog
-      then getExecutable prog
+      then lib.getExe prog
       else if isPath prog
       then toString prog
       else if isString prog
       then prog
-      else throw "spawn: invalid program type: ${lib.typeOf prog}";
+      else throw "spawn: invalid program type: ${typeOf prog}";
 
     buildCommand = {
       program,
       args ? [],
       env ? {},
     }: let
-      cmd = concatStringsSep " " ([(escape (resolveProgram program))] ++ map escape args);
-      envVars =
+      cmdline = escapeShellArgs ([(resolveProgram program)] ++ args);
+      envStr =
         if env == {}
         then ""
-        else concatStringsSep " " (mapAttrsToList (k: v: "${escape k}=${escape v}") env);
-    in "spawn ${envVars}${lib.optionalString (env != {}) " "}\"${cmd}\"";
+        else concatStringsSep " " (mapAttrsToList (k: v: "${k}=${escapeShellArg v}") env);
+    in "spawn ${envStr}${optionalString (env != {}) " "}${cmdline}";
   in
-    if isList command || isString command || isDerivation command || isPath command
-    then "spawn \"${resolveProgram command}\""
+    if isList command
+    then
+      buildCommand {
+        program = builtins.head command;
+        args = builtins.tail command;
+      }
+    else if isString command || isDerivation command || isPath command
+    then "spawn ${escapeShellArg (resolveProgram command)}"
     else if builtins.isAttrs command
     then buildCommand command
-    else throw "spawn: unsupported input type: ${lib.typeOf command}";
+    else throw "spawn: unsupported input type: ${typeOf command}";
 
   home = "/home/jules";
   wallpaperFile = "${home}/060_media/010_wallpapers/zoe-love-bg/zoe-love-4k.png";
   screenshotDir = "${home}/060_media/005_screenshots";
-  screenshotCmd = save-dir:
-    pkgs.writeShellScript "screenshot" ''
-      grim -g "$(slurp -d)" - | tee ${save-dir}$(date +%Y-%m-%d_%H-%M-%S).png | wl-copy -t image/png
-      ${getExecutable pkgs.libnotify} "Saving screenshot to ${save-dir}..."
-    '';
-
-  takeScreenshot = screenshotCmd screenshotDir;
 in {
   options.local.wayland.river = mkEnableOpt "Enable River.";
   config = {
-    programs.river = {
+    programs.river-classic = {
       inherit (cfg) enable;
       package = null;
       xwayland = enabled;
@@ -143,7 +148,7 @@ in {
     local.home = {
       xdg.portal.xdgOpenUsePortal = true;
       wayland.windowManager.river = enabled' {
-        package = null;
+        package = pkgs.river-classic;
         systemd = enabled' {
           variables = [
             "DISPLAY"
@@ -183,12 +188,16 @@ in {
                 "Super+Shift bracketright" = "focus-output next";
                 "Super+Shift bracketleft" = "focus-output previous";
 
-                "Super Return" = builtins.trace (spawn {program = pkgs.kitty;}) (spawn {program = pkgs.kitty;});
+                "Super Return" = traceSpawn (spawn {program = pkgs.kitty;});
                 "Super+Shift Return" = "spawn fuzzel";
                 "Super Z" = "spawn zen";
 
-                "Super S" = builtins.trace (spawn {program = takeScreenshot;}) (spawn {program = takeScreenshot;});
-                "Alt+Shift E" = "spawn ${pkgs.emoji-picker}/emoji.sh";
+                "Super S" = traceSpawn {
+                  program = pkgs.julespkgs.screenshot;
+                  env = {SCREENSHOT_DIR = screenshotDir;};
+                };
+                # "Alt+Shift E" = "spawn ${pkgs.emoji-picker}/emoji.sh";
+                "Alt+Shift E" = traceSpawn {program = pkgs.emoji-picker;};
 
                 "Super C" = "close";
                 "Super+Shift E" = "exit";

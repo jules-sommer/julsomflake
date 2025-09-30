@@ -1,14 +1,18 @@
-{pkgs, ...}: let
+{
+  pkgs,
+  helpers,
+  ...
+}: let
+  inherit (helpers) enabled';
   kitty = cmd: exec "kitty ${cmd}";
   exec = cmd: ''
     riverctl spawn "${cmd}"
   '';
   mkstyle = import ./styles.nix;
 in {
-  local.home.programs.waybar = {
-    enable = true;
+  local.home.programs.waybar = enabled' {
     style = mkstyle {
-      font-family = "jetbrainsmono nerd font";
+      font-family = "JetBrainsMono Nerd Font";
       font-size = "14px";
       shadow = "rgba(17, 17, 26, 0.1) 0px 4px 16px, rgba(17, 17, 26, 0.05) 0px 8px 32px";
       spacing = "5px";

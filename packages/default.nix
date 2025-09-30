@@ -1,28 +1,60 @@
 {
+  self,
+  inputs,
   pkgs,
   lib,
-  helpers,
   ...
 }: let
-  inherit (lib) mapAttrs concatMapAttrs mapAttrs' nameValuePair;
-  flattenWithSeparator = separator:
+  inherit (lib.customisation) makeScope;
+  inherit (lib.filesystem) packagesFromDirectoryRecursive;
+
+  inherit
+    (lib)
+    isDerivation
+    concatStringsSep
     concatMapAttrs
-    (theme: pkgs:
-      mapAttrs'
-      (pkg: drv: nameValuePair "${theme}${separator}${pkg}" drv)
-      pkgs);
+    isAttrs
+    ;
 
-  flatten = flattenWithSeparator "_";
+  flattenPackages = separator: path: value:
+    if isDerivation value
+    then {
+      ${concatStringsSep separator path} = value;
+    }
+    else if isAttrs value
+    then concatMapAttrs (name: flattenPackages separator (path ++ [name])) value
+    else {}; # Ignore the functions which makeScope returns
 
-  findModules = base_dir: (lib.mapAttrs (
-      basename: kind: let
-        path = lib.path.append base_dir basename;
-        defaultNixExists = lib.pathExists (lib.path.append path "default.nix");
-      in
-        if defaultNixExists
-        then import path {inherit (pkgs) fetchFromGitHub;}
-        else findModules path
-    )
-    (lib.filterAttrs (_: kind: kind == "directory") (builtins.readDir base_dir)));
+  inputsScope = makeScope pkgs.newScope (_: {
+    inherit inputs pkgs;
+    inherit (pkgs) fetchFromGitHub;
+  });
+
+  getPinVersion = pin:
+    if pin ? version
+    then pin.version
+    else if pin ? revision
+    then pin.revision
+    else if pin ? hash && pin ? repository
+    then "${pin.repository.owner}/${pin.repository.repo}/${pin.hash}"
+    else null;
+
+  fetchFromNpins = pin:
+    pkgs.fetchFromGitHub {
+      inherit (pin.repository) owner repo;
+      rev = pin.revision;
+      sha256 = pin.hash;
+    };
+
+  scopeFromDirectory = directory:
+    packagesFromDirectoryRecursive {
+      inherit directory;
+      inherit (inputsScope) newScope callPackage;
+    };
+
+  defaultFlattenPackages = flattenPackages "_" [];
 in
-  flatten (findModules ./.)
+  (defaultFlattenPackages {
+    themes = defaultFlattenPackages (scopeFromDirectory ./themes);
+  })
+  // defaultFlattenPackages (scopeFromDirectory ./by-name)

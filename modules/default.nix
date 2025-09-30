@@ -1,12 +1,15 @@
 {
   lib,
   config,
+  inputs,
   ...
-}: let
+}:
+let
   # refers to the home shortcut config option
   inherit (config.local) home;
   inherit (lib) enabled enabled';
-in {
+in
+{
   imports = [
     ./audio
     ./cli
@@ -33,19 +36,19 @@ in {
       potentially creating issues.
     '';
 
-    type = with lib.types;
-      coercedTo anything
-      (v:
-        if builtins.isList v
-        then v
-        else [v])
-      (listOf deferredModule);
-    default = [];
+    type =
+      with lib.types;
+      coercedTo anything (v: if builtins.isList v then v else [ v ]) (listOf deferredModule);
+    default = [ ];
   };
 
   config = {
     home-manager = {
-      sharedModules = [] ++ home;
+      sharedModules =
+        with inputs;
+        [
+        ]
+        ++ home;
 
       useGlobalPkgs = true;
       useUserPackages = true;

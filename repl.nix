@@ -15,9 +15,7 @@ let
 
   pkgs = import inputs.nixpkgs {
     config.allowUnfree = true;
-    overlays = with inputs; [
-      ghostty.overlays.default
-    ];
+    overlays = lib.attrValues flake.overlays;
   };
 in
   flake

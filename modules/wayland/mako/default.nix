@@ -6,7 +6,7 @@
 }: let
   inherit (lib) mkDefault;
   inherit (helpers) enabled';
-  inherit (packages) rose-pine_mako;
+  inherit (packages) themes_rose-pine_mako;
 in {
   local.home.services.mako = enabled' {
     settings = {
@@ -18,6 +18,6 @@ in {
     };
     extraConfig =
       builtins.readFile
-      "${rose-pine_mako}/theme/rose-pine.theme";
+      "${themes_rose-pine_mako}/theme/rose-pine.theme";
   };
 }

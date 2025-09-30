@@ -12,18 +12,14 @@
     ;
   inherit
     (helpers)
-    mkOpt
-    mkEnableOpt
-    enabledIf
+    enabledPred
     ;
 
   cfg = config.local.terminal.kitty;
 in {
-  options.local.terminal.kitty = mkEnableOpt "Kitty configuration.";
-
-  config.local.home.programs.kitty =
-    (enabledIf cfg.enable)
-    // {
+  local.home.programs.kitty =
+    enabledPred cfg.enable
+    {
       package = pkgs.kitty;
       font = lib.mkDefault {
         name = "JetBrainsMono Nerd Font";

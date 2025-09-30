@@ -2,9 +2,11 @@
   lib,
   pkgs,
   ...
-}: let
-  inherit (lib) enabled enabled';
-in {
+}:
+let
+  inherit (lib) enabled enabled' disabled;
+in
+{
   imports = [
     ./hardware
     ./kernel
@@ -15,6 +17,13 @@ in {
   ];
 
   local = {
+    cli = {
+      joshuto = enabled;
+      btop = enabled;
+      helix = enabled;
+      starship = enabled;
+    };
+
     programs = {
       kmail = enabled;
       libreoffice = enabled;
@@ -24,7 +33,7 @@ in {
     stylix = enabled;
     wayland = {
       river = enabled;
-
+      niri = disabled;
       login = {
         greetd = enabled;
         settings.default_session = "river";
@@ -46,15 +55,12 @@ in {
     };
 
     home = {
-      qt = enabled' (
-        lib.mkDefault {
-          platformTheme.name = "kde6";
-          style.name = "breeze";
-        }
-      );
+      qt = lib.mkDefault {
+        platformTheme.name = "kde";
+        style.name = "breeze";
+      };
 
-      xdg = {
-        enable = true;
+      xdg = enabled' {
         configHome = /home/jules/.config;
       };
 
@@ -99,6 +105,7 @@ in {
       home.sessionVariables = {
         EDITOR = "nvim";
         MANPAGER = "nvim +Man!";
+        SCREENSHOT_DIR = "/home/jules/060_media/005_screenshots";
       };
 
       home.stateVersion = "24.11";
@@ -223,15 +230,15 @@ in {
   };
 
   xdg = {
-    icons.enable = true;
+    icons = enabled;
     mime = enabled' {
       defaultApplications = {
-        "x-scheme-handler/http" = ["zen.desktop"];
-        "x-scheme-handler/https" = ["zen.desktop"];
-        "image/*" = ["imv.desktop"];
-        "video/*" = ["mpv.desktop"];
-        "application/pdf" = ["okular.desktop"];
-        "text/*" = ["nvim.desktop"];
+        "x-scheme-handler/http" = [ "zen.desktop" ];
+        "x-scheme-handler/https" = [ "zen.desktop" ];
+        "image/*" = [ "imv.desktop" ];
+        "video/*" = [ "mpv.desktop" ];
+        "application/pdf" = [ "okular.desktop" ];
+        "text/*" = [ "nvim.desktop" ];
       };
     };
   };
@@ -250,8 +257,8 @@ in {
   i18n.defaultLocale = "en_CA.UTF-8";
 
   networking = {
-    networkmanager.enable = true;
-    firewall.enable = false;
+    networkmanager = enabled;
+    firewall = enabled;
 
     hostName = "estradiol";
     hostId = lib.mkDefault "30a4185c";
