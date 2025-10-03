@@ -1,115 +1,54 @@
-{lib}: let
-  inherit
-    (lib)
-    types
-    mkOption
+{ inputs }:
+let
+  inherit (builtins) isFunction listToAttrs readDir;
+  inherit (inputs.nixpkgs.lib)
+    recursiveUpdate
+    foldl'
+    attrValues
+    mapAttrs
+    removeSuffix
+    hasPrefix
+    isAttrs
     filterAttrs
-    hasAttr
+    hasSuffix
     ;
-in rec {
-  # Returns a filtered attrset of users that are "normal users", i.e have key `isNormalUser = true;`
-  # all-users argument is the value of `config.users.users`
-  getNormalUsers = users: filterAttrs (_: userAttrs: userAttrs.isNormalUser or false) users;
-
-  getUserHomeDir = user: user.home or "/home/${user.name}";
-
-  getUserHomeDirFromStr = users: user:
-    if hasAttr user users
-    then users.${user}.home
-    else "/home/${user}";
-
-  getAllUserHomeDirs = users: lib.mapAttrs (_: getUserHomeDir) users;
-
-  enabled = {
-    enable = true;
-  };
-
-  disabled = {
-    enable = false;
-  };
-
-  enabled' = cfg:
-    {
-      enable = true;
-    }
-    // cfg;
-
-  disabled' = cfg:
-    {
-      enable = false;
-    }
-    // cfg;
-
-  makeChannel = system: input: {
-    inherit system;
-    inherit (input) lib;
-    inherit (input.lib) version;
-    _input = input;
-    pkgs = input.legacyPackages.${system};
-  };
-
-  extendLibMany = lib: extensions:
-    lib.extend (
-      _: prev:
-        lib.foldl' (acc: elem: lib.recursiveUpdate acc elem) {} ([
-            {__extended = true;}
-            prev
+in
+inputs.nixpkgs.lib.extend (
+  _: prev:
+  foldl' recursiveUpdate { } (
+    [
+      { __extended = true; }
+    ]
+    ++ (with inputs; [
+      helpers
+      { utils = utils.lib; }
+      home-manager.lib
+    ])
+    ++ (
+      readDir ./.
+      |> filterAttrs (
+        file: kind:
+        kind == "regular" && hasSuffix "nix" file && file != "default.nix" && !hasPrefix "__" file
+      )
+      |> mapAttrs (
+        file: _:
+        let
+          value = import ./${file} { inherit (inputs.nixpkgs) lib; };
+          name = removeSuffix ".nix" file;
+        in
+        if isAttrs value then
+          value
+        else if isFunction value then
+          listToAttrs [
+            {
+              inherit name;
+              inherit value;
+            }
           ]
-          ++ extensions)
-    );
-
-  extendLib = pkgs: extension:
-    pkgs.lib.extend (
-      _: prev:
-        {
-          __extended = true;
-        }
-        // prev
-        // extension
-    );
-
-  mkEnableOpt = description: {enable = lib.mkEnableOption description;};
-
-  ## Create a NixOS module option without a description.
-  ##
-  ## ```nix
-  ## lib.mkOpt' nixpkgs.lib.types.str "My default"
-  ## ```
-  ##
-  #@ Type -> Any -> String
-  mkOpt' = type: default: mkOpt type default null;
-
-  ## Create a boolean NixOS module option.
-  ##
-  ## ```nix
-  ## lib.mkBoolOpt true "Description of my option."
-  ## ```
-  ##
-  #@ Type -> Any -> String
-  mkBoolOpt = mkOpt types.bool;
-
-  ## Create a NixOS module option, with an optional description.
-  ##
-  ## Usage without description:
-  ## ```nix
-  ## lib.mkOpt nixpkgs.lib.types.str "My default"
-  ## ```
-  ##
-  ## Usage with description:
-  ## ```nix
-  ## lib.mkOpt nixpkgs.lib.types.str "My default" "Description of my option."
-  ## ```
-  ##
-  #@ Type -> Any -> Optional String -> mkOption
-  mkOpt = type: default: description:
-    mkOption {inherit type default description;};
-
-  ## Create a boolean NixOS module option without a description.
-  ##
-  ## ```nix
-  ## lib.mkBoolOpt true
-  ## ```
-  ##
-  #@ Type -> Any -> String
-  mkBoolOpt' = mkOpt' types.bool;
-}
+        else
+          { }
+      )
+      |> attrValues
+    )
+  )
+)

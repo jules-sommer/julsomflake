@@ -13,8 +13,8 @@
         default
         from_inputs
         unfree
-        disable_niri_tests
         julespkgs
+        (niri { }) # this overlay takes a param { with_tests ? false }
       ];
       makePkgs =
         system:
@@ -39,16 +39,7 @@
         };
 
         pkgs = makePkgs system;
-        lib = self.lib.extendLibMany pkgs.lib (
-          with inputs;
-          [
-            helpers
-            { utils = utils.lib; }
-            { hm = home-manager.lib; }
-            self.lib
-          ]
-        );
-
+        inherit (self) lib;
         inherit (inputs.nixpkgs.lib) nixosSystem;
 
         specialArgs = _module.args;
@@ -74,7 +65,6 @@
                 (_: {
                   inherit _module;
                   nixpkgs.overlays = defaultOverlays;
-                  home-manager.users.jules.nixpkgs.overlays = defaultOverlays;
                 })
                 inputs.stylix.nixosModules.stylix
                 ./modules/default.nix
@@ -94,8 +84,8 @@
             };
           };
 
-        lib = import ./lib/default.nix {
-          inherit (inputs.nixpkgs) lib;
+        lib = import ./lib {
+          inherit inputs;
         };
 
         overlays = import ./overlays {
@@ -144,7 +134,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    neovim.url = "/home/jules/000_dev/000_nix/nvf_julesvim";
+    neovim = {
+      url = "git+https://git.nixfox.ca/Jules/neovim-flake.git";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     ghostty.url = "github:ghostty-org/ghostty";
     emoji.url = "/home/jules/000_dev/000_nix/emoji-picker";
     nix-init.url = "github:nix-community/nix-init";
