@@ -14,35 +14,17 @@ in
     })
   ];
 
-  disable_niri_tests =
-    final: prev:
-    let
-      disableChecks =
-        drv:
-        drv.overrideAttrs (old: {
-          doCheck = false;
-          doInstallCheck = false;
-          checkPhase = "";
-          installCheckPhase = "";
-          preCheck = (old.preCheck or "") + ''
-            export RUST_TEST_THREADS=1
-            export CARGO_BUILD_JOBS=1
-          '';
-        });
-    in
-    (
-      {
-        niri = disableChecks prev.niri;
-      }
-      // (
-        if builtins.hasAttr "niri-unwrapped" prev then
-          {
-            "niri-unwrapped" = disableChecks prev."niri-unwrapped";
-          }
-        else
-          { }
-      )
-    );
+  # this overlay is exactly the same as the one provided by sodiboo/niri-flake
+  # with the one exception of it's handling of cargo tests. Basically, it defaults
+  # to disabling the tests which frequently run into open FD limits.
+  niri =
+    {
+      with_tests ? false,
+    }:
+    (final: prev: {
+      niri-stable = inputs.niri.packages.${prev.system}.niri-stable;
+      niri-unstable = inputs.niri.packages.${prev.system}.niri-unstable;
+    });
 
   julespkgs = _: prev: {
     julespkgs = packages.${prev.system};

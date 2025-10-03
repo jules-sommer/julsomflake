@@ -1,11 +1,19 @@
+{ lib }:
+let
+  inherit (lib) concatStringsSep;
+in
 {
   font-family ? "JetBrainsMono Nerd Font",
   font-size ? "14px",
-  shadow ? "rgba(17, 17, 26, 0.1) 0px 4px 16px, rgba(17, 17, 26, 0.05) 0px 8px 32px",
+  shadow ? [
+    "rgba(17, 17, 26, 0.1) 0px 4px 16px"
+    "rgba(17, 17, 26, 0.05) 0px 8px 32px"
+  ],
   spacing ? "5px",
   spacing-small ? "3px",
   radius ? "8px",
-}: ''
+}:
+''
   * {
     font-size: ${font-size};
     font-family: "${font-family}";
@@ -21,7 +29,7 @@
     border-radius: ${radius};
     color: white;
     background: rgba(17, 17, 26, 0.4);
-    box-shadow: ${shadow};
+    box-shadow: ${concatStringsSep "," shadow};
   }
 
   tooltip {

@@ -16,7 +16,39 @@ in
     ./users
   ];
 
+  specialisation = {
+    niri.configuration = {
+      system.nixos.tags = [ "niri" ];
+
+      local.wayland = {
+        niri = enabled;
+        login.settings.default_session = "niri";
+      };
+    };
+
+    plasma.configuration = {
+      system.nixos.tags = [ "plasma" ];
+
+      local.wayland = {
+        plasma = enabled;
+        login.settings.default_session = "startplasma-wayland";
+      };
+    };
+
+    river.configuration = {
+      system.nixos.tags = [ "river" ];
+
+      local.wayland = {
+        river = enabled;
+        login.settings.default_session = "river";
+      };
+    };
+  };
+
   local = {
+    wayland.login.greetd = enabled;
+    stylix = enabled;
+
     cli = {
       joshuto = enabled;
       btop = enabled;
@@ -29,15 +61,6 @@ in
       libreoffice = enabled;
       masterpdf = enabled;
       okular = enabled;
-    };
-    stylix = enabled;
-    wayland = {
-      river = enabled;
-      niri = disabled;
-      login = {
-        greetd = enabled;
-        settings.default_session = "river";
-      };
     };
 
     shells = {
@@ -181,6 +204,7 @@ in
   system.stateVersion = "24.05";
 
   hardware = {
+    keyboard.qmk = enabled;
     cpu.amd.ryzen-smu = enabled;
     graphics = enabled' {
       enable32Bit = true;

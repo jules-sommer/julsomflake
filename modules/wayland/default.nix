@@ -57,6 +57,14 @@ in
       };
     }
     {
+      local.home.home.packages = with pkgs; [
+        julespkgs.screenshot
+      ];
+    }
+    {
+      security.pam.services.waylock = { };
+    }
+    {
       xdg.portal = mkIf cfg.enable {
         wlr = enabled;
         extraPortals =

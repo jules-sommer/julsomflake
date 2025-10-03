@@ -5,7 +5,13 @@
   helpers,
   ...
 }: let
-  inherit (helpers) enabled' enabled enabledPred mkEnableOpt;
+  inherit
+    (helpers)
+    enabled'
+    enabled
+    enabledPred
+    mkEnableOpt
+    ;
   inherit
     (lib)
     isString
@@ -50,12 +56,17 @@
       else throw "Can't determine binary name for package: ${drv}";
   in "${lib.getBin drv}/bin/${name}";
 
-  traceSpawn = args: let s = spawn args; in builtins.trace s s;
+  getBinaryByName = drv: name: "${lib.getExe drv}/bin/${name}";
+
+  traceSpawn = args: let
+    s = spawn args;
+  in
+    builtins.trace s s;
 
   spawn = command: let
     resolveProgram = prog:
       if isDerivation prog
-      then lib.getExe prog
+      then getExecutable prog
       else if isPath prog
       then toString prog
       else if isString prog
@@ -123,28 +134,6 @@ in {
       ];
     };
 
-    security = {
-      polkit = enabled;
-      pam = {
-        services.waylock = {};
-      };
-    };
-
-    xdg = {
-      portal = {
-        wlr = enabled;
-        extraPortals = [
-          pkgs.xdg-desktop-portal-gtk
-          pkgs.xdg-desktop-portal-wlr
-        ];
-
-        config.river.default = lib.mkDefault [
-          "wlr"
-          "gtk"
-        ];
-      };
-    };
-
     local.home = {
       xdg.portal.xdgOpenUsePortal = true;
       wayland.windowManager.river = enabled' {
@@ -188,16 +177,17 @@ in {
                 "Super+Shift bracketright" = "focus-output next";
                 "Super+Shift bracketleft" = "focus-output previous";
 
-                "Super Return" = traceSpawn (spawn {program = pkgs.kitty;});
+                "Super Return" = spawn {
+                  program = getBinaryByName pkgs.kitty "kitty";
+                };
                 "Super+Shift Return" = "spawn fuzzel";
                 "Super Z" = "spawn zen";
 
                 "Super S" = traceSpawn {
-                  program = pkgs.julespkgs.screenshot;
-                  env = {SCREENSHOT_DIR = screenshotDir;};
+                  program = "${pkgs.julespkgs.screenshot}/bin/screenshot";
+                  env.SCREENSHOT_DIR = screenshotDir;
                 };
-                # "Alt+Shift E" = "spawn ${pkgs.emoji-picker}/emoji.sh";
-                "Alt+Shift E" = traceSpawn {program = pkgs.emoji-picker;};
+                "Alt+Shift E" = traceSpawn {program = "${pkgs.emoji-picker}/emoji.sh";};
 
                 "Super C" = "close";
                 "Super+Shift E" = "exit";
@@ -275,6 +265,7 @@ in {
             "kitty"
             "rivertile"
             "/home/jules/000_dev/010_zig/river-conf/zig-out/bin/river_conf"
+            "wlr-randr --output HDMI-A-1 --pos 0,0; wlr-randr --output DP-1 --pos 1920,0 --mode 2560x1080@74.990997Hz"
             ''
               wbg "${wallpaperFile}"
             ''

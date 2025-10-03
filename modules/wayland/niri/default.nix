@@ -1,5 +1,6 @@
 {
   pkgs,
+  lib,
   helpers,
   inputs,
   config,
@@ -8,9 +9,9 @@
 let
   inherit (helpers)
     mkEnableOpt
-    enabledPred
     enabled
     ;
+  inherit (lib) mkIf;
   cfg = config.local.wayland.niri;
   niriPkg = inputs.niri.packages.${pkgs.system}.niri-stable.overrideAttrs { doCheck = false; };
 in
@@ -18,10 +19,9 @@ in
   options.local.wayland.niri = mkEnableOpt "Enable niri.";
 
   config = {
-    # home-manager settings for niri
     programs.niri.package = niriPkg;
     local.home = {
-      programs.niri = enabledPred cfg.enable {
+      programs.niri = mkIf cfg.enable {
         package = niriPkg;
         settings = {
           input = {
@@ -87,15 +87,12 @@ in
 
           spawn-at-startup = [
             { command = [ "kitty" ]; }
-            { command = [ "rivertile" ]; }
-            { command = [ "/home/jules/000_dev/010_zig/river-conf/zig-out/bin/river_conf" ]; }
             {
               command = [
                 "wbg"
                 "/home/jules/060_media/010_wallpapers/zoe-love-bg/zoe-love-4k.png"
               ];
             }
-            { command = [ "river-bnf" ]; }
           ];
 
           prefer-no-csd = true;
@@ -105,7 +102,7 @@ in
           };
 
           binds = {
-            "Mod+Escape".action."toggle-keyboard-shortcuts-inhibit" = [ ];
+            "Mod+Escape".action.toggle-keyboard-shortcuts-inhibit = [ ];
             "Mod+Z".action.spawn = "zen";
             "Mod+Space".action.spawn = "fuzzel";
             "Mod+Return".action.spawn = "kitty";
@@ -125,6 +122,7 @@ in
                 "/home/jules/060_media/010_wallpapers/zoe-love-bg/zoe-love-4k.png"
               ];
             };
+
             "Mod+Shift+Slash".action."show-hotkey-overlay" = [ ];
 
             "Mod+H".action."focus-column-left" = [ ];

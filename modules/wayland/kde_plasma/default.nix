@@ -4,15 +4,14 @@
   helpers,
   config,
   ...
-}: let
-  inherit
-    (lib)
+}:
+let
+  inherit (lib)
     foldl'
     recursiveUpdate
     mkIf
     ;
-  inherit
-    (helpers)
+  inherit (helpers)
     enabled
     enabled'
     mkEnableOpt
@@ -20,21 +19,20 @@
     ;
 
   cfg = config.local.wayland.plasma;
-in {
-  options.local.wayland.plasma =
-    mkEnableOpt "Enable KDE Plasma 6 via wayland."
-    // {
-      extraPackages = mkEnableOpt "Enable a selection of extra kdePackages.";
-    };
-  config = foldl' recursiveUpdate {} [
+in
+{
+  options.local.wayland.plasma = mkEnableOpt "Enable KDE Plasma 6 via wayland." // {
+    extraPackages = mkEnableOpt "Enable a selection of extra kdePackages.";
+  };
+  config = foldl' recursiveUpdate { } [
     (mkIf cfg.enable {
       services = {
         desktopManager.plasma6 = enabled;
-        displayManager = {
-          sddm = enabled' {
-            wayland = enabled;
-          };
-        };
+        # displayManager = {
+        #   sddm = enabled' {
+        #     wayland = enabled;
+        #   };
+        # };
       };
 
       environment.systemPackages =

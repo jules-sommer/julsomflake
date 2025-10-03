@@ -1,15 +1,14 @@
 {
+  pkgs,
   lib,
   config,
   inputs,
   ...
-}:
-let
+}: let
   # refers to the home shortcut config option
   inherit (config.local) home;
   inherit (lib) enabled enabled';
-in
-{
+in {
   imports = [
     ./audio
     ./cli
@@ -27,25 +26,40 @@ in
     ./wayland
     ./xanmod_kernel
   ];
+  options = {
+    home = lib.mkOption {
+      type = lib.types.attrs;
+      description = ''
+        Shortcut to the fully evaluated home-manager config
+        for user `jules`.
+      '';
+      readOnly = true;
+    };
 
-  options.local.home = lib.mkOption {
-    description = ''
-      Shorthand for accessing home-manager via a system module, this
-      prevents having to type out `config.home-manager.users.jules.[...]`
-      all over the flake's modules, thus hard-coding the username and
-      potentially creating issues.
-    '';
+    local.home = lib.mkOption {
+      description = ''
+        Shorthand for accessing home-manager via a system module, this
+        prevents having to type out `config.home-manager.users.jules.[...]`
+        all over the flake's modules, thus hard-coding the username and
+        potentially creating issues.
+      '';
 
-    type =
-      with lib.types;
-      coercedTo anything (v: if builtins.isList v then v else [ v ]) (listOf deferredModule);
-    default = [ ];
+      type = lib.mkOptionType {
+        name = "home-manager module";
+        check = _: true;
+        merge = loc:
+          map (def: {
+            _file = def.file;
+            imports = [def.value];
+          });
+      };
+    };
   };
 
   config = {
+    home = config.home-manager.users.jules;
     home-manager = {
-      sharedModules =
-        with inputs;
+      sharedModules = with inputs;
         [
         ]
         ++ home;
@@ -55,27 +69,39 @@ in
       backupFileExtension = "backup";
     };
 
-    local.home = {
-      manual = {
-        json = enabled;
-        html = enabled;
-        manpages = enabled;
-      };
-      home.extraOutputsToInstall = [
-        "doc"
-        "info"
-        "devdoc"
+    environment.systemPackages = [pkgs.git];
+    local = {
+      config_aliases = [
+        {
+          # this alias maps `config.homeDirectory` to point to `config.home-manager.users.jules.home.homeDirectory`.
+          source = ["homeDirectory"];
+          dest = ["home-manager" "users" "jules" "home" "homeDirectory"];
+        }
       ];
-      services.home-manager = {
-        autoExpire = enabled' {
-          timestamp = "-7 days";
-          store = {
-            cleanup = true;
-            options = "--delete-older-than 14d";
-          };
+
+      home = {
+        manual = {
+          json = enabled;
+          html = enabled;
+          manpages = enabled;
         };
-        autoUpgrade = enabled' {
-          frequency = "weekly";
+        home.extraOutputsToInstall = [
+          "doc"
+          "info"
+          "devdoc"
+        ];
+
+        services.home-manager = {
+          autoExpire = enabled' {
+            timestamp = "-7 days";
+            store = {
+              cleanup = true;
+              options = "--delete-older-than 14d";
+            };
+          };
+          autoUpgrade = enabled' {
+            frequency = "weekly";
+          };
         };
       };
     };
