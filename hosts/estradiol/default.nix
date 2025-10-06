@@ -2,11 +2,9 @@
   lib,
   pkgs,
   ...
-}:
-let
+}: let
   inherit (lib) enabled enabled' disabled;
-in
-{
+in {
   imports = [
     ./hardware
     ./kernel
@@ -18,7 +16,7 @@ in
 
   specialisation = {
     niri.configuration = {
-      system.nixos.tags = [ "niri" ];
+      system.nixos.tags = ["niri"];
 
       local.wayland = {
         niri = enabled;
@@ -27,7 +25,7 @@ in
     };
 
     plasma.configuration = {
-      system.nixos.tags = [ "plasma" ];
+      system.nixos.tags = ["plasma"];
 
       local.wayland = {
         plasma = enabled;
@@ -36,7 +34,7 @@ in
     };
 
     river.configuration = {
-      system.nixos.tags = [ "river" ];
+      system.nixos.tags = ["river"];
 
       local.wayland = {
         river = enabled;
@@ -66,11 +64,6 @@ in
     shells = {
       fish = enabled;
       zsh = enabled;
-
-      extras = {
-        direnv = enabled;
-        nix-index = enabled;
-      };
     };
 
     kernel.xanmod = enabled' {
@@ -96,20 +89,9 @@ in
         fzf = enabled;
         bat = enabled;
         ripgrep = enabled;
-        nh = enabled' {
-          flake = builtins.toString ./.;
-          clean = {
-            enable = true;
-            dates = "weekly";
-          };
-        };
         lazygit.enable = true;
         direnv = enabled' {
           nix-direnv = enabled;
-        };
-        eza = enabled' {
-          enableFishIntegration = true;
-          icons = "always";
         };
         starship = enabled;
         waybar = enabled;
@@ -257,12 +239,12 @@ in
     icons = enabled;
     mime = enabled' {
       defaultApplications = {
-        "x-scheme-handler/http" = [ "zen.desktop" ];
-        "x-scheme-handler/https" = [ "zen.desktop" ];
-        "image/*" = [ "imv.desktop" ];
-        "video/*" = [ "mpv.desktop" ];
-        "application/pdf" = [ "okular.desktop" ];
-        "text/*" = [ "nvim.desktop" ];
+        "x-scheme-handler/http" = ["zen.desktop"];
+        "x-scheme-handler/https" = ["zen.desktop"];
+        "image/*" = ["imv.desktop"];
+        "video/*" = ["mpv.desktop"];
+        "application/pdf" = ["okular.desktop"];
+        "text/*" = ["nvim.desktop"];
       };
     };
   };

@@ -11,7 +11,21 @@ in {
     ./helix
     ./joshuto
     ./starship
+    ./bat.nix
+    ./eza.nix
+    ./carapace.nix
+    ./direnv.nix
+    ./nix-index.nix
+    ./fastfetch.nix
+    ./zoxide.nix
   ];
+
+  # TODO: These are deprecated options from `local.shells.extras`. They
+  # may no longer be needed, but figure out what to replace them with if anything.
+  # extras = {
+  #   direnv = mkEnableOpt "Enable direnv shell integration w/ default options.";
+  #   nix-index = mkEnableOpt "Enable nix-index, a file database for nixpkgs, and it's shell integrations w/ default options.";
+  # };
 
   options.local.cli = mkOption {
     type = types.submodule {

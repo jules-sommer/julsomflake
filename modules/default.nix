@@ -10,22 +10,27 @@
   inherit (lib) enabled enabled';
 in {
   imports = [
-    ./audio
     ./cli
-    ./doas
-    ./documents+pdf
     ./evremap
-    ./fonts
-    ./kmail
     ./nix
     ./shells
-    ./ssh
     ./stylix
     ./terminal
-    ./users
     ./wayland
-    ./xanmod_kernel
+    ./aliases.nix
+    ./audio.nix
+    ./doas.nix
+    ./docs_pdf.nix
+    ./fonts.nix
+    ./kmail.nix
+    ./nh.nix
+    ./secrets.nix
+    ./ssh.nix
+    ./users.nix
+    ./xanmod_kernal.nix
+    ./printers.nix
   ];
+
   options = {
     home = lib.mkOption {
       type = lib.types.attrs;
@@ -70,38 +75,29 @@ in {
     };
 
     environment.systemPackages = [pkgs.git];
-    local = {
-      config_aliases = [
-        {
-          # this alias maps `config.homeDirectory` to point to `config.home-manager.users.jules.home.homeDirectory`.
-          source = ["homeDirectory"];
-          dest = ["home-manager" "users" "jules" "home" "homeDirectory"];
-        }
+
+    local.home = {
+      manual = {
+        json = enabled;
+        html = enabled;
+        manpages = enabled;
+      };
+      home.extraOutputsToInstall = [
+        "doc"
+        "info"
+        "devdoc"
       ];
 
-      home = {
-        manual = {
-          json = enabled;
-          html = enabled;
-          manpages = enabled;
+      services.home-manager = {
+        autoExpire = enabled' {
+          timestamp = "-7 days";
+          store = {
+            cleanup = true;
+            options = "--delete-older-than 14d";
+          };
         };
-        home.extraOutputsToInstall = [
-          "doc"
-          "info"
-          "devdoc"
-        ];
-
-        services.home-manager = {
-          autoExpire = enabled' {
-            timestamp = "-7 days";
-            store = {
-              cleanup = true;
-              options = "--delete-older-than 14d";
-            };
-          };
-          autoUpgrade = enabled' {
-            frequency = "weekly";
-          };
+        autoUpgrade = enabled' {
+          frequency = "weekly";
         };
       };
     };

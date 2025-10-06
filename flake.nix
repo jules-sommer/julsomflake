@@ -1,31 +1,30 @@
 {
-  outputs =
-    {
-      self,
-      utils,
-      ...
-    }@inputs:
-    let
-      inherit (utils.lib) eachDefaultSystemPassThrough eachDefaultSystem;
-      inherit (self) overlays;
-      systems = utils.lib.system;
-      defaultOverlays = with overlays; [
-        default
-        from_inputs
-        unfree
-        julespkgs
-        (niri { }) # this overlay takes a param { with_tests ? false }
-      ];
-      makePkgs =
-        system:
-        import inputs.nixpkgs {
-          inherit system;
-          overlays = defaultOverlays ++ [ ];
-        };
-    in
+  outputs = {
+    self,
+    utils,
+    ...
+  } @ inputs: let
+    inherit (utils.lib) eachDefaultSystemPassThrough eachDefaultSystem;
+    inherit (self) overlays;
+    systems = utils.lib.system;
+    defaultOverlays = with overlays; [
+      default
+      from_inputs
+      unfree
+      julespkgs
+      (niri {}) # this overlay takes a param { with_tests ? false }
+    ];
+
+    src = ./.; # flake source passed to modules via _module.args
+
+    makePkgs = system:
+      import inputs.nixpkgs {
+        inherit system;
+        overlays = defaultOverlays ++ [];
+      };
+  in
     eachDefaultSystemPassThrough (
-      system:
-      let
+      system: let
         helpers = inputs.helpers.lib;
 
         _module.args = {
@@ -34,6 +33,7 @@
             lib
             self
             inputs
+            src
             ;
           packages = self.packages.${system};
         };
@@ -43,25 +43,23 @@
         inherit (inputs.nixpkgs.lib) nixosSystem;
 
         specialArgs = _module.args;
-      in
-      {
+      in {
         packages.${system} = import ./packages {
           inherit self inputs pkgs;
           inherit (inputs.nixpkgs) lib;
         };
-        nixosConfigurations =
-          let
-            sharedModules = with inputs; [
-              home-manager.nixosModules.home-manager
-              niri.nixosModules.niri
-              sops-nix.nixosModules.sops
-            ];
-          in
-          {
-            estradiol = nixosSystem {
-              system = systems.x86_64-linux;
-              inherit specialArgs;
-              modules = [
+        nixosConfigurations = let
+          sharedModules = with inputs; [
+            home-manager.nixosModules.home-manager
+            niri.nixosModules.niri
+            sops-nix.nixosModules.sops
+          ];
+        in {
+          estradiol = nixosSystem {
+            system = systems.x86_64-linux;
+            inherit specialArgs;
+            modules =
+              [
                 (_: {
                   inherit _module;
                   nixpkgs.overlays = defaultOverlays;
@@ -72,17 +70,18 @@
                 ./modules/stylix
               ]
               ++ sharedModules;
-            };
+          };
 
-            progesterone = nixosSystem {
-              system = systems.aarch64-linux;
-              inherit specialArgs;
-              modules = [
+          progesterone = nixosSystem {
+            system = systems.aarch64-linux;
+            inherit specialArgs;
+            modules =
+              [
                 ./hosts/progesterone
               ]
               ++ sharedModules;
-            };
           };
+        };
 
         lib = import ./lib {
           inherit inputs;
@@ -96,12 +95,10 @@
       }
     )
     // eachDefaultSystem (
-      system:
-      let
+      system: let
         pkgs = makePkgs system;
-      in
-      {
-        devShells = import ./devShells.nix { inherit pkgs; };
+      in {
+        devShells = import ./devShells.nix {inherit pkgs;};
       }
     );
 
@@ -141,6 +138,5 @@
 
     ghostty.url = "github:ghostty-org/ghostty";
     emoji.url = "/home/jules/000_dev/000_nix/emoji-picker";
-    nix-init.url = "github:nix-community/nix-init";
   };
 }

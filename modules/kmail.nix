@@ -4,7 +4,7 @@
   pkgs,
   ...
 }: let
-  inherit (lib) mkEnableOpt mkIf mkMerge;
+  inherit (lib) mkEnableOpt mkIf;
   cfg = config.local.programs.kmail;
 in {
   options.local.programs.kmail = mkEnableOpt "Enable KMail from kdePackages.";

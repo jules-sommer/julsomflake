@@ -31,6 +31,9 @@ in {
     ];
   };
 
+  # INFO: test if setting fonts via stylix is enough to remove
+  # this additional config.
+
   home-manager.users.jules.fonts.fontconfig = enabled' {
     defaultFonts = {
       emoji = ["Noto Color Emoji"];

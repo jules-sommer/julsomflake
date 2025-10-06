@@ -2,10 +2,14 @@
   helpers,
   pkgs,
   config,
+  lib,
   ...
 }: let
   inherit (helpers) enabled' modules;
   inherit (modules) disabledIf;
+  inherit (lib) mkIf;
+
+  cfg = config.security.doas;
 in {
   security = {
     polkit = enabled' {
@@ -32,5 +36,10 @@ in {
         }
       ];
     };
+  };
+
+  local.shells.settings.aliases = mkIf cfg.enable {
+    sudo = "doas";
+    sudoedit = "doas rnano";
   };
 }

@@ -6,11 +6,15 @@
   ...
 }: let
   inherit
-    (helpers)
+    (lib)
     mkEnableOpt
     enabled'
-    enabledPred
     disabled
+    genAttrs
+    ;
+  inherit
+    (helpers)
+    enabledPred
     ;
   cfg = config.local.stylix;
 in {
@@ -25,18 +29,12 @@ in {
       package = pkgs.rose-pine-cursor;
       size = 24;
     };
-
     homeManagerIntegration = {
       autoImport = true;
       followSystem = true;
     };
     targets = {};
-    opacity = {
-      terminal = 0.85;
-      popups = 0.85;
-      applications = 0.9;
-      desktop = 0.9;
-    };
+    opacity = genAttrs ["terminal" "popups" "applications" "desktop"] (_: 0.9);
     fonts = {
       monospace = {
         package = pkgs.nerd-fonts.jetbrains-mono;

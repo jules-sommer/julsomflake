@@ -4,9 +4,9 @@
   lib,
   pkgs,
   ...
-}:
-let
-  inherit (helpers)
+}: let
+  inherit
+    (helpers)
     includeIf
     enabled
     enabledIf
@@ -16,7 +16,8 @@ let
     disabledIf
     enabled'
     ;
-  inherit (lib)
+  inherit
+    (lib)
     mkIf
     types
     attrsets
@@ -25,8 +26,7 @@ let
   inherit (attrsets) recursiveUpdate;
   cfg = config.local.wayland;
   isAnyWaylandCompositorEnabled = cfg.niri.enable || cfg.river.enable || cfg.plasma.enable;
-in
-{
+in {
   imports = [
     ./river
     ./waybar
@@ -34,12 +34,13 @@ in
     ./kde_plasma
     ./mako
     ./niri
+    ./clipboard.nix
   ];
 
   options.local.wayland = {
     enable =
       mkOpt types.bool isAnyWaylandCompositorEnabled
-        "Enable wayland support, setting this option to true configures and enables wayland-related portals and other settings. And disables xserver if not already.";
+      "Enable wayland support, setting this option to true configures and enables wayland-related portals and other settings. And disables xserver if not already.";
     login = {
       greetd = mkEnableOpt "Enable greetd login manager.";
       settings = {
@@ -48,7 +49,7 @@ in
     };
   };
 
-  config = foldl' recursiveUpdate { } [
+  config = foldl' recursiveUpdate {} [
     {
       security.pam.services.greetd.enableGnomeKeyring = true;
       services.greetd = {
@@ -62,13 +63,12 @@ in
       ];
     }
     {
-      security.pam.services.waylock = { };
+      security.pam.services.waylock = {};
     }
     {
       xdg.portal = mkIf cfg.enable {
         wlr = enabled;
-        extraPortals =
-          with pkgs;
+        extraPortals = with pkgs;
           [
             xdg-desktop-portal-gtk
             xdg-desktop-portal-wlr
@@ -78,7 +78,7 @@ in
           ]);
 
         config = {
-          common.default = [ "gtk" ];
+          common.default = ["gtk"];
           river.default = [
             "wlr"
             "gtk"
