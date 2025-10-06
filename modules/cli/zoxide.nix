@@ -5,11 +5,11 @@
 }: let
   inherit (lib) enabled' enableShellIntegrations;
 in {
-  environment.systemPackages = with pkgs; [zoxide];
+  environment.systemPackages = with pkgs; [zoxide fzf];
   local = {
     shells.aliases = {
-      cd = "z";
-      cdi = "zi"; # cd with zoxide interactively
+      cd = "__zoxide_z";
+      cdi = "__zoxide_zi"; # cd with zoxide interactively
       zd = "zoxide"; # edit the zoxide database
     };
     home.programs.zoxide =
