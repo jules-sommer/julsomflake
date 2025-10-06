@@ -1,6 +1,6 @@
-{ lib }:
-let
-  inherit (lib)
+{lib}: let
+  inherit
+    (lib)
     types
     mkOption
     filterAttrs
@@ -8,8 +8,7 @@ let
     isString
     hasAttr
     ;
-in
-rec {
+in rec {
   enabled = {
     enable = true;
   };
@@ -18,21 +17,19 @@ rec {
     enable = false;
   };
 
-  enabled' =
-    cfg:
+  enabled' = cfg:
     {
       enable = true;
     }
     // cfg;
 
-  disabled' =
-    cfg:
+  disabled' = cfg:
     {
       enable = false;
     }
     // cfg;
 
-  mkEnableOpt = description: { enable = lib.mkEnableOption description; };
+  mkEnableOpt = description: {enable = lib.mkEnableOption description;};
 
   ## Create a NixOS module option without a description.
   ##
@@ -44,11 +41,7 @@ rec {
   mkOpt' = type: default: mkOpt type default null;
   mkOptNoDesc = mkOpt';
 
-  mkOptWithExample =
-    type: default: example': description:
-    let
-      example = if isString example then example else toString example;
-    in
+  mkOptWithExample = type: default: example: description:
     mkOption {
       inherit
         type
@@ -58,10 +51,22 @@ rec {
         ;
     };
 
-  mkOptWithExampleString =
-    type: default: description:
+  # this is the same as `mkOptWithExample` but instead accepts a string
+  # for the example, or if not provided a string, will try to perform `toString`
+  # on the provided example value.
+  mkOptWithExampleString = type: default: example': description: let
+    example =
+      if isString example
+      then example
+      else toString example;
+  in
     mkOption {
-      inherit type default description;
+      inherit
+        type
+        default
+        description
+        example
+        ;
     };
 
   ## Create a boolean NixOS module option.
@@ -86,9 +91,8 @@ rec {
   ## ```
   ##
   #@ Type -> Any -> Optional String -> mkOption
-  mkOpt =
-    type: default: description:
-    mkOption { inherit type default description; };
+  mkOpt = type: default: description:
+    mkOption {inherit type default description;};
 
   ## Create a boolean NixOS module option without a description.
   ##
