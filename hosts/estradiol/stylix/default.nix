@@ -1,9 +1,11 @@
 {
   helpers,
   pkgs,
+  lib,
   ...
 }: let
-  inherit (helpers) enabled' enabled disabled;
+  inherit (helpers) enabled';
+  inherit (lib) genAttrs;
 in {
   stylix = enabled' {
     autoEnable = true;

@@ -7,21 +7,6 @@
   hasJoshuto = config.local.cli.joshuto.enable;
 in {
   local.home.programs.joshuto = enabledPred hasJoshuto {
-    # keymap = [
-    #   {
-    #     keys = ["e" "v"];
-    #     commands = ["shell $EDITOR %s"];
-    #   }
-    #   {
-    #     keys = ["O"];
-    #     commands = ["spawn $SHELL --working-directory %d"];
-    #   }
-    #   {
-    #     keys = ["i"];
-    #     commands = ["spawn imv -b checks -t %s"];
-    #   }
-    # ];
-
     settings = {
       xdg_open = true;
       use_trash = false;

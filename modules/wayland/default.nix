@@ -51,6 +51,23 @@ in {
 
   config = foldl' recursiveUpdate {} [
     {
+      services.playerctld = enabled;
+    }
+    {
+      users.users.seat = {
+        isSystemUser = true;
+        group = "seat";
+        description = "Seat management daemon user";
+      };
+
+      services.seatd = enabled' {
+        user = "seat";
+        group = "seat";
+      };
+
+      users.users.jules.extraGroups = ["seat"];
+    }
+    {
       security.pam.services.greetd.enableGnomeKeyring = true;
       services.greetd = {
         inherit (cfg.login.greetd) enable;
@@ -72,6 +89,7 @@ in {
           [
             xdg-desktop-portal-gtk
             xdg-desktop-portal-wlr
+            xdg-desktop-portal-gnome
           ]
           ++ (with pkgs.kdePackages; [
             xdg-desktop-portal-kde
@@ -85,6 +103,7 @@ in {
           ];
           niri.default = [
             "wlr"
+            "gnome"
             "gtk"
           ];
           hyprland.default = [

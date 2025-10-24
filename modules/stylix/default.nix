@@ -27,7 +27,7 @@ in {
     cursor = {
       name = "BreezeX-RosePineDawn-Linux";
       package = pkgs.rose-pine-cursor;
-      size = 24;
+      size = 32;
     };
     homeManagerIntegration = {
       autoImport = true;

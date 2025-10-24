@@ -7,29 +7,20 @@
 }: let
   # refers to the home shortcut config option
   inherit (config.local) home;
-  inherit (lib) enabled enabled';
+  inherit (lib) enabled enabled' getModulesRecursive;
 in {
-  imports = [
-    ./cli
-    ./evremap
-    ./nix
-    ./shells
-    ./stylix
-    ./terminal
-    ./wayland
-    ./aliases.nix
-    ./audio.nix
-    ./doas.nix
-    ./docs_pdf.nix
-    ./fonts.nix
-    ./kmail.nix
-    ./nh.nix
-    ./secrets.nix
-    ./ssh.nix
-    ./users.nix
-    ./xanmod_kernal.nix
-    ./printers.nix
-  ];
+  imports = lib.trace ([
+      ./cli
+      ./evremap
+      ./nix
+      ./shells
+      ./stylix
+      ./terminal
+      ./wayland
+      ./networking
+      ./http
+    ]
+    ++ getModulesRecursive ./. {max-depth = 0;});
 
   options = {
     home = lib.mkOption {

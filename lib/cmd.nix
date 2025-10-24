@@ -1,5 +1,7 @@
 {lib, ...}: let
-  inherit (lib) typeOf replaceStrings stringLength concatMap concatStringsSep attrNames;
+  inherit (lib) typeOf replaceStrings stringLength concatMap concatStringsSep attrNames isString isList;
+  strings = import ./strings.nix {inherit lib;};
+  inherit (strings) splitOnWhitespace;
 
   dashify = k: replaceStrings ["_"] ["-"] k;
 
@@ -46,6 +48,21 @@
 
   cmdList = parts: flatten parts;
   cmd = parts: concatStringsSep " " (cmdList parts);
-in {
+in rec {
   inherit cmd cmdList;
+
+  spawn = command: let
+    commandIsString = isString command;
+    commandIsList = isList command;
+  in
+    cmd (
+      ["fish" "-c"]
+      ++ (
+        if commandIsString
+        then (splitOnWhitespace command)
+        else if commandIsList
+        then command
+        else throw "`spawn` only accepts commands of type `string` or `list`, instead got: ${typeOf command}."
+      )
+    );
 }

@@ -12,7 +12,7 @@
       from_inputs
       unfree
       julespkgs
-      (niri {}) # this overlay takes a param { with_tests ? false }
+      niri
     ];
 
     src = ./.; # flake source passed to modules via _module.args
@@ -52,7 +52,7 @@
           sharedModules = with inputs; [
             home-manager.nixosModules.home-manager
             niri.nixosModules.niri
-            sops-nix.nixosModules.sops
+            agenix.nixosModules.default
           ];
         in {
           estradiol = nixosSystem {
@@ -89,7 +89,7 @@
 
         overlays = import ./overlays {
           inherit inputs;
-          inherit (self) packages;
+          inherit self;
           inherit (inputs.nixpkgs) lib;
         };
       }
@@ -98,7 +98,7 @@
       system: let
         pkgs = makePkgs system;
       in {
-        devShells = import ./devShells.nix {inherit pkgs;};
+        devShells = import ./devShells.nix {inherit pkgs inputs system;};
       }
     );
 
@@ -110,11 +110,16 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    sops-nix = {
-      url = "github:Mic92/sops-nix";
-      inputs.nixpkgs.follows = "nixpkgs";
+    helium.url = "github:FKouhai/helium2nix/main";
+
+    agenix = {
+      url = "github:ryantm/agenix";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        darwin.follows = "";
+      };
     };
-    nq.url = "github:diniamo/nq";
+
     unfree.url = "github:numtide/nixpkgs-unfree?ref=nixos-unstable";
 
     utils.url = "github:numtide/flake-utils";
@@ -127,16 +132,29 @@
     };
 
     julespkgs = {
-      url = "/home/jules/000_dev/000_nix/packages";
+      url = "git+file:///home/jules/000_dev/000_nix/packages";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    zig = {
+      url = "github:silversquirl/zig-flake/compat";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    zls = {
+      url = "github:zigtools/zls";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        zig-overlay.follows = "zig";
+      };
+    };
+
     neovim = {
-      url = "git+https://git.nixfox.ca/Jules/neovim-flake.git";
+      # url = "git+https://git.nixfox.ca/Jules/neovim-flake.git";
+      url = "git+file:///home/jules/000_dev/000_nix/julsomvim";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     ghostty.url = "github:ghostty-org/ghostty";
-    emoji.url = "/home/jules/000_dev/000_nix/emoji-picker";
   };
 }

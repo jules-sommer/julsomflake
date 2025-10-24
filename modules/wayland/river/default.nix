@@ -5,97 +5,11 @@
   helpers,
   ...
 }: let
-  inherit
-    (helpers)
-    enabled'
-    enabled
-    enabledPred
-    mkEnableOpt
-    ;
-  inherit
-    (lib)
-    isString
-    isList
-    isDerivation
-    isPath
-    escapeShellArg
-    escapeShellArgs
-    mapAttrsToList
-    concatStringsSep
-    optionalString
-    typeOf
-    foldl'
-    foldr
-    head
-    zipAttrsWith
-    ;
+  inherit (helpers) enabled' enabled mkEnableOpt;
+  inherit (lib.attrsets) recursiveUpdate;
+  inherit (lib) foldl' listToAttrs;
 
   cfg = config.local.wayland.river;
-
-  inherit (lib.attrsets) recursiveUpdate;
-
-  mergeWithFn = sets: fn:
-    foldr (
-      x: y:
-        zipAttrsWith fn [
-          x
-          y
-        ]
-    ) {}
-    sets;
-
-  mergePriority = sets: mergeWithFn sets (_: head);
-  getExecutable = drv: let
-    name =
-      if lib.hasAttr "pname" drv
-      then drv.pname
-      else if lib.hasAttr "name" drv
-      then drv.name
-      else if lib.hasAttr "meta" drv && lib.hasAttr "name" drv.meta
-      then drv.meta.name
-      else throw "Can't determine binary name for package: ${drv}";
-  in "${lib.getBin drv}/bin/${name}";
-
-  getBinaryByName = drv: name: "${lib.getExe drv}/bin/${name}";
-
-  traceSpawn = args: let
-    s = spawn args;
-  in
-    builtins.trace s s;
-
-  spawn = command: let
-    resolveProgram = prog:
-      if isDerivation prog
-      then getExecutable prog
-      else if isPath prog
-      then toString prog
-      else if isString prog
-      then prog
-      else throw "spawn: invalid program type: ${typeOf prog}";
-
-    buildCommand = {
-      program,
-      args ? [],
-      env ? {},
-    }: let
-      cmdline = escapeShellArgs ([(resolveProgram program)] ++ args);
-      envStr =
-        if env == {}
-        then ""
-        else concatStringsSep " " (mapAttrsToList (k: v: "${k}=${escapeShellArg v}") env);
-    in "spawn ${envStr}${optionalString (env != {}) " "}${cmdline}";
-  in
-    if isList command
-    then
-      buildCommand {
-        program = builtins.head command;
-        args = builtins.tail command;
-      }
-    else if isString command || isDerivation command || isPath command
-    then "spawn ${escapeShellArg (resolveProgram command)}"
-    else if builtins.isAttrs command
-    then buildCommand command
-    else throw "spawn: unsupported input type: ${typeOf command}";
 
   home = "/home/jules";
   wallpaperFile = "${home}/060_media/010_wallpapers/zoe-love-bg/zoe-love-4k.png";
@@ -130,6 +44,7 @@ in {
         waylock
         wbg
         brightnessctl
+        playerctl
         imv
       ];
     };
@@ -168,7 +83,7 @@ in {
               accel-profile = "adaptive";
             };
           };
-          map = mergePriority [
+          map = [
             {
               normal = {
                 "Super bracketright" = "focus-view next";
@@ -177,17 +92,13 @@ in {
                 "Super+Shift bracketright" = "focus-output next";
                 "Super+Shift bracketleft" = "focus-output previous";
 
-                "Super Return" = spawn {
-                  program = getBinaryByName pkgs.kitty "kitty";
-                };
-                "Super+Shift Return" = "spawn fuzzel";
-                "Super Z" = "spawn zen";
+                "Super Return" = "spawn ${pkgs.kitty}/bin/kitty";
+                "Super+Shift Return" = "spawn ${pkgs.fuzzel}/bin/fuzzel";
 
-                "Super S" = traceSpawn {
-                  program = "${pkgs.julespkgs.screenshot}/bin/screenshot";
-                  env.SCREENSHOT_DIR = screenshotDir;
-                };
-                "Alt+Shift E" = traceSpawn {program = "${pkgs.emoji-picker}/emoji.sh";};
+                "Super Z" = "spawn ${pkgs.zen-browser}/bin/zen-browser";
+
+                "Super S" = "SCREENSHOT_DIR=${screenshotDir} ${pkgs.julespkgs.screenshot}/bin/screenshot";
+                "Alt E" = "EMOJI_PICKER_MODE=\"type\" ${pkgs.julespkgs.emoji-picker}/bin/emoji-picker";
 
                 "Super C" = "close";
                 "Super+Shift E" = "exit";
@@ -229,21 +140,10 @@ in {
                 "Super+Alt+Shift L" = "resize horizontal 100";
               };
             }
-            {
-              launch = {
-                "None Return" = "spawn kitty";
-                "None Z" = "spawn zen";
-                "None J" = "spawn kitty -e joshuto";
-                "None Escape" = "enter-mode normal";
-              };
-              normal = {
-                "Super+Shift L" = "enter-mode launch";
-              };
-            }
           ];
           rule-add = let
             genRules = key: names: value: {
-              ${key} = builtins.listToAttrs (
+              ${key} = listToAttrs (
                 map (name: {
                   name = "'${name}'";
                   inherit value;
@@ -262,16 +162,19 @@ in {
           set-cursor-warp = "on-output-change";
           set-repeat = "50 200";
           spawn = [
-            "kitty"
+            "${pkgs.kitty}/bin/kitty"
             "rivertile"
             "/home/jules/000_dev/010_zig/river-conf/zig-out/bin/river_conf"
-            "wlr-randr --output HDMI-A-1 --pos 0,0; wlr-randr --output DP-1 --pos 1920,0 --mode 2560x1080@74.990997Hz"
+            # TODO: Replace this with
+            "${pkgs.wlr-randr}/bin/wlr-randr --output HDMI-A-1 --pos 0,0"
+            "${pkgs.wlr-randr}/bin/wlr-randr --output DP-1 --pos 1920,0 --mode 2560x1080@74.990997Hz"
             ''
-              wbg "${wallpaperFile}"
+              ${pkgs.wbg}/bin/wbg "${wallpaperFile}"
             ''
             "river-bnf"
           ];
-          xcursor-theme = lib.mkForce "Bibata-Modern-Ice 24";
+
+          xcursor-theme = lib.mkForce "${config.stylix.cursor.name} ${toString config.stylix.cursor.size}";
         };
       };
     };

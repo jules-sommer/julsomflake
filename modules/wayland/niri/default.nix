@@ -5,21 +5,32 @@
   inputs,
   config,
   ...
-}:
-let
-  inherit (helpers)
+}: let
+  inherit
+    (helpers)
     mkEnableOpt
     enabled
     ;
-  inherit (lib) mkIf;
+  inherit (lib) mkIf enabled' isList isString concatStringsSep splitString;
   cfg = config.local.wayland.niri;
-  niriPkg = inputs.niri.packages.${pkgs.system}.niri-stable.overrideAttrs { doCheck = false; };
-in
-{
+  niriPkg = inputs.niri.packages.${pkgs.system}.niri-stable.overrideAttrs {doCheck = false;};
+  cmd = parts: concatStringsSep " " parts;
+  spawn = command:
+    if isList command
+    then ["${pkgs.fish}/bin/fish" "-c" (cmd command)]
+    else if isString command
+    then let
+      commandParts = splitString " " command;
+    in
+      ["${pkgs.fish}/bin/fish" "-c"] ++ commandParts
+    else throw "Command provided to `spawn` must be either a list of strings or a string.";
+in {
   options.local.wayland.niri = mkEnableOpt "Enable niri.";
 
   config = {
-    programs.niri.package = niriPkg;
+    programs.niri = enabled' {
+      package = niriPkg;
+    };
     local.home = {
       programs.niri = mkIf cfg.enable {
         package = niriPkg;
@@ -55,7 +66,7 @@ in
                 height = 1080;
                 refresh = 74.990997;
               };
-              transform = { };
+              transform = {};
               position = {
                 x = 1920;
                 y = 0;
@@ -69,7 +80,7 @@ in
                 width = 1080;
                 refresh = 60.000000;
               };
-              transform = { };
+              transform = {};
               position = {
                 x = 0;
                 y = 0;
@@ -79,14 +90,14 @@ in
           };
 
           cursor = {
-            theme = "Bibata-Modern-Ice";
+            theme = "BreezeX-RosePineDawn-Linux";
             size = 32;
             hide-when-typing = true;
             hide-after-inactive-ms = 1000;
           };
 
           spawn-at-startup = [
-            { command = [ "kitty" ]; }
+            {command = ["kitty"];}
             {
               command = [
                 "wbg"
@@ -102,10 +113,11 @@ in
           };
 
           binds = {
-            "Mod+Escape".action.toggle-keyboard-shortcuts-inhibit = [ ];
-            "Mod+Z".action.spawn = "zen";
-            "Mod+Space".action.spawn = "fuzzel";
-            "Mod+Return".action.spawn = "kitty";
+            "Mod+Escape".action.toggle-keyboard-shortcuts-inhibit = [];
+            "Mod+Z".action.spawn = spawn "zen";
+            "Mod+Space".action.spawn = spawn "fuzzel";
+            "Mod+Shift+Return".action.spawn = spawn "fuzzel";
+            "Mod+Return".action.spawn = spawn "kitty";
             "Mod+Shift+E".action.spawn = [
               "wleave"
               "-p"
@@ -122,55 +134,72 @@ in
                 "/home/jules/060_media/010_wallpapers/zoe-love-bg/zoe-love-4k.png"
               ];
             };
+            "Mod+WheelScrollDown" = {
+              cooldown-ms = 150;
+              action.focus-workspace-down = [];
+            };
 
-            "Mod+Shift+Slash".action."show-hotkey-overlay" = [ ];
+            "Mod+WheelScrollUp".action.focus-workspace-up = [];
+            "Mod+WheelScrollRight".action.focus-column-right = [];
+            "Mod+WheelScrollLeft".action.focus-column-left = [];
 
-            "Mod+H".action."focus-column-left" = [ ];
-            "Mod+J".action."focus-window-down" = [ ];
-            "Mod+K".action."focus-window-up" = [ ];
-            "Mod+L".action."focus-column-right" = [ ];
-            "Mod+Comma".action."focus-monitor-left" = [ ];
-            "Mod+Period".action."focus-monitor-right" = [ ];
-            "Mod+Shift+Comma".action."move-column-to-monitor-left" = [ ];
-            "Mod+Shift+Period".action."move-column-to-monitor-right" = [ ];
+            "XF86AudioRaiseVolume".action.spawn = spawn "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.1+";
+            "XF86AudioLowerVolume".action.spawn = spawn "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.1-";
+            "XF86AudioMute".action.spawn = spawn "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle";
 
-            "Mod+Ctrl+H".action."move-column-left" = [ ];
-            "Mod+Ctrl+J".action."move-window-down" = [ ];
-            "Mod+Ctrl+K".action."move-window-up" = [ ];
-            "Mod+Ctrl+L".action."move-column-right" = [ ];
+            "XF86MonBrightnessUp".action.spawn = spawn "brightnessctl set 10%+";
+            "XF86MonBrightnessDown".action.spawn = spawn "brightnessctl set 10%-";
 
-            "Mod+Home".action."focus-column-first" = [ ];
-            "Mod+End".action."focus-column-last" = [ ];
-            "Mod+Ctrl+Home".action."move-column-to-first" = [ ];
-            "Mod+Ctrl+End".action."move-column-to-last" = [ ];
+            "Mod+Shift+Slash".action.show-hotkey-overlay = [];
 
-            "Mod+U".action."focus-workspace-up" = [ ];
-            "Mod+I".action."focus-workspace-down" = [ ];
-            "Mod+Ctrl+U".action."move-column-to-workspace-up" = [ ];
-            "Mod+Ctrl+I".action."move-column-to-workspace-down" = [ ];
-            "Mod+Shift+U".action."move-workspace-up" = [ ];
-            "Mod+Shift+I".action."move-workspace-down" = [ ];
+            "Mod+C".action.close-window = [];
+            # "Mod+c".action."center-column" = [];
+            "Mod+H".action."focus-column-left" = [];
+            "Mod+J".action."focus-window-down" = [];
+            "Mod+K".action."focus-window-up" = [];
+            "Mod+L".action."focus-column-right" = [];
+            "Mod+Comma".action."focus-monitor-left" = [];
+            "Mod+Period".action."focus-monitor-right" = [];
+            "Mod+Shift+Comma".action."move-column-to-monitor-left" = [];
+            "Mod+Shift+Period".action."move-column-to-monitor-right" = [];
 
-            "Mod+Alt+H".action."consume-window-into-column" = [ ];
-            "Mod+Alt+L".action."expel-window-from-column" = [ ];
-            "Mod+R".action."switch-preset-column-width" = [ ];
-            "Mod+F".action."maximize-column" = [ ];
-            "Mod+Shift+F".action."fullscreen-window" = [ ];
-            "Mod+C".action."center-column" = [ ];
+            "Mod+Ctrl+H".action."move-column-left" = [];
+            "Mod+Ctrl+J".action."move-window-down" = [];
+            "Mod+Ctrl+K".action."move-window-up" = [];
+            "Mod+Ctrl+L".action."move-column-right" = [];
+
+            "Mod+Home".action."focus-column-first" = [];
+            "Mod+End".action."focus-column-last" = [];
+            "Mod+Ctrl+Home".action."move-column-to-first" = [];
+            "Mod+Ctrl+End".action."move-column-to-last" = [];
+
+            "Mod+U".action."focus-workspace-up" = [];
+            "Mod+I".action."focus-workspace-down" = [];
+            "Mod+Ctrl+U".action."move-column-to-workspace-up" = [];
+            "Mod+Ctrl+I".action."move-column-to-workspace-down" = [];
+            "Mod+Shift+U".action."move-workspace-up" = [];
+            "Mod+Shift+I".action."move-workspace-down" = [];
+
+            "Mod+Alt+H".action."consume-window-into-column" = [];
+            "Mod+Alt+L".action."expel-window-from-column" = [];
+            "Mod+R".action."switch-preset-column-width" = [];
+            "Mod+F".action."maximize-column" = [];
+            "Mod+Shift+F".action."fullscreen-window" = [];
 
             "Mod+Minus".action."set-column-width" = "-10%";
             "Mod+Equal".action."set-column-width" = "+10%";
             "Mod+Shift+Minus".action."set-window-height" = "-10%";
             "Mod+Shift+Equal".action."set-window-height" = "+10%";
 
-            "Mod+Print".action."screenshot" = [ ];
-            "Ctrl+Print".action."screenshot-screen" = [ ];
-            "Alt+Print".action."screenshot-window" = [ ];
-            "Mod+Shift+P".action."power-off-monitors" = [ ];
+            "Mod+Print".action."screenshot" = [];
+            "Ctrl+Print".action."screenshot-screen" = [];
+            "Alt+Print".action."screenshot-window" = [];
+            "Mod+Shift+P".action."power-off-monitors" = [];
           };
 
           environment = {
             "-ELECTRON_OZONE_PLATFORM_HINT" = "wayland";
+            MOZ_ENABLE_WAYLAND = "1";
           };
         };
       };

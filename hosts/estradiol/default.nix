@@ -44,6 +44,13 @@ in {
   };
 
   local = {
+    meta = {
+      primaryUser = {
+        username = "jules";
+        email = "jsomme@pm.me";
+        full_name = "Jules Sommer";
+      };
+    };
     wayland.login.greetd = enabled;
     stylix = enabled;
 
@@ -86,6 +93,9 @@ in {
             email = "rcsrc@pm.me";
           };
         };
+        claude-code =
+          enabled' {
+          };
         fzf = enabled;
         bat = enabled;
         ripgrep = enabled;
@@ -115,26 +125,29 @@ in {
 
       home.stateVersion = "24.11";
 
-      home.packages = with pkgs; [
-        ianny
-        jan
-        eza
-        gh
-        ghostty
-        just
-        gimp-with-plugins
-        gitoxide
-
-        vesktop
-        joshuto
-        broot
-        dust
-        chromium
-        heroic
-        audacity
-        rofi-rbw-wayland
-        bitwarden-desktop
-      ];
+      home.packages = with pkgs;
+        [
+          jan
+          eza
+          jq
+          gh
+          ghostty
+          just
+          gimp-with-plugins
+          gitoxide
+          vesktop
+          joshuto
+          broot
+          dust
+          helium
+          heroic
+          audacity
+          rofi-rbw-wayland
+          bitwarden-desktop
+        ]
+        ++ (with pkgs.kdePackages; [
+          dolphin
+        ]);
     };
 
     audio.pipewire = enabled' {
@@ -222,7 +235,6 @@ in {
       btop
       mpv
       kitty
-      localsend
     ];
 
     variables = {
@@ -259,13 +271,7 @@ in {
     };
   };
 
-  time.timeZone = "America/Toronto";
-  i18n.defaultLocale = "en_CA.UTF-8";
-
   networking = {
-    networkmanager = enabled;
-    firewall = enabled;
-
     hostName = "estradiol";
     hostId = lib.mkDefault "30a4185c";
   };
