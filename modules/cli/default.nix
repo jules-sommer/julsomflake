@@ -11,10 +11,7 @@ in {
     mkOption {
     };
 
-  config = {
-    local.home.programs = with pkgs; [
-      serie
-      jq
-    ];
-  };
+  config.local.home.home.packages = with pkgs; [
+    serie
+  ];
 }

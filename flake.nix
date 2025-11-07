@@ -150,8 +150,7 @@
     };
 
     neovim = {
-      # url = "git+https://git.nixfox.ca/Jules/neovim-flake.git";
-      url = "git+file:///home/jules/000_dev/000_nix/julsomvim";
+      url = "git+https://git.nixfox.ca/Jules/julsomvim.git";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

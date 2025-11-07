@@ -8,7 +8,7 @@ in {
   default = _: prev: {};
   unfree = composeManyExtensions [
     (_: prev: {
-      inherit (inputs.unfree.legacyPackages.${prev.system}) zsh-abbr masterpdfeditor4 masterpdfeditor claude-code;
+      inherit (inputs.unfree.legacyPackages.${prev.system}) zsh-abbr masterpdfeditor4 masterpdfeditor claude-code libsciter;
     })
   ];
 

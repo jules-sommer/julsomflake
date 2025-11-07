@@ -5,7 +5,7 @@
   ...
 }: let
   inherit (helpers) enabled';
-  inherit (lib) attrValues genAttrs cmd spawn;
+  inherit (lib) attrValues genAttrs cmd spawn foldl' recursiveUpdate;
   getBin = {
     pkg,
     bin_name,
@@ -40,8 +40,13 @@
 in {
   local.home = {
     stylix.targets = {
-      waybar =
-        enabled' (genAttrs ["addCss" "enableCenterBackColors" "enableLeftBackColors" "enableRightBackColors"] (_: true));
+      waybar = enabled' (foldl' recursiveUpdate {} [
+        # we just want stylix to add it's @define-color attributes, and not mess with our actual waybar css
+        (genAttrs ["addCss" "enableCenterBackColors" "enableLeftBackColors" "enableRightBackColors"] (_: false))
+        {
+          font = "monospace";
+        }
+      ]);
     };
 
     programs.waybar = enabled' {
@@ -86,7 +91,7 @@ in {
 
           "custom/notifications" = {
             exec-if = "command -v ${makoctl}";
-            exec = "(${makoctl} list | ${jq} -e '.data[] | length > 0' > /dev/null && echo '\nDismiss all notifications\n') || echo '' ";
+            exec = "makoctl count";
             format = {};
             on-click = "${makoctl} dismiss -a";
             interval = 3;
@@ -99,7 +104,7 @@ in {
             ];
             tooltip = false;
             interval = 1600;
-            exec = spawn "${pkgs.julespkgs.pretty-uptime}/bin/uptime";
+            exec = spawn "${pkgs.julespkgs.pretty-uptime}/bin/pretty-uptime";
           };
 
           "custom/music" = {
@@ -109,7 +114,7 @@ in {
             tooltip = false;
             exec = "${playerctl} metadata --format='{{ artist }} - {{ title }}'";
             on-click = "${playerctl} play-pause";
-            max-length = 50;
+            max-length = 30;
           };
 
           pulseaudio = {

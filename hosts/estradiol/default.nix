@@ -3,16 +3,9 @@
   pkgs,
   ...
 }: let
-  inherit (lib) enabled enabled' disabled;
+  inherit (lib) enabled enabled' getModulesRecursive;
 in {
-  imports = [
-    ./hardware
-    ./kernel
-    ./printing
-    ./stylix
-    ./system
-    ./users
-  ];
+  imports = getModulesRecursive ./. {};
 
   specialisation = {
     niri.configuration = {
@@ -51,7 +44,10 @@ in {
         full_name = "Jules Sommer";
       };
     };
-    wayland.login.greetd = enabled;
+    wayland = enabled' {
+      login.greetd = enabled;
+    };
+
     stylix = enabled;
 
     cli = {
@@ -78,15 +74,6 @@ in {
     };
 
     home = {
-      qt = lib.mkDefault {
-        platformTheme.name = "kde";
-        style.name = "breeze";
-      };
-
-      xdg = enabled' {
-        configHome = /home/jules/.config;
-      };
-
       programs = {
         rbw = enabled' {
           settings = {
@@ -97,14 +84,7 @@ in {
           enabled' {
           };
         fzf = enabled;
-        bat = enabled;
         ripgrep = enabled;
-        lazygit.enable = true;
-        direnv = enabled' {
-          nix-direnv = enabled;
-        };
-        starship = enabled;
-        waybar = enabled;
         git = enabled' {
           delta = enabled;
           ignores = [
@@ -121,6 +101,7 @@ in {
         EDITOR = "nvim";
         MANPAGER = "nvim +Man!";
         SCREENSHOT_DIR = "/home/jules/060_media/005_screenshots";
+        TERMINAL = "kitty";
       };
 
       home.stateVersion = "24.11";
@@ -146,6 +127,7 @@ in {
           bitwarden-desktop
         ]
         ++ (with pkgs.kdePackages; [
+          ark
           dolphin
         ]);
     };

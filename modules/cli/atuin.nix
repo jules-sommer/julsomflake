@@ -14,6 +14,7 @@ in {
   services.atuin = enabled' {
     host = "0.0.0.0";
     port = 8888;
+    maxHistoryLength = 1024 * 4 * 6;
     openRegistration = false;
     openFirewall = true;
   };
@@ -30,9 +31,10 @@ in {
       settings = {
         sync_address = "http://0.0.0.0:8888";
         auto_sync = true;
-        sync = {
-          records = true;
-        };
+        filter_mode = "host";
+        workspaces = true;
+        inline_height = 20;
+        sync.records = true;
         sync_frequency = "5m";
         search_mode = "fuzzy";
         command_chaining = true;

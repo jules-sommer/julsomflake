@@ -6,36 +6,22 @@
   ...
 }: let
   inherit
-    (helpers)
-    includeIf
-    enabled
-    enabledIf
-    mkEnableOpt
-    enabledPred
-    mkOpt
-    disabledIf
-    enabled'
-    ;
-  inherit
     (lib)
     mkIf
     types
     attrsets
     foldl'
+    enabled
+    mkEnableOpt
+    mkOpt
+    enabled'
+    getModulesRecursive
     ;
   inherit (attrsets) recursiveUpdate;
   cfg = config.local.wayland;
   isAnyWaylandCompositorEnabled = cfg.niri.enable || cfg.river.enable || cfg.plasma.enable;
 in {
-  imports = [
-    ./river
-    ./waybar
-    ./fuzzel
-    ./kde_plasma
-    ./mako
-    ./niri
-    ./clipboard.nix
-  ];
+  imports = getModulesRecursive ./. {};
 
   options.local.wayland = {
     enable =
@@ -83,7 +69,7 @@ in {
       security.pam.services.waylock = {};
     }
     {
-      xdg.portal = mkIf cfg.enable {
+      xdg.portal = mkIf (cfg.enable || isAnyWaylandCompositorEnabled) (enabled' {
         wlr = enabled;
         extraPortals = with pkgs;
           [
@@ -115,7 +101,7 @@ in {
             "gtk"
           ];
         };
-      };
+      });
     }
     {
       services.xserver = {

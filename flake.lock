@@ -1899,17 +1899,17 @@
         "utils": "utils_3"
       },
       "locked": {
-        "lastModified": 1761224039,
-        "narHash": "sha256-BbUb/Olaukg3Z8ntywkm8z9LSvY+/lf/qkS0hYOjou0=",
+        "lastModified": 1762093630,
+        "narHash": "sha256-xeOzTekfPLwYC0ki4iBmN+/AEKtubQ8h4xR75+vUOkQ=",
         "ref": "refs/heads/main",
-        "rev": "c3e5703afb0f581d19b983e5592f5ec01a9c4a04",
-        "revCount": 56,
+        "rev": "ca9c33b1f901a47b41fde9b2bf854a3d5edf4377",
+        "revCount": 57,
         "type": "git",
-        "url": "file:///home/jules/000_dev/000_nix/julsomvim"
+        "url": "https://git.nixfox.ca/Jules/julsomvim.git"
       },
       "original": {
         "type": "git",
-        "url": "file:///home/jules/000_dev/000_nix/julsomvim"
+        "url": "https://git.nixfox.ca/Jules/julsomvim.git"
       }
     },
     "niri": {

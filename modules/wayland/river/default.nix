@@ -7,7 +7,7 @@
 }: let
   inherit (helpers) enabled' enabled mkEnableOpt;
   inherit (lib.attrsets) recursiveUpdate;
-  inherit (lib) foldl' listToAttrs;
+  inherit (lib) foldl' listToAttrs riverSpawnDefault riverSpawnWithEnv;
 
   cfg = config.local.wayland.river;
 
@@ -57,7 +57,6 @@ in {
           variables = [
             "DISPLAY"
             "WAYLAND_DISPLAY"
-            "XDG_CURRENT_DESKTOP"
             "NIXOS_OZONE_WL"
             "XCURSOR_THEME"
             "XCURSOR_SIZE"
@@ -66,6 +65,7 @@ in {
         xwayland.enable = true;
         extraSessionVariables = {
           MOZ_ENABLE_WAYLAND = "1";
+          XDG_CURRENT_DESKTOP = "river";
         };
         settings = {
           declare-mode = [
@@ -95,10 +95,19 @@ in {
                 "Super Return" = "spawn ${pkgs.kitty}/bin/kitty";
                 "Super+Shift Return" = "spawn ${pkgs.fuzzel}/bin/fuzzel";
 
-                "Super Z" = "spawn ${pkgs.zen-browser}/bin/zen-browser";
+                "Super Z" = riverSpawnDefault "${pkgs.zen-browser}/bin/zen";
 
-                "Super S" = "SCREENSHOT_DIR=${screenshotDir} ${pkgs.julespkgs.screenshot}/bin/screenshot";
-                "Alt E" = "EMOJI_PICKER_MODE=\"type\" ${pkgs.julespkgs.emoji-picker}/bin/emoji-picker";
+                "Super S" =
+                  riverSpawnWithEnv {
+                    SCREENSHOT_DIR = screenshotDir;
+                  }
+                  "${pkgs.julespkgs.screenshot}/bin/screenshot";
+
+                "Alt E" =
+                  riverSpawnWithEnv {
+                    EMOJI_PICKER_MODE = "type";
+                  }
+                  "${pkgs.julespkgs.emoji-picker}/bin/emoji-picker";
 
                 "Super C" = "close";
                 "Super+Shift E" = "exit";
@@ -155,7 +164,7 @@ in {
             foldl' recursiveUpdate {} [
               (genRules "-app-id" ["zen" "zen-alpha" "Jan" "*"] "ssd")
             ];
-          keyboard-layout = ''-options "caps:swapescape" "us"'';
+          keyboard-layout = "us";
           default-layout = "rivertile";
           focus-follows-cursor = "normal";
           border-width = 10;

@@ -1,5 +1,5 @@
 {lib, ...}: let
-  inherit (lib) typeOf replaceStrings stringLength concatMap concatStringsSep attrNames isString isList;
+  inherit (lib) typeOf replaceStrings stringLength concatMap concatStringsSep attrNames isString isList mapAttrsToList foldl';
   strings = import ./strings.nix {inherit lib;};
   inherit (strings) splitOnWhitespace;
 
@@ -51,18 +51,67 @@
 in rec {
   inherit cmd cmdList;
 
-  spawn = command: let
+  spawn = spawnWithOptions {};
+
+  spawnWithoutShell = spawnWithOptions {use-shell = false;};
+
+  # builds a command string using `cmd` to spawn the provided
+  # command/binary, optionally passes the provided command through
+  # a shell, i.e `fish -c`, for cmd substitution and such. The
+  # option `use-shell` configures this behaviour.
+  spawnWithOptions = {
+    use-shell ? true,
+    shell ? ["fish" "-c"],
+    env ? {},
+  }: command: let
     commandIsString = isString command;
     commandIsList = isList command;
+    shellCmd =
+      if use-shell
+      then shell
+      else [];
+
+    envVars = env |> mapAttrsToList (k: v: ["${k}=${toString v}"]);
   in
-    cmd (
-      ["fish" "-c"]
-      ++ (
+    cmd (foldl' (acc: elem: acc ++ elem) [] [
+      envVars
+      shellCmd
+      (
         if commandIsString
         then (splitOnWhitespace command)
         else if commandIsList
         then command
         else throw "`spawn` only accepts commands of type `string` or `list`, instead got: ${typeOf command}."
       )
-    );
+    ]);
+
+  riverSpawnDefault = riverSpawnWithOptions {};
+  riverSpawnWithEnv = env: riverSpawnWithOptions {inherit env;};
+  riverSpawnWithOptions = {
+    prefix-riverctl ? false,
+    env ? {},
+  }: command: let
+    commandIsString = isString command;
+    commandIsList = isList command;
+    envVars = env |> mapAttrsToList (k: v: ["${k}=${toString v}"]);
+    prefix =
+      if prefix-riverctl
+      then ["riverctl" "spawn"]
+      else ["spawn"];
+  in
+    cmd (foldl' (acc: elem: acc ++ elem) [] [
+      prefix
+      [
+        "\""
+        envVars
+        (
+          if commandIsString
+          then (splitOnWhitespace command)
+          else if commandIsList
+          then command
+          else throw "`spawn` only accepts commands of type `string` or `list`, instead got: ${typeOf command}."
+        )
+        "\""
+      ]
+    ]);
 }

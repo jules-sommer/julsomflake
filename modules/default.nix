@@ -73,11 +73,15 @@ in {
         html = enabled;
         manpages = enabled;
       };
-      home.extraOutputsToInstall = [
-        "doc"
-        "info"
-        "devdoc"
-      ];
+      home = {
+        enableNixpkgsReleaseCheck = true;
+        preferXdgDirectories = true;
+        extraOutputsToInstall = [
+          "doc"
+          "info"
+          "devdoc"
+        ];
+      };
 
       services.home-manager = {
         autoExpire = enabled' {
