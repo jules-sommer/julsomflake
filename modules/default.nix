@@ -1,5 +1,6 @@
 {
   pkgs,
+  self,
   lib,
   config,
   inputs,
@@ -8,19 +9,10 @@
   # refers to the home shortcut config option
   inherit (config.local) home;
   inherit (lib) enabled enabled' getModulesRecursive;
+  inherit (builtins) substring toString;
 in {
-  imports = lib.trace ([
-      ./cli
-      ./evremap
-      ./nix
-      ./shells
-      ./stylix
-      ./terminal
-      ./wayland
-      ./networking
-      ./http
-    ]
-    ++ getModulesRecursive ./. {max-depth = 0;});
+  imports =
+    getModulesRecursive ./. {max-depth = 1;};
 
   options = {
     home = lib.mkOption {
@@ -62,7 +54,7 @@ in {
 
       useGlobalPkgs = true;
       useUserPackages = true;
-      backupFileExtension = "backup";
+      backupFileExtension = "backup-${toString self.lastModified}";
     };
 
     environment.systemPackages = [pkgs.git];

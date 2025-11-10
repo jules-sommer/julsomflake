@@ -5,7 +5,7 @@
 }: let
   inherit (lib) mkOption getModulesRecursive;
 in {
-  imports = getModulesRecursive ./. {max-depth = 1;};
+  imports = getModulesRecursive ./. {max-depth = 2;};
 
   options.local.cli =
     mkOption {

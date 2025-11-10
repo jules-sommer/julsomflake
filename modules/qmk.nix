@@ -10,6 +10,8 @@ in {
     qmk
     qmk_hid
     hid-listen
+    keymap-drawer
+    wev
     qmk-udev-rules
     keymapviz
   ];

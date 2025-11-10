@@ -9,7 +9,8 @@
     mkEnableOpt
     enabled
     enabled'
-    mkMerge
+    foldl'
+    recursiveUpdate
     mkIf
     genAttrs
     ;
@@ -22,7 +23,7 @@
 in {
   options.local.stylix = mkEnableOpt "Enable theming via stylix.";
   config = {
-    stylix = mkIf cfg.enable {
+    stylix = mkIf cfg.enable (enabled' {
       autoEnable = true;
       base16Scheme = "${pkgs.base16-schemes}/share/themes/rose-pine.yaml";
       polarity = "dark";
@@ -50,7 +51,7 @@ in {
 
       opacity = genAttrs ["terminal" "popups" "applications" "desktop"] (_: 0.9);
 
-      fonts = mkMerge [
+      fonts = foldl' recursiveUpdate {} [
         {
           sizes = genAttrs ["applications" "terminal" "desktop" "popups"] (_: 14);
           monospace = font "JetBrainsMono Nerd Font" pkgs.nerd-fonts.jetbrains-mono;
@@ -58,12 +59,12 @@ in {
         }
         (genAttrs ["sansSerif" "serif"] (_: font "NotoSans Nerd font" pkgs.nerd-fonts.noto))
       ];
-    };
+    });
 
     local.home = {
       qt = enabled' {
-        platformTheme.name = "kde";
-        style.name = "breeze";
+        platformTheme.name = lib.mkForce "kde";
+        style.name = lib.mkForce "breeze";
       };
 
       dconf.settings = {

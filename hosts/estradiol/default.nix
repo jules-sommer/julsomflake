@@ -52,6 +52,7 @@ in {
 
     cli = {
       joshuto = enabled;
+      nnn = enabled;
       btop = enabled;
       helix = enabled;
       starship = enabled;
@@ -142,7 +143,6 @@ in {
 
   programs = {
     wshowkeys = enabled;
-    wireshark = enabled;
     mtr = enabled;
     nix-ld = enabled;
     fuse = {
@@ -153,49 +153,7 @@ in {
     gnupg.agent = enabled' {
       enableSSHSupport = true;
     };
-    git = {
-      lfs = enabled' {
-        enablePureSSHTransfer = true;
-      };
-      config = {
-        init = {
-          defaultBranch = "main";
-        };
-        url = {
-          "https://github.com/" = {
-            insteadOf = [
-              "gh:"
-              "github:"
-            ];
-          };
-        };
-      };
-    };
   };
-
-  boot = {
-    loader.systemd-boot.enable = true;
-    loader.efi.canTouchEfiVariables = true;
-  };
-
-  system.stateVersion = "24.05";
-
-  hardware = {
-    keyboard.qmk = enabled;
-    cpu.amd.ryzen-smu = enabled;
-    graphics = enabled' {
-      enable32Bit = true;
-      extraPackages = with pkgs; [
-        vulkan-loader
-        vulkan-validation-layers
-        vulkan-extension-layer
-      ];
-    };
-  };
-
-  nix.settings.extra-system-features = lib.mkForce [
-    "gccarch-znver4"
-  ];
 
   environment = {
     systemPackages = with pkgs; [

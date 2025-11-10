@@ -36,7 +36,7 @@
     bin_name = "jq";
   };
 
-  makeStyle = import ./styles.nix {inherit lib;};
+  makeStyle = import ./__styles.nix {inherit lib;};
 in {
   local.home = {
     stylix.targets = {

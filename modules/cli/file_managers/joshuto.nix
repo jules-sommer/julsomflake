@@ -3,22 +3,11 @@
   config,
   ...
 }: let
-  inherit (lib) mkIf cmd;
+  inherit (lib) mkIf cmd enabled';
   hasJoshuto = config.local.cli.joshuto.enable;
 in {
-  local.home = {
-    xdg.desktopEntries.joshuto = {
-      name = "Joshuto";
-      genericName = "File Manager";
-      comment = "TUI file manager";
-      exec = cmd ["kitty" "joshuto" "%U"];
-      icon = "utilities-terminal";
-      terminal = true;
-      type = "Application";
-      categories = ["System" "FileTools" "FileManager"];
-      mimeType = ["inode/directory"];
-    };
-    programs.joshuto = mkIf hasJoshuto {
+  local.home = mkIf hasJoshuto {
+    programs.joshuto = enabled' {
       settings = {
         xdg_open = true;
         use_trash = false;
@@ -37,6 +26,18 @@ in {
           line_number_style = "relative";
         };
       };
+    };
+
+    xdg.desktopEntries.joshuto = {
+      name = "joshuto";
+      genericName = "File Manager";
+      comment = "TUI file manager";
+      exec = cmd ["kitty" "joshuto" "%U"];
+      icon = "utilities-terminal";
+      terminal = true;
+      type = "Application";
+      categories = ["System" "FileTools" "FileManager"];
+      mimeType = ["inode/directory"];
     };
   };
 }

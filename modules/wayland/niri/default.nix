@@ -36,8 +36,8 @@ in {
         package = niriPkg;
         settings = {
           input = {
-            warp-mouse-to-focus = enabled;
-            focus-follows-mouse = enabled;
+            warp-mouse-to-focus.enable = true;
+            focus-follows-mouse.enable = true;
             mod-key = "Super";
             mod-key-nested = "Alt";
             mouse = {
@@ -51,7 +51,8 @@ in {
             keyboard = {
               xkb = {
                 layout = "us";
-                options = "ctrl:swap_rwin_rctl,compose:ralt,caps:swapescape";
+                options = "compose:ralt";
+                # options = "ctrl:swap_rwin_rctl,compose:ralt,caps:swapescape";
               };
               repeat-delay = 200;
               repeat-rate = 50;

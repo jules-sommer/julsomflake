@@ -12,18 +12,17 @@
     groups.forgejo.gid = config.users.users.forgejo.uid;
   };
 
-  local.http = {
-    forgejo = {
-      domain = "git.local";
-      port = "3000";
-      ssl = true;
-
-      systemd = {
-        createSystemUser = true;
-        user = "forgejo";
-        group = "forgejo";
-      };
-      # .... whatever else is needed to generate the necessary nix expressions automatically
-    };
-  };
+  # local.http = {
+  #   forgejo = {
+  #     domain = "git.local";
+  #     port = "3000";
+  #     ssl = true;
+  #
+  #     systemd = {
+  #       createSystemUser = true;
+  #       user = "forgejo";
+  #       group = "forgejo";
+  #     };
+  #   };
+  # };
 }

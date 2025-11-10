@@ -3,7 +3,7 @@
   pkgs,
   ...
 }: let
-  inherit (lib) enabled' enableShellIntegrations mkMerge;
+  inherit (lib) enabled' enableShellIntegrations foldl' recursiveUpdate;
 in {
   environment.systemPackages = with pkgs; [zoxide];
   local.home.programs = {
@@ -24,7 +24,7 @@ in {
         "--type-add=video:*.{mp4,mkv,avi,mov,wmv,flv,webm,m4v,mpg,mpeg,m2v,3gp,3g2,mts,m2ts,ts,vob,ogv,f4v,rm,rmvb,asf,amv,divx}"
       ];
     };
-    fzf = enabled' (mkMerge [
+    fzf = enabled' (foldl' recursiveUpdate {} [
       {
         defaultOptions = [
           "--height 40%"

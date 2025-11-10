@@ -6,7 +6,6 @@
   src,
   ...
 }: let
-  inherit (lib) mkIf foldl' recursiveUpdate;
   inherit (helpers) enabledPred;
   cfg = config.local.shells.fish;
 in {
@@ -15,9 +14,12 @@ in {
     local = {
       shells.aliases = {
         nfr = ''
-          nix repl --expr "builtins.getFlake \"$(pwd)\""
+          nix repl \
+            --expr "let flake = builtins.getFlake \"$(pwd)\"; pkgs = import flake.inputs.nixpkgs { system = builtins.currentSystem; }; in flake // { inherit pkgs; lib = pkgs.lib; }" \
+            --show-trace
         '';
       };
+
       home = {
         programs.fish = enabledPred cfg.enable {
           package = pkgs.fish;
@@ -92,35 +94,6 @@ in {
               '';
             };
           };
-
-          # shellAliases = foldl' recursiveUpdate {} [
-          #   {
-          #     # screenshot = "grim -g \"$(slurp -d)\" - | tee ~/060_media/005_screenshots/$(date +%Y-%m-%d_%H-%M-%S).png | wl-copy -t image/png";
-          #     targz = "tar -czvf";
-          #     cat = "bat";
-          #     ls = "eza --icons=always --hyperlink --color=always --color-scale=all";
-          #   }
-          #   (mkIf config.security.doas.enable {
-          #     sudo = "doas";
-          #     sudoedit = "doas rnano";
-          #   })
-          #   (mkIf config.home.programs.fastfetch.enable {
-          #     ff = "fastfetch";
-          #   })
-          # ];
-          #
-          # shellAbbrs = {
-          #   lst = "ls -TL2";
-          #   br = "broot -hips";
-          #   brw = "broot -hips";
-          #
-          #   cd = "z";
-          #   ci = "zi";
-          #   clone = "gix clone";
-          #   gco = "git checkout";
-          #   gc = "git commit";
-          #   gca = "git commit -a";
-          # };
         };
       };
     };

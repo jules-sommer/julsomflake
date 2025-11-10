@@ -16,12 +16,29 @@
     mkOpt
     enabled'
     getModulesRecursive
+    defaultExcludePredicate
     ;
   inherit (attrsets) recursiveUpdate;
   cfg = config.local.wayland;
   isAnyWaylandCompositorEnabled = cfg.niri.enable || cfg.river.enable || cfg.plasma.enable;
+  trace = x: builtins.trace x x;
 in {
-  imports = getModulesRecursive ./. {};
+  imports = getModulesRecursive ./. {
+    blacklist = [
+      {
+        # exclude evremap/keys.nix since it is itself not a nixos module
+        name = "keys.nix";
+        kind = "regular";
+        depth = 1;
+      }
+      # {
+      #   # exclude evremap/keys.nix since it is itself not a nixos module
+      #   name = "evremap";
+      #   kind = "directory";
+      #   depth = 0;
+      # }
+    ];
+  };
 
   options.local.wayland = {
     enable =
@@ -111,7 +128,7 @@ in {
         autorun = true;
         xkb = {
           layout = "us";
-          options = "eurosign:e,caps:escape";
+          options = "eurosign:e";
         };
       };
     }

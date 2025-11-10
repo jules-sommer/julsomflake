@@ -4,14 +4,15 @@
   helpers,
   config,
   ...
-}:
-let
-  inherit (lib)
+}: let
+  inherit
+    (lib)
     foldl'
     recursiveUpdate
     mkIf
     ;
-  inherit (helpers)
+  inherit
+    (helpers)
     enabled
     enabled'
     mkEnableOpt
@@ -19,12 +20,13 @@ let
     ;
 
   cfg = config.local.wayland.plasma;
-in
-{
-  options.local.wayland.plasma = mkEnableOpt "Enable KDE Plasma 6 via wayland." // {
-    extraPackages = mkEnableOpt "Enable a selection of extra kdePackages.";
-  };
-  config = foldl' recursiveUpdate { } [
+in {
+  options.local.wayland.plasma =
+    mkEnableOpt "Enable KDE Plasma 6 via wayland."
+    // {
+      extraPackages = mkEnableOpt "Enable a selection of extra kdePackages.";
+    };
+  config = foldl' recursiveUpdate {} [
     (mkIf cfg.enable {
       services = {
         desktopManager.plasma6 = enabled;
@@ -37,16 +39,12 @@ in
 
       environment.systemPackages =
         (with pkgs.kdePackages; [
-          discover # Optional: Install if you use Flatpak or fwupd firmware update sevice
-          kcalc # Calculator
           kcharselect # Tool to select and copy special characters from all installed fonts
           kclock # Clock app
           kcolorchooser # A small utility to select a color
           kolourpaint # Easy-to-use paint program
           ksystemlog # KDE SystemLog Application
           sddm-kcm # Configuration module for SDDM
-          isoimagewriter # Optional: Program to write hybrid ISO files onto USB disks
-          partitionmanager # Optional: Manage the disk devices, partitions and file systems on your computer
         ])
         ++ (with pkgs; [
           kdiff3 # Compares and merges 2 or 3 files or directories

@@ -164,6 +164,8 @@ in {
             foldl' recursiveUpdate {} [
               (genRules "-app-id" ["zen" "zen-alpha" "Jan" "*"] "ssd")
             ];
+
+          # keyboard-layout = ''-options "caps:swapescape" "us"'';
           keyboard-layout = "us";
           default-layout = "rivertile";
           focus-follows-cursor = "normal";
@@ -174,12 +176,7 @@ in {
             "${pkgs.kitty}/bin/kitty"
             "rivertile"
             "/home/jules/000_dev/010_zig/river-conf/zig-out/bin/river_conf"
-            # TODO: Replace this with
-            "${pkgs.wlr-randr}/bin/wlr-randr --output HDMI-A-1 --pos 0,0"
-            "${pkgs.wlr-randr}/bin/wlr-randr --output DP-1 --pos 1920,0 --mode 2560x1080@74.990997Hz"
-            ''
-              ${pkgs.wbg}/bin/wbg "${wallpaperFile}"
-            ''
+            "${pkgs.wbg}/bin/wbg \"${wallpaperFile}\""
             "river-bnf"
           ];
 

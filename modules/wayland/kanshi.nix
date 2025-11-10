@@ -1,7 +1,7 @@
 {lib, ...}: let
   inherit (lib) enabled';
 in {
-  home.services.kanshi = enabled' {
+  local.home.services.kanshi = enabled' {
     settings = [
       {
         profile = {
