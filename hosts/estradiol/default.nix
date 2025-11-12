@@ -99,6 +99,7 @@ in {
       };
 
       home.sessionVariables = {
+        QMK_HOME = "/home/jules/000_dev/090_qmk/qmk_firmware";
         EDITOR = "nvim";
         MANPAGER = "nvim +Man!";
         SCREENSHOT_DIR = "/home/jules/060_media/005_screenshots";

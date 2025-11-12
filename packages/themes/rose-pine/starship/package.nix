@@ -1,4 +1,4 @@
-{fetchFromGitHub}:
+{fetchFromNpins}:
 fetchFromGitHub {
   owner = "rose-pine";
   repo = "starship";

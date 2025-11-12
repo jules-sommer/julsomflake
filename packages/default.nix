@@ -3,6 +3,7 @@
   inputs,
   pkgs,
   lib,
+  npins,
   ...
 }: let
   inherit (lib.customisation) makeScope;
@@ -14,7 +15,11 @@
     concatStringsSep
     concatMapAttrs
     isAttrs
+    foldl'
+    recursiveUpdate
     ;
+
+  inherit (lib) foldlAttrsRecursive;
 
   flattenPackages = separator: path: value:
     if isDerivation value
@@ -53,8 +58,11 @@
     };
 
   defaultFlattenPackages = flattenPackages "_" [];
+  scopeFromDirectoryFlatten = dir: dir |> scopeFromDirectory |> defaultFlattenPackages;
 in
-  (defaultFlattenPackages {
-    themes = defaultFlattenPackages (scopeFromDirectory ./themes);
-  })
-  // defaultFlattenPackages (scopeFromDirectory ./by-name)
+  foldlAttrsRecursive (map defaultFlattenPackages [
+    {
+      themes = scopeFromDirectoryFlatten ./themes;
+    }
+    (scopeFromDirectoryFlatten ./by-name)
+  ])

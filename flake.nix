@@ -5,15 +5,17 @@
     ...
   } @ inputs: let
     inherit (utils.lib) eachDefaultSystemPassThrough eachDefaultSystem;
-    inherit (self) overlays;
+    inherit (inputs.nixpkgs.lib) importJSON;
     systems = utils.lib.system;
-    defaultOverlays = with overlays; [
+    defaultOverlays = with self.overlays; [
       default
       from_inputs
       unfree
       julespkgs
       niri
     ];
+
+    npins = (importJSON ./npins/sources.json).pins;
 
     src = ./.; # flake source passed to modules via _module.args
 
@@ -45,9 +47,11 @@
         specialArgs = _module.args;
       in {
         packages.${system} = import ./packages {
-          inherit self inputs pkgs;
-          inherit (inputs.nixpkgs) lib;
+          inherit self inputs pkgs npins;
+          # inherit (inputs.nixpkgs) lib;
+          inherit (self) lib;
         };
+
         nixosConfigurations = let
           sharedModules = with inputs; [
             home-manager.nixosModules.home-manager

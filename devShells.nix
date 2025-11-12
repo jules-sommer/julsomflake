@@ -7,7 +7,7 @@
   inherit (pkgs.lib) foldl';
 in {
   default = pkgs.mkShell {
-    nativeBuildInputs = with pkgs; [alejandra neovim];
+    nativeBuildInputs = with pkgs; [alejandra neovim npins];
   };
   zig = pkgs.mkShell {
     nativeBuildInputs = with pkgs; [fish];

@@ -31,7 +31,8 @@ in {
       settings = {
         sync_address = "http://0.0.0.0:8888";
         auto_sync = true;
-        filter_mode = "host";
+        filter_mode = "workspace";
+        filter_mode_shell_up_key_binding = "workspace";
         workspaces = true;
         inline_height = 20;
         sync.records = true;
