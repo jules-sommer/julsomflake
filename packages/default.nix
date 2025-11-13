@@ -31,7 +31,7 @@
     else {}; # Ignore the functions which makeScope returns
 
   inputsScope = makeScope pkgs.newScope (_: {
-    inherit inputs pkgs;
+    inherit inputs pkgs getPinVersion fetchFromNpins npins;
     inherit (pkgs) fetchFromGitHub;
   });
 

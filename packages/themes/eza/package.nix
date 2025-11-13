@@ -3,4 +3,4 @@
   fetchFromNpins,
   ...
 }:
-fetchFromNpins npins.fish_rose-pine
+fetchFromNpins npins.eza-themes

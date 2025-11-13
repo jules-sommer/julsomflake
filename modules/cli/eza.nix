@@ -1,10 +1,15 @@
-{lib, ...}: let
+{
+  lib,
+  packages,
+  ...
+}: let
   inherit (lib) enableShellIntegrations enabled';
 in {
   local = {
     home.programs.eza =
       enabled' {
         colors = "auto";
+        theme = "${packages.themes_eza}/themes/rose-pine.yml";
         git = true;
         icons = "auto";
       }

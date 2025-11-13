@@ -48,7 +48,6 @@
       in {
         packages.${system} = import ./packages {
           inherit self inputs pkgs npins;
-          # inherit (inputs.nixpkgs) lib;
           inherit (self) lib;
         };
 
