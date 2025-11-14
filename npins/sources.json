@@ -39,6 +39,19 @@
       "url": "https://github.com/rose-pine/mako/archive/12f7814de6a485ecc373933cc04bb2b13b23e491.tar.gz",
       "hash": "1k6l1kdrzv7dpcwfrkcjj8c8kfwcfjc0w754lvxan2436fbiac70"
     },
+    "rose-pine-fuzzel": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "bomgar",
+        "repo": "rose-pine-fuzzel"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "4f6702c5e6922743be1c979cd3f4e55c7d8f6a8f",
+      "url": "https://github.com/bomgar/rose-pine-fuzzel/archive/4f6702c5e6922743be1c979cd3f4e55c7d8f6a8f.tar.gz",
+      "hash": "0mvapdry6d6zbn782xlqlk3lrz7wxax4nh01zli9hj2nrm8a1f1r"
+    },
     "starship_catppuccin": {
       "type": "Git",
       "repository": {

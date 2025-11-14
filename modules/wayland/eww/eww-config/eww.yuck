@@ -1,0 +1,46 @@
+(defwindow bar-dp1
+  :monitor "DP-1"
+  :geometry (geometry 
+    :x "0%"
+    :y "0%"
+    :width "100%"
+    :height "32px"
+    :anchor "top center")
+  :stacking "fg"
+  :reserve (struts :distance "40px" :side "top" :distance "4%")
+  :windowtype "dock"
+  :wm-ignore false
+  (bar :monitor "DP-1"))
+
+(defwindow bar-hdmi
+  :monitor "HDMI-A-1"
+  :geometry (geometry 
+    :x "0%"
+    :y "0%"
+    :width "100%"
+    :height "28px"
+    :anchor "top center")
+  :stacking "fg"
+  :reserve (struts :distance "40px" :side "top" :distance "4%")
+  :windowtype "dock"
+  :wm-ignore false
+  (bar :monitor "HDMI-A-1"))
+
+(deflisten workspaces "scripts/eww-niri-workspaces")
+
+(deflisten music :initial ""
+  "playerctl --follow metadata --format '{{ artist }}  {{ title }}' || true")
+
+(defwidget bar [monitor]
+  (box :class "bar" :orientation "h"
+    (workspaces-widget :monitor monitor)))
+
+(defwidget workspaces-widget [monitor] 
+  (box :orientation "h" 
+       :class "workspaces"
+       :space-evenly false
+    (for wsp in {workspaces.outputs[monitor].workspaces}
+      (eventbox :cursor "pointer"
+        (button :onclick "niri msg action focus-workspace ${wsp.index}"
+          (box :class "workspace ${wsp.is_active ? 'active' : ''} ${arraylength(wsp.columns) == 0 ? 'empty' : ''}"
+            (label :text "${wsp.index}")))))))

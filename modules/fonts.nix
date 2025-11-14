@@ -18,17 +18,19 @@ in {
       };
     };
 
-    packages = with pkgs.nerd-fonts; [
-      jetbrains-mono
-      fira-code
-      zed-mono
-      iosevka
-      victor-mono
-      sauce-code-pro
-      open-dyslexic
-      lilex
-      hack
-    ];
+    packages =
+      (with pkgs.nerd-fonts; [
+        jetbrains-mono
+        fira-code
+        zed-mono
+        iosevka
+        victor-mono
+        sauce-code-pro
+        open-dyslexic
+        lilex
+        hack
+      ])
+      ++ (with pkgs; [google-fonts]);
   };
 
   # INFO: test if setting fonts via stylix is enough to remove

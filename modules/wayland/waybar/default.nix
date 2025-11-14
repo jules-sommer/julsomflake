@@ -2,41 +2,79 @@
   pkgs,
   helpers,
   lib,
+  config,
   ...
 }: let
   inherit (helpers) enabled';
-  inherit (lib) attrValues genAttrs cmd spawn foldl' recursiveUpdate;
-  getBin = {
-    pkg,
-    bin_name,
-  }: "${pkg}/bin/${bin_name}";
+  inherit (lib) genAttrs spawn foldl' recursiveUpdate getBinary optionalAttrs optional concat optionals;
 
-  makoctl = getBin {
-    pkg = pkgs.mako;
-    bin_name = "makoctl";
+  makoctl = getBinary pkgs.mako;
+  fuzzel = getBinary pkgs.fuzzel;
+  playerctl = getBinary pkgs.playerctl;
+  pwvucontrol = getBinary pkgs.pwvucontrol;
+  jq = getBinary pkgs.jq;
+
+  activeCompositor = config.local.wayland.activeCompositor;
+
+  genMargins = sides: val: genAttrs (map (side: "margin-${side}") sides) (_: val);
+
+  makeStyle = import ./__styles.nix {
+    inherit lib config;
+    theme = config.lib.stylix.colors.withHashtag;
   };
 
-  fuzzel = getBin {
-    pkg = pkgs.fuzzel;
-    bin_name = "fuzzel";
-  };
+  icons = rec {
+    calendar = "󰃭 ";
+    clock = " ";
+    battery.charging = "󱐋";
+    battery.horizontal = [
+      " "
+      " "
+      " "
+      " "
+      " "
+    ];
+    battery.vertical = [
+      "󰁺"
+      "󰁻"
+      "󰁼"
+      "󰁽"
+      "󰁾"
+      "󰁿"
+      "󰂀"
+      "󰂁"
+      "󰂂"
+      "󰁹"
+    ];
+    battery.levels = battery.vertical;
+    network.disconnected = "󰤮 ";
+    network.ethernet = "󰈀 ";
+    network.strength = [
+      "󰤟 "
+      "󰤢 "
+      "󰤥 "
+      "󰤨 "
+    ];
+    bluetooth.on = "󰂯";
+    bluetooth.off = "󰂲";
+    bluetooth.battery = "󰥉";
+    volume.source = "󱄠";
+    volume.muted = "󰝟";
+    volume.levels = [
+      "󰕿"
+      "󰖀"
+      "󰕾"
+    ];
+    idle.on = "󰈈 ";
+    idle.off = "󰈉 ";
+    vpn = "󰌆 ";
 
-  playerctl = getBin {
-    pkg = pkgs.playerctl;
-    bin_name = "playerctl";
+    notification.red-badge = "<span foreground='red'><sup></sup></span>";
+    notification.bell = "󰂚";
+    notification.bell-badge = "󱅫";
+    notification.bell-outline = "󰂜";
+    notification.bell-outline-badge = "󰅸";
   };
-
-  pwvucontrol = getBin {
-    pkg = pkgs.pwvucontrol;
-    bin_name = "pwvucontrol";
-  };
-
-  jq = getBin {
-    pkg = pkgs.jq;
-    bin_name = "jq";
-  };
-
-  makeStyle = import ./__styles.nix {inherit lib;};
 in {
   local.home = {
     stylix.targets = {
@@ -54,220 +92,219 @@ in {
         font-family = "JetBrainsMono Nerd Font";
         font-size = "14px";
         shadow = [
-          "rgba(17, 17, 26, 0.1) 0px 4px 16px"
-          "rgba(17, 17, 26, 0.05) 0px 8px 32px"
+          "rgba(100, 100, 111, 0.2) 0px 7px 29px 0px"
         ];
         spacing = "5px";
         spacing-small = "3px";
-        radius = "8px";
+        radius = "9999px";
       };
       settings = {
-        mainbar = {
-          layer = "top";
-          spacing = 5;
-          height = 0;
-          margin-top = 10;
-          margin-right = 10;
-          margin-bottom = 0;
-          margin-left = 10;
+        mainbar = foldl' recursiveUpdate {} [
+          {
+            layer = "top";
+            spacing = 20;
+            height = 32;
+          }
 
-          modules-left = [
-            "river/tags"
-            "river/window"
-          ];
+          (genMargins ["top" "left" "right"] 8)
+          {margin-bottom = 8;}
 
-          modules-center = [
-            "clock"
-          ];
-
-          modules-right = [
-            "tray"
-            "group/system"
-            "river/mode"
-            "custom/notifications"
-            "custom/uptime"
-            "custom/music"
-          ];
-
-          "custom/notifications" = {
-            exec-if = "command -v ${makoctl}";
-            exec = "makoctl count";
-            format = {};
-            on-click = "${makoctl} dismiss -a";
-            interval = 3;
-          };
-
-          "custom/uptime" = {
-            format = "{}";
-            format-icon = [
-              ""
-            ];
-            tooltip = false;
-            interval = 1600;
-            exec = spawn "${pkgs.julespkgs.pretty-uptime}/bin/pretty-uptime";
-          };
-
-          "custom/music" = {
-            format = "  {}";
-            escape = true;
-            interval = 5;
-            tooltip = false;
-            exec = "${playerctl} metadata --format='{{ artist }} - {{ title }}'";
-            on-click = "${playerctl} play-pause";
-            max-length = 30;
-          };
-
-          pulseaudio = {
-            scroll-step = 5;
-            max-volume = 150;
-            format = "{icon} {volume}% {format_source}";
-            format-bluetooth = "{volume}% {icon} {format_source}";
-            on-click = spawn pwvucontrol;
-            format-bluetooth-muted = " {icon} {format_source}";
-            format-muted = " {format_source}";
-            format-source = " {volume}%";
-            format-source-muted = "";
-            format-icons = {
-              headphone = "";
-              # hands-free = "";
-              # headset = "";
-              phone = "";
-              portable = "";
-              car = "";
-              default = [
-                ""
-                ""
-                ""
-              ];
+          (optionalAttrs (activeCompositor == "river") {
+            "river/mode" = {
+              format = " {}";
             };
-          };
 
-          "custom/startmenu" = {
-            tooltip = false;
-            format = "󱄅";
-            exec = spawn fuzzel;
-            on-click = spawn fuzzel;
-          };
-
-          "group/system" = {
-            orientation = "horizontal";
-            modules = [
-              "cpu"
-              "memory"
-              "network"
-              "wireplumber"
-            ];
-          };
-
-          "group/power" = {
-            orientation = "horizontal";
-            drawer = {
-              transition-duration = 500;
-              children-class = "not-power";
-              transition-left-to-right = false;
+            "river/layout" = {
+              format = " {}";
+              min-length = 4;
+              align = "right";
             };
-            modules = [
-              "custom/power"
-              "custom/quit"
-              "custom/lock"
-              "custom/reboot"
-            ];
-          };
 
-          "river/mode" = {
-            format = " {}";
-          };
+            "river/tags" = {
+              num-tags = 5;
+            };
 
-          "river/layout" = {
-            format = " {}";
-            min-length = 4;
-            align = "right";
-          };
+            "river/window" = {
+              format = "{}";
+              max-length = 65;
+            };
+          })
 
-          "river/tags" = {
-            num-tags = 5;
-          };
-
-          "river/window" = {
-            format = "{}";
-            max-length = 65;
-          };
-
-          tray = {
-            tooltip = false;
-          };
-
-          clock = {
-            format = "{:%A, :%H:%M %p}  ";
-            format-alt = "{:%A, %B %d, %Y (%R)}   ";
-            tooltip-format = "<tt><big>{calendar}</big></tt>";
-            calendar = {
-              mode = "year";
-              mode-mon-col = 3;
-              weeks-pos = "right";
-              on-scroll = 1;
-              on-click-right = "mode";
-              format = {
-                months = "<span color='#ffead3'><b>{}</b></span>";
-                days = "<span color='#ecc6d9'><b>{}</b></span>";
-                weeks = "<span color='#99ffdd'><b>W{}</b></span>";
-                weekdays = "<span color='#ffcc66'><b>{}</b></span>";
-                today = "<span color='#ff6699'><b><u>{}</u></b></span>";
+          (optionalAttrs (activeCompositor == "niri") {
+            "niri/workspaces" = {
+              format = ''<span size="small">{icon}</span><span size="small">{index}</span>'';
+              format-icons = {
+                dev = "󰅩";
+                browser = "󰖟";
+                chat = "󰭻";
+                active = "";
+                default = "";
+                empty = "";
               };
             };
-            actions = {
-              on-click-right = "mode";
-              on-click-forward = "tz_up";
-              on-click-backward = "tz_down";
-              on-scroll-up = "shift_up";
-              on-scroll-down = "shift_down";
+
+            "niri/window" = {
+              format = "{}";
+              rewrite = {
+                "\\(.*\\) (.*) - YouTube — Zen Browser" = " $1";
+                "(.*) -- Zen Browser" = "󰾔 $1";
+                "(.*) - Helium" = "󰾔 $1";
+                "(.*) - neovim" = " $1";
+                "(.*) - gurlvim" = " $1";
+                "(.*) Discord | (.*)" = "  $2";
+                "\\(.*\\) Discord \\| (#.*) \\| (.*)" = "  $1 ($2)"; # Server channels
+                "\\(.*\\) Discord \\| (.*)" = "  $1"; # DMs and fallback
+                "(.*)Signal(.*)" = "󰭻 $2";
+              };
             };
-          };
+          })
 
-          # clock = {
-          #   format = " {:%i:%m %p\t  %a, %d %b %y}";
-          #   tooltip = false;
-          # };
-
-          wireplumber = {
-            format = "{icon}{volume}%";
-            format-muted = "󰖁";
-            on-click = "helvum";
-            format-icons = [
-              "󰕿"
-              "󰖀"
-              "󰕾"
+          {
+            modules-left = foldl' concat [] [
+              (optionals (activeCompositor == "river") [
+                "river/tags"
+                "river/window"
+              ])
+              (optionals (activeCompositor == "niri") [
+                "niri/workspaces"
+                "niri/window"
+              ])
             ];
-          };
+          }
+          {
+            modules-right = foldl' concat [] [
+              [
+                "tray"
+                "wireplumber"
+                "network"
+                "wireplumber#source"
+                "idle_inhibitor"
+              ]
+              (optionals (activeCompositor == "river") [
+                "river/mode"
+              ])
+              [
+                "custom/notifications"
+                "custom/uptime"
+                "custom/music"
+              ]
+            ];
+          }
 
-          cpu = {
-            format = "󰻠 {usage}%";
-            interval = 2;
-            states = {
-              critical = 90;
+          {
+            modules-center = [
+              "clock"
+            ];
+
+            "custom/notifications" = {
+              exec-if = "command -v ${makoctl}";
+              exec = "makoctl count";
+              format = {};
+              on-click = "${makoctl} dismiss -a";
+              interval = 3;
             };
-          };
 
-          memory = {
-            format = " {percentage}%";
-            interval = 2;
-            states = {
-              critical = 80;
+            "custom/uptime" = {
+              format = "{}";
+              format-icon = [
+                ""
+              ];
+              tooltip = false;
+              interval = 1600;
+              exec = spawn "${pkgs.julespkgs.pretty-uptime}/bin/pretty-uptime";
             };
-          };
 
-          network = {
-            format-wifi = "󰖩";
-            format-ethernet = "󰈀";
-            format-disconnected = "󰖪";
-            tooltip-format-disconnected = "󰖪";
-            tooltip-format-wifi = "{essid} ({signalstrength}%) ";
-            tooltip-format-ethernet = "{ifname} 󰈀";
-            on-click = spawn "nmtui";
-            interval = 5;
-            tooltip = false;
-          };
-        };
+            "custom/music" = {
+              format = "  {}";
+              escape = true;
+              interval = 5;
+              tooltip = false;
+              exec = "${playerctl} metadata --format='{{ artist }} - {{ title }}'";
+              on-click = "${playerctl} play-pause";
+              max-length = 30;
+            };
+
+            tray = {
+              tooltip = false;
+            };
+
+            clock = {
+              format = "${icons.clock} {:%A, :%I:%M %p}";
+              format-alt = "${icons.calendar} {:%A, %B %d, %Y (%I:%M %p)}";
+              tooltip-format = "<tt><small>{calendar}</small></tt>";
+              calendar = {
+                mode = "month";
+                mode-mon-col = 3;
+                weeks-pos = "right";
+                on-scroll = 1;
+                on-click-right = "mode";
+                format = {
+                  months = "<span color='#ffead3'><b>{}</b></span>";
+                  days = "<span color='#ecc6d9'><b>{}</b></span>";
+                  weeks = "<span color='#99ffdd'><b>W{}</b></span>";
+                  weekdays = "<span color='#ffcc66'><b>{}</b></span>";
+                  today = "<span color='#ff6699'><b><u>{}</u></b></span>";
+                };
+              };
+              actions = {
+                on-click-right = "mode";
+                on-click-forward = "tz_up";
+                on-click-backward = "tz_down";
+                on-scroll-up = "shift_up";
+                on-scroll-down = "shift_down";
+              };
+            };
+
+            # clock = {
+            #   format = " {:%i:%m %p\t  %a, %d %b %y}";
+            #   tooltip = false;
+            # };
+
+            wireplumber = {
+              format = "{icon} {volume}%";
+              format-muted = "${icons.volume.muted} {volume}%";
+              format-icons = icons.volume.levels;
+              reverse-scrolling = 1;
+              tooltip = false;
+            };
+
+            "wireplumber#source" = {
+              format = "${icons.volume.source} {node_name}";
+              tooltip = false;
+            };
+
+            idle_inhibitor = {
+              format = "{icon}";
+              format-icons = {
+                activated = icons.idle.on;
+                deactivated = icons.idle.off;
+              };
+            };
+
+            cpu = {
+              format = "󰻠 {usage}%";
+              interval = 2;
+              states = {
+                critical = 90;
+              };
+            };
+
+            memory = {
+              format = " {percentage}%";
+              interval = 2;
+              states = {
+                critical = 80;
+              };
+            };
+            network = {
+              tooltip-format = "{ifname}";
+              format-disconnected = icons.network.disconnected;
+              format-ethernet = icons.network.ethernet;
+              format-wifi = "{icon} {essid}";
+              format-icons = icons.network.strength;
+            };
+          }
+        ];
       };
     };
   };

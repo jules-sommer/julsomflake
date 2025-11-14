@@ -20,7 +20,17 @@ in {
           PageSize = "A4";
         };
       }
+      {
+        name = "Canon_TS9100_series";
+        location = "Nancy Home";
+        deviceUri = "dnssd://Canon%20TS9100%20series._ipp._tcp.local/?uuid=00000000-0000-1000-8000-001820414f3f";
+        model = "everywhere";
+        ppdOptions = {
+          PageSize = "A4";
+        };
+      }
     ];
+
     ensureDefaultPrinter = "HP_OfficeJet_Pro_8710_7C8143";
   };
 }

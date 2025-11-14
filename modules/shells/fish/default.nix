@@ -2,6 +2,7 @@
   pkgs,
   config,
   lib,
+  src,
   ...
 }: let
   inherit (lib) mkIf getModulesRecursive enabled' enabled;
@@ -12,24 +13,12 @@ in {
     programs.fish = enabled;
     local = {
       shells.aliases = {
-        nfr = ''
-          nix repl \
-            --expr "let flake = builtins.getFlake \"$(pwd)\"; pkgs = import flake.inputs.nixpkgs { system = builtins.currentSystem; }; in flake // { inherit pkgs; lib = pkgs.lib; }" \
-            --show-trace
-        '';
+        nfr = "nix-flake-repl";
       };
 
       home.programs.fish = enabled' {
         package = pkgs.fish;
         plugins = [
-          {
-            name = "fifc";
-            src = pkgs.fishPlugins.fifc;
-          }
-          {
-            name = "sponge";
-            src = pkgs.fishPlugins.sponge;
-          }
           {
             name = "fish-you-should-use";
             src = pkgs.fishPlugins.fish-you-should-use;
@@ -39,11 +28,19 @@ in {
             src = pkgs.fishPlugins.done;
           }
           {
-            name = "tide";
-            src = pkgs.fishPlugins.tide;
+            name = "pure";
+            src = pkgs.fishPlugins.pure;
           }
         ];
-        functions.fish_greeting.body = "";
+        functions = {
+          fish_greeting.body = "";
+          nix-flake-repl.body = ''
+            nix repl \
+              --expr "let flake = builtins.getFlake \"$(pwd)\"; pkgs = import flake.inputs.nixpkgs { system = builtins.currentSystem; }; in (flake // { inherit pkgs; lib = pkgs.lib; })" \
+              --show-trace
+          '';
+          build.body = builtins.readFile (lib.path.append src "build.fish");
+        };
       };
     };
   };

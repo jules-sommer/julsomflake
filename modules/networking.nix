@@ -2,6 +2,7 @@
   lib,
   src,
   config,
+  pkgs,
   ...
 }: let
   inherit (lib) enabled enabled';
@@ -15,6 +16,10 @@ in {
     owner = "root";
     group = "root";
   };
+
+  local.home.home.packages = with pkgs; [
+    protonvpn-gui
+  ];
 
   networking = {
     firewall = enabled;

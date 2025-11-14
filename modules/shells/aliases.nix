@@ -132,28 +132,3 @@ in {
     };
   };
 }
-#
-# old aliases/abbrs
-#
-# shellAliases = foldl' recursiveUpdate {} [
-#   {
-#     # screenshot = "grim -g \"$(slurp -d)\" - | tee ~/060_media/005_screenshots/$(date +%Y-%m-%d_%H-%M-%S).png | wl-copy -t image/png";
-#     targz = "tar -czvf";
-#     cat = "bat";
-#   }
-#   (mkIf config.security.doas.enable {
-#     sudo = "doas";
-#     sudoedit = "doas rnano";
-#   })
-#   (mkIf config.home.programs.fastfetch.enable {
-#     ff = "fastfetch";
-#   })
-# ];
-#
-# shellAbbrs = {
-#   lst = "ls -TL2";
-#   br = "broot -hips";
-#   brw = "broot -hips";
-#
-# };
-

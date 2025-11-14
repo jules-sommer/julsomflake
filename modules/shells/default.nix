@@ -1,13 +1,13 @@
 {
-  helpers,
+  pkgs,
   lib,
   ...
 }: let
   inherit
-    (helpers)
+    (lib)
     mkEnableOpt
+    enableShellIntegrations
     ;
-  inherit (lib) enableShellIntegrations;
 in {
   imports = [
     ./fish
@@ -19,10 +19,14 @@ in {
     fish = mkEnableOpt "Enable Fish shell.";
     zsh = mkEnableOpt "Enable Zsh shell.";
   };
-
-  config.local.home.home.shell =
-    {
-      enableShellIntegration = true;
-    }
-    // enableShellIntegrations ["fish" "zsh" "bash"] true;
+  config = {
+    environment.systemPackages = with pkgs; [
+      killall
+    ];
+    local.home.home.shell =
+      {
+        enableShellIntegration = true;
+      }
+      // enableShellIntegrations ["fish" "zsh" "bash"] true;
+  };
 }

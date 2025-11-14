@@ -9,6 +9,8 @@ in {
     pipewire.enable = true;
   };
 
+  environment.systemPackages = with pkgs; [radeontop];
+
   hardware = {
     keyboard.qmk = enabled;
     cpu.amd.ryzen-smu = enabled;

@@ -1,13 +1,13 @@
 {
   config,
-  helpers,
+  lib,
   ...
 }: let
   cfg = config.local.cli.helix;
-  inherit (helpers) enabledPred;
+  inherit (lib) mkEnableOpt mkIf enabled';
 in {
-  local.home.programs.helix = enabledPred cfg.enable {
-    enable = true;
+  options.local.cli.helix = mkEnableOpt "Whether to enable nnn TUI file manager.";
+  config.local.home.programs.helix = mkIf cfg.enable (enabled' {
     settings = {
       editor = {
         line-number = "relative";
@@ -18,5 +18,5 @@ in {
       ".build/"
       "!.gitignore"
     ];
-  };
+  });
 }

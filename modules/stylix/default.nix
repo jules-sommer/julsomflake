@@ -8,11 +8,14 @@
     (lib)
     mkEnableOpt
     enabled
+    disabled
     enabled'
     foldl'
     recursiveUpdate
     mkIf
     genAttrs
+    mkDefault
+    mkForce
     ;
 
   font = name: package: {
@@ -38,10 +41,10 @@ in {
         followSystem = true;
       };
 
-      iconTheme = {
+      iconTheme = enabled' {
         dark = "breeze-dark";
         light = "breeze";
-        package = pkgs.breeze-icons;
+        package = pkgs.kdePackages.breeze-icons;
       };
 
       targets = {
@@ -61,10 +64,51 @@ in {
       ];
     });
 
+    qt = enabled' (mkForce {
+      platformTheme = "kde";
+      style = "breeze";
+    });
+
+    environment.systemPackages = with pkgs; [
+      adwaita-icon-theme
+      hicolor-icon-theme
+    ];
+
+    programs.dconf = enabled;
+
     local.home = {
+      gtk = enabled' {
+        theme = mkForce {
+          name = "Breeze-Dark";
+          package = pkgs.kdePackages.breeze-gtk;
+        };
+        iconTheme = mkForce {
+          name = "breeze-dark";
+          package = pkgs.kdePackages.breeze-icons;
+        };
+      };
+
+      stylix = {
+        autoEnable = true;
+        targets = {
+          fuzzel = disabled;
+          swaylock = disabled;
+          gtk = enabled;
+          qt = enabled' {
+            platform = "kde";
+          };
+        };
+      };
+
       qt = enabled' {
-        platformTheme.name = lib.mkForce "kde";
-        style.name = lib.mkForce "breeze";
+        platformTheme = {
+          package = pkgs.kdePackages.plasma-integration;
+          name = lib.mkForce "kde";
+        };
+        style = {
+          name = lib.mkForce "breeze";
+          package = pkgs.kdePackages.breeze;
+        };
       };
 
       dconf.settings = {

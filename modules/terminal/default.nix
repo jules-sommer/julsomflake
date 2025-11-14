@@ -1,18 +1,17 @@
-{
-  lib,
-  helpers,
-  ...
-}: let
-  inherit (helpers) mkEnableOpt enabled disabled;
+{lib, ...}: let
+  inherit (lib) mkEnableOpt enabled disabled mkOpt;
 in {
-  imports = [
-    ./ghostty
-    ./kitty
-  ];
+  imports = lib.getModulesRecursive ./. {max-depth = 0;};
 
   options.local.terminal = lib.mkOption {
     type = lib.types.submodule {
       options = {
+        default =
+          mkOpt
+          (lib.types.enum ["kitty" "ghostty"])
+          "kitty"
+          "The default terminal emulator to use. This determines things like $TERMINAL env vars, etc.";
+
         kitty = mkEnableOpt "Kitty terminal emulator.";
         ghostty = mkEnableOpt "Ghostty terminal emulator.";
       };

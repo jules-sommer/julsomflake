@@ -7,5 +7,9 @@ let
 
   all = users ++ systems;
 in {
-  "./secrets/wifi-rcmp-surveillance.age".publicKeys = all;
+  "secrets/wifi-rcmp-surveillance.age".publicKeys = all;
+  "secrets/restic-password.age".publicKeys = all;
+  "secrets/restic-repo-path.age".publicKeys = all;
+  "secrets/restic-htpasswd.age".publicKeys = all;
+  "secrets/id_ed25519.age".publicKeys = all;
 }

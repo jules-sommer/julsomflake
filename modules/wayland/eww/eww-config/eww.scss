@@ -1,0 +1,33 @@
+* {
+  all: unset;
+  font-family: "JetBrainsMono Nerd Font";
+  font-size: 14px;
+}
+
+.bar {
+  background: rgba(17, 17, 26, 0.95);
+  padding: 4px;
+}
+
+.workspaces {
+  padding: 0 8px;
+}
+
+.workspace {
+  min-width: 24px;
+  padding: 4px 8px;
+  margin: 0 4px;
+  border-radius: 4px;
+  background: rgba(51, 24, 76, 0.85);
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.workspace.active {
+  background: transparent;
+  border: 1px solid #7aa2f7;
+  color: #7aa2f7;
+}
+
+.workspace.focused {
+  color: white;
+}

@@ -15,6 +15,7 @@ in {
 
   systemd.user.services.zig_docs = {
     description = "Zig nightly docs server (user)";
+    path = with pkgs; [fish];
     serviceConfig = {
       Restart = "always";
       RestartSec = "5s";

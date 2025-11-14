@@ -49,20 +49,4 @@ in {
       };
     }
   ];
-
-  # shells = {
-  #   settings = {
-  #     aliases.cat = "bat";
-  #     abbreviations = {
-  #       "--help" = {
-  #         position = "anywhere";
-  #         expansion = "--help | bat -plhelp";
-  #       };
-  #       "-h" = {
-  #         position = "anywhere";
-  #         expansion = "-h | bat -plhelp";
-  #       };
-  #     };
-  #   };
-  # };
 }

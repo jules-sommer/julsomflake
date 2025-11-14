@@ -77,17 +77,35 @@ in {
         (genAttrs [
           "x-scheme-handler/http"
           "x-scheme-handler/https"
+          "x-scheme-handler/chrome"
           "x-scheme-handler/about"
           "x-scheme-handler/unknown"
           "text/html"
           "text/xml"
           "application/xhtml+xml"
+          "application/x-extension-htm"
+          "application/x-extension-html"
+          "application/x-extension-shtml"
+          "application/x-extension-xhtml"
+          "application/x-extension-xht"
+
+          # "inode/directory" = file-manager;
+          #
+          # "x-scheme-handler/http" = web-browser;
+          # "x-scheme-handler/https" = web-browser;
+          # "text/html" = web-browser;
+          # "application/x-extension-htm" = web-browser;
+          # "application/x-extension-html" = web-browser;
+          # "application/x-extension-shtml" = web-browser;
+          # "application/xhtml+xml" = web-browser;
+          # "application/x-extension-xhtml" = web-browser;
+          # "application/x-extension-xht" = web-browser;
         ] (_: "zen.desktop"))
 
         # NOTE: anddd the nice and easy single mimetype settings
         {
           "application/pdf" = "okular.desktop";
-          "inode/directory" = "dolphin.desktop";
+          "inode/directory" = "org.kde.dolphin.desktop";
         }
       ];
     };

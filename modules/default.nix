@@ -8,8 +8,8 @@
 }: let
   # refers to the home shortcut config option
   inherit (config.local) home;
-  inherit (lib) enabled enabled' getModulesRecursive;
-  inherit (builtins) substring toString;
+  inherit (lib) enabled enabled' getModulesRecursive mkAliasOptionModule mkOption mkOptionType;
+  inherit (builtins) toString;
 in {
   imports =
     getModulesRecursive ./. {max-depth = 1;};
@@ -24,23 +24,65 @@ in {
       readOnly = true;
     };
 
-    local.home = lib.mkOption {
-      description = ''
-        Shorthand for accessing home-manager via a system module, this
-        prevents having to type out `config.home-manager.users.jules.[...]`
-        all over the flake's modules, thus hard-coding the username and
-        potentially creating issues.
-      '';
+    local = {
+      home = lib.mkOption {
+        description = ''
+          Shorthand for accessing home-manager via a system module, this
+          prevents having to type out `config.home-manager.users.jules.[...]`
+          all over the flake's modules, thus hard-coding the username and
+          potentially creating issues.
+        '';
 
-      type = lib.mkOptionType {
-        name = "home-manager module";
-        check = _: true;
-        merge = loc:
-          map (def: {
-            _file = def.file;
-            imports = [def.value];
-          });
+        type = lib.mkOptionType {
+          name = "moduleSystemAlias";
+          check = _: true;
+          merge = loc:
+            map (def: {
+              _file = def.file;
+              imports = [def.value];
+            });
+        };
       };
+
+      homePackages = mkOption {
+        default = [];
+        type = lib.mkOptionType {
+          name = "home-manager `config.home-manager.users.jules.home.packages` alias";
+          check = _: true;
+          merge = loc: defs:
+            map (def: {
+              _file = def.file;
+              imports = [
+                (lib.setAttrByPath ["home" "packages"] def.value)
+              ];
+            })
+            defs;
+        };
+      };
+
+      # homePackages = mkHomeAlias ["home" "packages"] ''
+      #   Alias for `config.home-manager.users.jules.home.packages` @ `local.homePackages`
+      # '';
+
+      homeSessionVariables = mkOption {
+        default = {};
+        type = lib.mkOptionType {
+          name = "home-manager `config.home-manager.users.jules.home.sessionVariables` alias";
+          check = _: true;
+          merge = loc: defs:
+            map (def: {
+              _file = def.file;
+              imports = [
+                (lib.setAttrByPath ["home" "sessionVariables"] def.value)
+              ];
+            })
+            defs;
+        };
+      };
+
+      # homeSessionVariables = mkHomeAlias ["home" "sessionVariables"] ''
+      #   Alias for `config.home-manager.users.jules.home.sessionVariables` @ `local.homeSessionVariables`
+      # '';
     };
   };
 
@@ -51,7 +93,12 @@ in {
         [
           agenix.homeManagerModules.default
         ]
-        ++ home;
+        ++ config.local.homePackages
+        ++ config.local.homeSessionVariables;
+
+      users.jules = {
+        imports = config.local.home;
+      };
 
       useGlobalPkgs = true;
       useUserPackages = true;

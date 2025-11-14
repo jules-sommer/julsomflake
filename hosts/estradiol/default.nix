@@ -1,6 +1,7 @@
 {
   lib,
   pkgs,
+  src,
   ...
 }: let
   inherit (lib) enabled enabled' getModulesRecursive;
@@ -10,31 +11,21 @@ in {
   specialisation = {
     niri.configuration = {
       system.nixos.tags = ["niri"];
-
-      local.wayland = {
-        niri = enabled;
-        login.settings.default_session = "niri";
-      };
+      local.wayland.activeCompositor = "niri";
     };
 
     plasma.configuration = {
       system.nixos.tags = ["plasma"];
-
-      local.wayland = {
-        plasma = enabled;
-        login.settings.default_session = "startplasma-wayland";
-      };
+      local.wayland.activeCompositor = "plasma";
     };
 
     river.configuration = {
       system.nixos.tags = ["river"];
-
-      local.wayland = {
-        river = enabled;
-        login.settings.default_session = "river";
-      };
+      local.wayland.activeCompositor = "river";
     };
   };
+
+  boot.initrd.kernelModules = ["amdgpu"];
 
   local = {
     meta = {
@@ -44,11 +35,11 @@ in {
         full_name = "Jules Sommer";
       };
     };
+
     wayland = enabled' {
+      portals = true;
       login.greetd = enabled;
     };
-
-    stylix = enabled;
 
     cli = {
       joshuto = enabled;
@@ -70,6 +61,16 @@ in {
       zsh = enabled;
     };
 
+    stylix = enabled;
+    gaming = enabled;
+    development = enabled;
+    bitwarden = enabled;
+
+    communication = {
+      discord = true;
+      signal = true;
+    };
+
     kernel.xanmod = enabled' {
       zfs.enable = false;
     };
@@ -81,57 +82,27 @@ in {
             email = "rcsrc@pm.me";
           };
         };
-        claude-code =
-          enabled' {
-          };
-        fzf = enabled;
-        ripgrep = enabled;
-        git = enabled' {
-          delta = enabled;
-          ignores = [
-            "*~"
-            "~*"
-            "zig-out/**/*"
-            ".zig-cache/**/*"
-            "target/**/*"
-          ];
-        };
       };
 
       home.sessionVariables = {
+        NIXOS_FLAKE_DIR = "/home/jules/000_dev/000_nix/julsomflake";
         QMK_HOME = "/home/jules/000_dev/090_qmk/qmk_firmware";
         EDITOR = "nvim";
         MANPAGER = "nvim +Man!";
         SCREENSHOT_DIR = "/home/jules/060_media/005_screenshots";
+        # WALLPAPER = "/home/jules/060_media/010_wallpapers/zoe-love-bg/zoe-love-4k.png";
+        WALLPAPER = "/home/jules/060_media/010_wallpapers/rose_pine_contourline.png";
         TERMINAL = "kitty";
       };
 
       home.stateVersion = "24.11";
 
-      home.packages = with pkgs;
-        [
-          jan
-          eza
-          jq
-          gh
-          ghostty
-          just
-          gimp-with-plugins
-          gitoxide
-          vesktop
-          joshuto
-          broot
-          dust
-          helium
-          heroic
-          audacity
-          rofi-rbw-wayland
-          bitwarden-desktop
-        ]
-        ++ (with pkgs.kdePackages; [
-          ark
-          dolphin
-        ]);
+      home.packages = with pkgs; [
+        helium
+        audacity
+        gimp-with-plugins
+        julespkgs.screenshot
+      ];
     };
 
     audio.pipewire = enabled' {
@@ -151,31 +122,21 @@ in {
       mountMax = 1000;
     };
 
-    gnupg.agent = enabled' {
-      enableSSHSupport = true;
-    };
+    # gnupg.agent = enabled' {
+    #   enableSSHSupport = true;
+    # };
   };
 
   environment = {
     systemPackages = with pkgs; [
-      zed-editor
       zen-browser
-      wl-clipboard
-      wayshot
-      kdePackages.spectacle
-      tmux
-      gh
-      uutils-coreutils-noprefix
-      protonvpn-cli
-      radeontop
-      nixfmt-rfc-style
-      neovim
-      bitwarden-cli
-      nixVersions.latest
       masterpdfeditor4
+      inkscape-with-extensions
       btop
       mpv
-      kitty
+
+      jmtpfs
+      libmtp
     ];
 
     variables = {
@@ -203,11 +164,11 @@ in {
   };
 
   services = {
+    gvfs = enabled;
     protonmail-bridge = {
       enable = true;
       path = with pkgs; [
         pass
-        gnome-keyring
       ];
     };
   };

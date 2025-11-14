@@ -63,6 +63,7 @@ in rec {
     use-shell ? true,
     shell ? ["fish" "-c"],
     env ? {},
+    as-list ? false,
   }: command: let
     commandIsString = isString command;
     commandIsList = isList command;
@@ -72,8 +73,8 @@ in rec {
       else [];
 
     envVars = env |> mapAttrsToList (k: v: ["${k}=${toString v}"]);
-  in
-    cmd (foldl' (acc: elem: acc ++ elem) [] [
+
+    parts = foldl' (acc: elem: acc ++ elem) [] [
       envVars
       shellCmd
       (
@@ -83,7 +84,17 @@ in rec {
         then command
         else throw "`spawn` only accepts commands of type `string` or `list`, instead got: ${typeOf command}."
       )
-    ]);
+    ];
+  in
+    if as-list
+    then cmdList parts
+    else cmd parts;
+
+  niriSpawn = cmd-list:
+    spawnWithOptions {as-list = true;} cmd-list;
+
+  niriSpawnWithOptions = opts: cmd-list:
+    spawnWithOptions (opts // {as-list = true;}) cmd-list;
 
   riverSpawnDefault = riverSpawnWithOptions {};
   riverSpawnWithEnv = env: riverSpawnWithOptions {inherit env;};

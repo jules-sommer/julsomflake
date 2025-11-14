@@ -21,10 +21,10 @@ in {
 
     sudo = disabledIf config.security.doas.enable;
     doas = enabled' {
+      wheelNeedsPassword = false;
       extraRules = [
         {
-          cmd = "${pkgs.nixos-rebuild}/bin/nixos-rebuild";
-          args = [];
+          cmd = "/run/current-system/sw/bin/nixos-rebuild";
           noPass = true;
           keepEnv = true;
           groups = ["wheel"];

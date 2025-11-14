@@ -5,48 +5,26 @@
   helpers,
   ...
 }: let
-  inherit (helpers) enabled' enabled mkEnableOpt;
   inherit (lib.attrsets) recursiveUpdate;
-  inherit (lib) foldl' listToAttrs riverSpawnDefault riverSpawnWithEnv;
+  inherit (lib) foldl' listToAttrs riverSpawnDefault riverSpawnWithEnv enabled' enabled mkIf;
 
-  cfg = config.local.wayland.river;
+  cfg = config.local.wayland;
+  activeCompositor = cfg.activeCompositor;
+  isRiverActive = activeCompositor == "river";
 
   home = "/home/jules";
   wallpaperFile = "${home}/060_media/010_wallpapers/zoe-love-bg/zoe-love-4k.png";
   screenshotDir = "${home}/060_media/005_screenshots";
 in {
-  options.local.wayland.river = mkEnableOpt "Enable River.";
-  config = {
-    programs.river-classic = {
-      inherit (cfg) enable;
+  config = mkIf isRiverActive {
+    environment.systemPackages = with pkgs; [
+      river-bnf
+      river-tag-overlay
+    ];
+
+    programs.river-classic = enabled' {
       package = null;
       xwayland = enabled;
-
-      # TODO: maybe go through these and figure out what's actually needed?
-      extraPackages = with pkgs; [
-        wayland-protocols
-        xdg-desktop-portal-gtk
-        xdg-desktop-portal-wlr
-        dunst
-        scrot
-        wlr-randr
-        slurp
-        grim
-        mpv
-        river-bnf
-        river-tag-overlay
-        wshowkeys
-        fuzzel
-        cliphist
-        lswt
-        wlrctl
-        ydotool
-        waylock
-        wbg
-        brightnessctl
-        playerctl
-        imv
-      ];
     };
 
     local.home = {
@@ -62,7 +40,7 @@ in {
             "XCURSOR_SIZE"
           ];
         };
-        xwayland.enable = true;
+        xwayland = enabled;
         extraSessionVariables = {
           MOZ_ENABLE_WAYLAND = "1";
           XDG_CURRENT_DESKTOP = "river";
@@ -165,11 +143,10 @@ in {
               (genRules "-app-id" ["zen" "zen-alpha" "Jan" "*"] "ssd")
             ];
 
-          # keyboard-layout = ''-options "caps:swapescape" "us"'';
           keyboard-layout = "us";
           default-layout = "rivertile";
           focus-follows-cursor = "normal";
-          border-width = 10;
+          border-width = 2;
           set-cursor-warp = "on-output-change";
           set-repeat = "50 200";
           spawn = [

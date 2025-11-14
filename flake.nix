@@ -11,6 +11,7 @@
       default
       from_inputs
       unfree
+      stable
       julespkgs
       niri
     ];
@@ -54,7 +55,7 @@
         nixosConfigurations = let
           sharedModules = with inputs; [
             home-manager.nixosModules.home-manager
-            niri.nixosModules.niri
+            niri-flake.nixosModules.niri
             agenix.nixosModules.default
           ];
         in {
@@ -107,13 +108,16 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-25.11-small";
 
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
-    helium.url = "github:FKouhai/helium2nix/main";
+    helium = {
+      url = "github:FKouhai/helium2nix/main";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     agenix = {
       url = "github:ryantm/agenix";
@@ -123,19 +127,44 @@
       };
     };
 
-    unfree.url = "github:numtide/nixpkgs-unfree?ref=nixos-unstable";
+    unfree = {
+      url = "github:numtide/nixpkgs-unfree";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
-    utils.url = "github:numtide/flake-utils";
-    helpers.url = "/home/jules/000_dev/000_nix/flake-helpers";
-    stylix.url = "github:danth/stylix";
+    utils = {
+      url = "github:numtide/flake-utils";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    helpers = {
+      url = "/home/jules/000_dev/000_nix/flake-helpers";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    stylix = {
+      url = "github:danth/stylix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     niri = {
-      url = "github:sodiboo/niri-flake";
+      url = "github:YaLTeR/niri";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    niri-flake = {
+      url = "git+file:///home/jules/000_dev/000_nix/niri-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     julespkgs = {
-      url = "git+file:///home/jules/000_dev/000_nix/packages";
+      # url = "git+https://git.nixfox.ca/Jules/julsompkgs";
+      url = "git+https://codeberg.org/julesomgirl/julsompkgs.git";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    neovim = {
+      url = "git+https://git.nixfox.ca/Jules/julsomvim";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -151,7 +180,5 @@
         zig-overlay.follows = "zig";
       };
     };
-
-    ghostty.url = "github:ghostty-org/ghostty";
   };
 }
