@@ -55,7 +55,7 @@ in {
         {
           sizes = genAttrs ["applications" "terminal" "desktop" "popups"] (_: 14);
           monospace = font "JetBrainsMono Nerd Font" pkgs.nerd-fonts.jetbrains-mono;
-          emoji = font "Noto Color Emoji" pkgs.noto-fonts-emoji;
+          emoji = font "Noto Color Emoji" pkgs.noto-fonts-color-emoji;
         }
         (genAttrs ["sansSerif" "serif"] (_: font "NotoSans Nerd font" pkgs.nerd-fonts.noto))
       ];

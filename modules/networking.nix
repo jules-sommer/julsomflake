@@ -1,8 +1,21 @@
-{lib, ...}: let
+{
+  lib,
+  src,
+  config,
+  ...
+}: let
   inherit (lib) enabled enabled';
 in {
   time.timeZone = "America/Toronto";
   i18n.defaultLocale = "en_CA.UTF-8";
+
+  age.secrets.wifi-rcmp-surveillance = {
+    file = lib.path.append src "secrets/wifi-rcmp-surveillance.age";
+    mode = "400";
+    owner = "root";
+    group = "root";
+  };
+
   networking = {
     firewall = enabled;
     nftables = enabled;
@@ -19,7 +32,10 @@ in {
               ssid = "RCMP Surveillance";
               mode = "infrastructure";
             };
-            wifi-sec.key-mgmt = "sae";
+            wifi-sec = {
+              key-mgmt = "sae";
+              psk = "$(<${config.age.secrets.wifi-rcmp-surveillance.path})";
+            };
             ipv4.method = "auto";
             ipv6.method = "auto";
           };
@@ -27,6 +43,7 @@ in {
       };
     };
   };
+
   services = {
     # LogLevel should be set to "VERBOSE" or higher
     # so that fail2ban can observe failed login attempts

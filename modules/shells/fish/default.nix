@@ -4,12 +4,12 @@
   lib,
   ...
 }: let
-  inherit (lib) mkIf getModulesRecursive;
+  inherit (lib) mkIf getModulesRecursive enabled' enabled;
   cfg = config.local.shells.fish;
 in {
   imports = getModulesRecursive ./. {max-depth = 1;};
   config = mkIf cfg.enable {
-    programs.fish.enable = true;
+    programs.fish = enabled;
     local = {
       shells.aliases = {
         nfr = ''
@@ -19,7 +19,7 @@ in {
         '';
       };
 
-      home.programs.fish = {
+      home.programs.fish = enabled' {
         package = pkgs.fish;
         plugins = [
           {

@@ -152,11 +152,6 @@
       };
     };
 
-    neovim = {
-      url = "git+https://git.nixfox.ca/Jules/julsomvim.git";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     ghostty.url = "github:ghostty-org/ghostty";
   };
 }

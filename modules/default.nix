@@ -49,6 +49,7 @@ in {
     home-manager = {
       sharedModules = with inputs;
         [
+          agenix.homeManagerModules.default
         ]
         ++ home;
 

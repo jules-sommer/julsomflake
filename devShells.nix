@@ -4,14 +4,24 @@
   system,
   ...
 }: let
-  inherit (pkgs.lib) foldl';
+  inherit (pkgs.lib) foldl' concat;
 in {
   default = pkgs.mkShell {
-    nativeBuildInputs = with pkgs; [alejandra neovim npins];
+    nativeBuildInputs = foldl' concat [] [
+      (with pkgs; [
+        alejandra
+        neovim
+        npins
+      ])
+      (with inputs; [
+        agenix.packages.${system}.default
+      ])
+    ];
   };
+
   zig = pkgs.mkShell {
     nativeBuildInputs = with pkgs; [fish];
-    packages = foldl' (acc: elem: acc ++ elem) [] [
+    packages = foldl' concat [] [
       (with pkgs; [
         jq
       ])
