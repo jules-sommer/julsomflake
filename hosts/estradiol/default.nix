@@ -4,7 +4,7 @@
   src,
   ...
 }: let
-  inherit (lib) enabled enabled' getModulesRecursive;
+  inherit (lib) enabled enabled' disabled getModulesRecursive;
 in {
   imports = getModulesRecursive ./. {};
 
@@ -45,12 +45,12 @@ in {
       joshuto = enabled;
       nnn = enabled;
       btop = enabled;
-      helix = enabled;
+      helix = disabled;
       starship = enabled;
     };
 
     programs = {
-      kmail = enabled;
+      kmail = disabled;
       libreoffice = enabled;
       masterpdf = enabled;
       okular = enabled;
@@ -99,7 +99,6 @@ in {
 
       home.packages = with pkgs; [
         helium
-        audacity
         gimp-with-plugins
         julespkgs.screenshot
       ];
@@ -115,16 +114,11 @@ in {
 
   programs = {
     wshowkeys = enabled;
-    mtr = enabled;
     nix-ld = enabled;
     fuse = {
       userAllowOther = true;
       mountMax = 1000;
     };
-
-    # gnupg.agent = enabled' {
-    #   enableSSHSupport = true;
-    # };
   };
 
   environment = {
@@ -134,7 +128,6 @@ in {
       inkscape-with-extensions
       btop
       mpv
-
       jmtpfs
       libmtp
     ];
@@ -143,11 +136,25 @@ in {
       LOG_ICONS = "true";
       KITTY_ENABLE_WAYLAND = "1";
       EDITOR = "nvim";
-      NIX_BUILD_CORES = 2;
       GC_INITIAL_HEAP_SIZE = "8G";
       MANPAGER = "nvim +Man!";
     };
   };
+
+  # Ryzen 5 7600X
+  # 12 cores on estradiol
+  # 4.4 <-> 5.4 GHz clock speed
+
+  # These settings allow nix builders to do the following:
+  #   1. Build a maximum of 3 derivations at once.
+  #   2. Each derivation being built gets access to 4 cores.
+  #   3. This means that 3 jobs running with 4 cores use all 12 cores.
+  nix.settings = {
+    max-jobs = 3;
+    cores = 4;
+  };
+
+  environment.variables.NIX_BUILD_CORES = 4;
 
   xdg = {
     icons = enabled;

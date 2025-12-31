@@ -14,6 +14,7 @@
     recursiveUpdate
     mkIf
     genAttrs
+    concatLists
     mkDefault
     mkForce
     ;
@@ -69,9 +70,16 @@ in {
       style = "breeze";
     });
 
-    environment.systemPackages = with pkgs; [
-      adwaita-icon-theme
-      hicolor-icon-theme
+    environment.systemPackages = concatLists [
+      (with pkgs; [
+        adwaita-icon-theme
+        hicolor-icon-theme
+      ])
+      (with pkgs.libsForQt5; [
+        qt5ct
+        qtstyleplugins
+        breeze-icons
+      ])
     ];
 
     programs.dconf = enabled;
@@ -101,12 +109,12 @@ in {
       };
 
       qt = enabled' {
-        platformTheme = {
+        platformTheme = mkForce {
           package = pkgs.kdePackages.plasma-integration;
-          name = lib.mkForce "kde";
+          name = "kde";
         };
-        style = {
-          name = lib.mkForce "breeze";
+        style = mkForce {
+          name = "breeze";
           package = pkgs.kdePackages.breeze;
         };
       };
@@ -122,6 +130,7 @@ in {
       home.sessionVariables = {
         QT_QPA_PLATFORMTHEME = "kde";
         QT_STYLE_OVERRIDE = "breeze";
+        QT5_STYLE_OVERRIDE = "breeze";
       };
     };
   };

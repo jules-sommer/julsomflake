@@ -20,7 +20,7 @@ in {
     (mkIf cfg.discord {
       local.home.home.packages = with pkgs; [legcord];
       local.home.programs.vesktop = enabled' {
-        package = pkgs.julespkgs.vesktop;
+        package = pkgs.vesktop;
       };
     })
     (mkIf cfg.zapzap {

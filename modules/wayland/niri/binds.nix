@@ -42,8 +42,8 @@
           emoji-picker
         ];
 
-        "XF86Calculator".action.spawn-sh = cmd [];
-        "Mod+M".action.spawn-sh = cmd ["kcalc"];
+        "XF86Calculator".action.spawn-sh = cmd ["kcalc"];
+        "F12".action.spawn-sh = cmd ["kcalc"];
       }
 
       # screenshot related binds

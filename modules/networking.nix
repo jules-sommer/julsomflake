@@ -21,6 +21,10 @@ in {
     protonvpn-gui
   ];
 
+  programs = {
+    mtr = enabled;
+  };
+
   networking = {
     firewall = enabled;
     nftables = enabled;

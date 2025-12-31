@@ -33,20 +33,26 @@ in {
 
       border = {
         width = 4;
-        active.gradient = {
-          from = "oklch(0.8501 0.1385 299.07 / 95%)";
-          to = "oklch(0.8918 0.2364 329.26 / 95%)";
-          angle = 45;
-          in' = "oklch shorter hue";
-          relative-to = "workspace-view";
+        active = {
+          color = "oklch(65.05904516611996 10.991750441472847 327.99999999999983)";
+          # gradient = {
+          #   from = "oklch(0.8501 0.1385 299.07 / 95%)";
+          #   to = "oklch(0.8918 0.2364 329.26 / 95%)";
+          #   angle = 45;
+          #   in' = "oklch shorter hue";
+          #   relative-to = "workspace-view";
+          # };
         };
+        inactive = {
+          color = "oklch(74.45374586335245 13.45550627732625 320.99999999999983)";
 
-        inactive.gradient = {
-          from = "oklch(0.9501 0.1039 299.07 / 65%)";
-          to = "oklch(0.9618 0.1773 329.26 / 65%)";
-          angle = 45;
-          in' = "oklch shorter hue";
-          relative-to = "workspace-view";
+          # gradient = {
+          #   from = "oklch(0.9501 0.1039 299.07 / 65%)";
+          #   to = "oklch(0.9618 0.1773 329.26 / 65%)";
+          #   angle = 45;
+          #   in' = "oklch shorter hue";
+          #   relative-to = "workspace-view";
+          # };
         };
       };
 

@@ -158,8 +158,8 @@
     };
 
     julespkgs = {
-      # url = "git+https://git.nixfox.ca/Jules/julsompkgs";
-      url = "git+https://codeberg.org/julesomgirl/julsompkgs.git";
+      url = "git+https://git.nixfox.ca/Jules/julsompkgs";
+      # url = "git+https://codeberg.org/julesomgirl/julsompkgs.git";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
