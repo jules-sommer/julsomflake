@@ -29,6 +29,8 @@ in {
   ];
 
   boot = {
+    initrd.kernelModules = ["amdgpu"];
+
     loader.systemd-boot.enable = true;
     loader.efi.canTouchEfiVariables = true;
   };

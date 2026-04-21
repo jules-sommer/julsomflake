@@ -31,6 +31,12 @@ in {
               from_shell = true;
             }
             {
+              invocation = "long_archive";
+              shortcut = "lar";
+              execution = "tar -I 'xz -9e' -cf {file-name}.tar.xz {file-name}";
+              from_shell = true;
+            }
+            {
               invocation = "archive";
               shortcut = "ar";
               execution = "tar czf {file-name}.tar.gz {file-name}";

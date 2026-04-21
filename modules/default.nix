@@ -106,33 +106,50 @@ in {
     };
 
     environment.systemPackages = [pkgs.git];
+    local = {
+      homeSessionVariables = {
+        EDITOR = "nvim";
+        MANPAGER = "nvim +Man!";
+        TERMINAL = "kitty";
 
-    local.home = {
-      manual = {
-        json = enabled;
-        html = enabled;
-        manpages = enabled;
+        QT_QPA_PLATFORM = "wayland";
+        QT_QPA_PLATFORMTHEME = "kde";
+        QT_QPA_PLATFORMTHEME_QT6 = "kde";
+        XDG_MENU_PREFIX = "plasma-";
+        QT_AUTO_SCREEN_SCALE_FACTOR = "1";
+        QT_ENABLE_HIGHDPI_SCALING = "1";
+        QT_SCALE_FACTOR_ROUNDING_POLICY = "RoundPreferFloor";
+        GTK_DECORATION_LAYOUT = "";
+        ELECTRON_OZONE_PLATFORM_HINT = "auto";
       };
+
       home = {
-        enableNixpkgsReleaseCheck = true;
-        preferXdgDirectories = true;
-        extraOutputsToInstall = [
-          "doc"
-          "info"
-          "devdoc"
-        ];
-      };
-
-      services.home-manager = {
-        autoExpire = enabled' {
-          timestamp = "-7 days";
-          store = {
-            cleanup = true;
-            options = "--delete-older-than 14d";
-          };
+        manual = {
+          json = enabled;
+          html = enabled;
+          manpages = enabled;
         };
-        autoUpgrade = enabled' {
-          frequency = "weekly";
+        home = {
+          enableNixpkgsReleaseCheck = true;
+          preferXdgDirectories = true;
+          extraOutputsToInstall = [
+            "doc"
+            "info"
+            "devdoc"
+          ];
+        };
+
+        services.home-manager = {
+          autoExpire = enabled' {
+            timestamp = "-7 days";
+            store = {
+              cleanup = true;
+              options = "--delete-older-than 14d";
+            };
+          };
+          autoUpgrade = enabled' {
+            frequency = "weekly";
+          };
         };
       };
     };

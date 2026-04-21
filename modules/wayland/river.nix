@@ -2,24 +2,20 @@
   lib,
   config,
   pkgs,
-  helpers,
   ...
 }: let
   inherit (lib.attrsets) recursiveUpdate;
-  inherit (lib) foldl' listToAttrs riverSpawnDefault riverSpawnWithEnv enabled' enabled mkIf;
+  inherit (lib) foldl' listToAttrs riverSpawnDefault riverSpawnWithEnv enabled' enabled;
 
   cfg = config.local.wayland;
-  activeCompositor = cfg.activeCompositor;
-  isRiverActive = activeCompositor == "river";
 
   home = "/home/jules";
   wallpaperFile = "${home}/060_media/010_wallpapers/zoe-love-bg/zoe-love-4k.png";
   screenshotDir = "${home}/060_media/005_screenshots";
 in {
-  config = mkIf isRiverActive {
+  config = {
     environment.systemPackages = with pkgs; [
       river-bnf
-      river-tag-overlay
     ];
 
     programs.river-classic = enabled' {

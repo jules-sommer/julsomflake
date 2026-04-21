@@ -3,19 +3,52 @@
   pkgs,
   ...
 }: let
-  inherit (lib) mkOption getModulesRecursive foldl' concat;
+  inherit
+    (lib)
+    getModulesRecursive
+    enableShellIntegrations
+    foldl'
+    concat
+    enabled
+    enabled'
+    ;
 in {
   imports = getModulesRecursive ./. {max-depth = 2;};
+  config = {
+    environment.systemPackages = with pkgs; [
+      nixfmt
+      nixVersions.latest
+      jq
+      cached-nix-shell
+      nurl
+      just
+      gitoxide
 
-  config.local.home.home.packages = foldl' concat [] [
-    (with pkgs; [
       serie
       dust
       caligula
-      vimv-rs
-    ])
-    (with pkgs.kdePackages; [
-      ark
-    ])
-  ];
+      fclones
+      p7zip
+      ncdu
+      fd
+      rmlint
+      mediainfo
+      exiftool
+
+      (lib.lowPrio busybox)
+      (lib.hiPrio gnutar)
+      (lib.hiPrio uutils-coreutils-noprefix)
+      (lib.hiPrio uutils-findutils)
+      (lib.hiPrio uutils-diffutils)
+      file
+    ];
+    local.home = {
+      programs.claude-code = enabled;
+      home.packages = foldl' concat [] [
+        (with pkgs.kdePackages; [
+          ark
+        ])
+      ];
+    };
+  };
 }

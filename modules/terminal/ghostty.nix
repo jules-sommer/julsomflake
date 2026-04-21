@@ -9,7 +9,7 @@
   cfg = config.local.terminal.ghostty;
 in {
   local.home.programs.ghostty = enabledPred cfg.enable {
-    package = inputs.ghostty.packages.${pkgs.system}.default;
+    package = inputs.ghostty.packages.${pkgs.stdenv.hostPlatform.system}.default;
     enableFishIntegration = true;
     enableZshIntegration = true;
     installVimSyntax = true;

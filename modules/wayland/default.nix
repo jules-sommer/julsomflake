@@ -4,17 +4,18 @@
   pkgs,
   ...
 }: let
+  inherit (pkgs) writeShellScriptBin;
   inherit
     (lib)
     mkIf
     types
     attrsets
-    optionalAttrs
     foldl'
     enabled
+    getExe
+    getExe'
     mkEnableOpt
     mkOpt
-    enabled'
     getModulesRecursive
     mkOption
     ;
@@ -22,28 +23,27 @@
   inherit (types) nullOr enum;
   cfg = config.local.wayland;
 
-  dbg-wayland-env = pkgs.callPackage ./__debug-env.nix {};
-
   mkSessionCommand = compositor:
-    pkgs.writeShellScriptBin "wayland-session-${compositor}" ''
+    writeShellScriptBin "wayland-session-${compositor}" ''
       export XDG_SESSION_TYPE=wayland
       export XDG_CURRENT_DESKTOP=${compositor}
 
       exec ${compositor}
     '';
 
+  niriSession = writeShellScriptBin "wayland-session-niri" ''
+    export XDG_SESSION_TYPE=wayland
+    ${getExe pkgs.niri} --session
+  '';
+
   defaultSession =
     if cfg.activeCompositor == "niri"
-    then mkSessionCommand "niri"
+    then niriSession
     else if cfg.activeCompositor == "river"
     then mkSessionCommand "river"
     else if cfg.activeCompositor == "plasma"
-    then "startplasma-wayland"
-    else if cfg.activeCompositor == "hyprland"
-    then "hyprland"
-    else builtins.warn "No active wayland compositor is set, assuming default." "niri";
-
-  defaultSessionBin = "${defaultSession}/bin/wayland-session-${cfg.activeCompositor}";
+    then getExe' pkgs.kdePackages.plasma-workspace "startplasma-wayland"
+    else niriSession;
 in {
   imports = getModulesRecursive ./. {
     max-depth = 1;
@@ -75,6 +75,11 @@ in {
 
   config = foldl' recursiveUpdate {} [
     {
+      local.home.home.activation.rebuildKdeCache = lib.hm.dag.entryAfter ["writeBoundary"] ''
+        $DRY_RUN_CMD ${pkgs.kdePackages.kservice}/bin/kbuildsycoca6 --noincremental
+      '';
+    }
+    {
       services.playerctld = enabled;
 
       # TODO: maybe go through these and figure out what's actually needed?
@@ -94,10 +99,10 @@ in {
       ];
     }
     {
-      # security.pam.services.greetd.enableGnomeKeyring = true;
+      security.pam.services.greetd.enableGnomeKeyring = true;
       services.greetd = {
         inherit (cfg.login.greetd) enable;
-        settings.default_session.command = "${pkgs.tuigreet}/bin/tuigreet --cmd ${defaultSessionBin}";
+        settings.default_session.command = "${pkgs.tuigreet}/bin/tuigreet --cmd ${getExe defaultSession}";
       };
     }
     {

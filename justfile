@@ -1,15 +1,17 @@
 set fallback
 hostname := env_var_or_default("hostname", "estradiol")
 
+build *args:
+  ./build.fish {{args}}
+
 check:
   nix flake check --show-trace --extra-experimental-features pipe-operators 
 
 repl:
   nix repl --show-trace --extra-experimental-features pipe-operators --file ./repl.nix
 
-
-build *args:
-  ./build.fish {{args}}
+update *inputs:
+  nix flake update {{inputs}}
 
 build-legacy action='switch' host=hostname specialisation="none":
   #!/usr/bin/env fish 

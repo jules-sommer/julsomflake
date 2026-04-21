@@ -33,9 +33,9 @@ writeShellApplication {
 
     if [ -z "$dir" ]; then
       if command -v xdg-user-dir >/dev/null 2>&1; then
-        dir="$(xdg-user-dir PICTURES)/Screenshots"
+        dir="$(xdg-user-dir PICTURES)/005_screenshots"
       else
-        dir="$HOME/Pictures/Screenshots"
+        dir="$HOME/060_media/005_screenshots"
       fi
     fi
 

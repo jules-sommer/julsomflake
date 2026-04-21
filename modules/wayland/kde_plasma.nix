@@ -1,28 +1,22 @@
 {
   pkgs,
   lib,
-  helpers,
   config,
   ...
 }: let
   inherit
     (lib)
-    foldl'
-    recursiveUpdate
-    mkIf
     enabled
     enabled'
     mkEnableOpt
-    enabledPred
     ;
 
   cfg = config.local.wayland;
-  isPlasmaActiveCompositor = cfg.activeCompositor == "plasma";
 in {
   options.local.wayland.plasma = {
     extraPackages = mkEnableOpt "Enable a selection of extra kdePackages.";
   };
-  config = mkIf isPlasmaActiveCompositor {
+  config = {
     services = {
       desktopManager.plasma6 = enabled;
       displayManager = {

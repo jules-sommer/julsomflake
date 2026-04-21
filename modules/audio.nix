@@ -45,7 +45,7 @@ in {
         sonic-visualiser
         pavucontrol
         pwvucontrol
-        helvum
+        crosspipe
         coppwr
       ];
     })
@@ -58,6 +58,17 @@ in {
           wireplumber = enabled' {
             inherit extraLv2Packages;
           };
+        };
+      };
+    })
+    (includeIf cfg.pipewire.enable {
+      services.pipewire.extraConfig.pipewire."92-sample-rates" = {
+        "context.properties" = {
+          "default.clock.rate" = 48000;
+          "default.clock.allowed-rates" = [44100 48000 96000];
+        };
+        "stream.properties" = {
+          "resample.quality" = 10;
         };
       };
     })

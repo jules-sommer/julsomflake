@@ -4,7 +4,7 @@
   config,
   ...
 }: let
-  inherit (lib) enabled' getBinaryByName getBinary;
+  inherit (lib) enabled' getExe' getExe;
 in {
   security.pam.services.swaylock = {};
   local.home = {
@@ -51,25 +51,20 @@ in {
     };
 
     services.swayidle = enabled' {
-      systemdTarget = "graphical-session.target";
-      events = [
-        {
-          event = "before-sleep";
-          command = "${getBinaryByName pkgs.systemd "loginctl"} lock-session";
-        }
-        {
-          event = "lock";
-          command = "${getBinaryByName pkgs.systemd "loginctl"} lock-session";
-        }
-      ];
+      systemdTargets = [config.home.wayland.systemd.target];
+      events = {
+        before-sleep = "${getExe' pkgs.systemd "loginctl"} lock-session";
+        lock = "${getExe' pkgs.systemd "loginctl"} lock-session";
+      };
       timeouts = [
         {
           timeout = 300;
-          command = "${getBinaryByName pkgs.systemd "loginctl"} lock-session";
+          command = "${getExe' pkgs.systemd "loginctl"} lock-session";
         }
         {
           timeout = 600;
-          command = "${getBinaryByName pkgs.systemd "loginctl"} lock-session";
+          command = "${getExe pkgs.niri} msg action power-off-monitors";
+          resumeCommand = "${getExe pkgs.niri} msg action power-on-monitors";
         }
       ];
     };
@@ -77,12 +72,12 @@ in {
     systemd.user.services.swaylock = {
       Unit = {
         Description = "Screen locker for Wayland";
-        PartOf = ["graphical-session.target"];
-        After = ["graphical-session.target"];
+        PartOf = [config.home.wayland.systemd.target];
+        After = [config.home.wayland.systemd.target];
       };
 
       Service = {
-        ExecStart = getBinary pkgs.swaylock-effects;
+        ExecStart = getExe pkgs.swaylock-effects;
         Restart = "on-failure";
         RestartSec = 1;
       };

@@ -36,7 +36,6 @@ in {
         comment = "TUI file manager";
         exec = cmd ["kitty" "joshuto" "%U"];
         icon = "utilities-terminal";
-        terminal = true;
         type = "Application";
         categories = ["System" "FileTools" "FileManager"];
         mimeType = ["inode/directory"];

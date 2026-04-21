@@ -5,15 +5,15 @@
 }: let
   inherit (lib) composeManyExtensions;
 in {
-  default = _: prev: {};
+  default = final: prev: {};
   stable = composeManyExtensions [
     (_: prev: {
-      inherit (inputs.nixpkgs-stable.legacyPackages.${prev.system}) protonvpn-gui electron;
+      inherit (inputs.nixpkgs-stable.legacyPackages.${prev.stdenv.hostPlatform.system}) protonvpn-gui electron;
     })
   ];
   unfree = composeManyExtensions [
     (_: prev: {
-      inherit (inputs.unfree.legacyPackages.${prev.system}) zsh-abbr masterpdfeditor4 masterpdfeditor claude-code libsciter;
+      inherit (inputs.unfree.legacyPackages.${prev.stdenv.hostPlatform.system}) zsh-abbr masterpdfeditor4 masterpdfeditor claude-code libsciter;
     })
   ];
 
@@ -21,21 +21,20 @@ in {
   # with the one exception of it's handling of cargo tests. Basically, it defaults
   # to disabling the tests which frequently run into open FD limits.
   niri = final: prev: {
-    niri = inputs.niri.packages.${prev.system}.default;
+    niri = inputs.niri.packages.${prev.stdenv.hostPlatform.system}.default.overrideAttrs {doCheck = false;};
   };
 
   julespkgs = _: prev: {
-    julespkgs = inputs.julespkgs.packages.${prev.system} // self.packages.${prev.system};
-    neovim = inputs.neovim.packages.${prev.system}.default;
+    julespkgs = inputs.julespkgs.packages.${prev.stdenv.hostPlatform.system} // self.packages.${prev.stdenv.hostPlatform.system};
   };
 
   from_inputs = composeManyExtensions (
     with inputs; [
       (_: prev: {
-        helium = helium.defaultPackage.${prev.system};
-        neovim = julespkgs.packages.${prev.system}.neovim;
-        zen-browser = julespkgs.packages.${prev.system}.zen-browser__default;
-        jan = julespkgs.packages.${prev.system}.jan;
+        helium = helium.defaultPackage.${prev.stdenv.hostPlatform.system};
+        neovim = neovim.packages.${prev.stdenv.hostPlatform.system}.default;
+        zen-browser = julespkgs.packages.${prev.stdenv.hostPlatform.system}.zen-browser__default;
+        jan = julespkgs.packages.${prev.stdenv.hostPlatform.system}.jan;
       })
     ]
   );

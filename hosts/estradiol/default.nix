@@ -7,25 +7,10 @@
   inherit (lib) enabled enabled' disabled getModulesRecursive;
 in {
   imports = getModulesRecursive ./. {};
-
-  specialisation = {
-    niri.configuration = {
-      system.nixos.tags = ["niri"];
-      local.wayland.activeCompositor = "niri";
-    };
-
-    plasma.configuration = {
-      system.nixos.tags = ["plasma"];
-      local.wayland.activeCompositor = "plasma";
-    };
-
-    river.configuration = {
-      system.nixos.tags = ["river"];
-      local.wayland.activeCompositor = "river";
-    };
+  boot = {
+    supportedFilesystems = ["ntfs"];
+    initrd.kernelModules = ["amdgpu"];
   };
-
-  boot.initrd.kernelModules = ["amdgpu"];
 
   local = {
     meta = {
@@ -38,6 +23,7 @@ in {
 
     wayland = enabled' {
       portals = true;
+      activeCompositor = "niri";
       login.greetd = enabled;
     };
 
@@ -141,34 +127,19 @@ in {
     };
   };
 
-  # Ryzen 5 7600X
-  # 12 cores on estradiol
-  # 4.4 <-> 5.4 GHz clock speed
-
-  # These settings allow nix builders to do the following:
-  #   1. Build a maximum of 3 derivations at once.
-  #   2. Each derivation being built gets access to 4 cores.
-  #   3. This means that 3 jobs running with 4 cores use all 12 cores.
-  nix.settings = {
-    max-jobs = 3;
-    cores = 4;
-  };
-
-  environment.variables.NIX_BUILD_CORES = 4;
-
-  xdg = {
-    icons = enabled;
-    mime = enabled' {
-      defaultApplications = {
-        "x-scheme-handler/http" = ["zen.desktop"];
-        "x-scheme-handler/https" = ["zen.desktop"];
-        "image/*" = ["imv.desktop"];
-        "video/*" = ["mpv.desktop"];
-        "application/pdf" = ["okular.desktop"];
-        "text/*" = ["nvim.desktop"];
-      };
-    };
-  };
+  # xdg = {
+  #   icons = enabled;
+  #   mime = enabled' {
+  #     defaultApplications = {
+  #       "x-scheme-handler/http" = ["zen.desktop"];
+  #       "x-scheme-handler/https" = ["zen.desktop"];
+  #       "image/*" = ["imv.desktop"];
+  #       "video/*" = ["mpv.desktop"];
+  #       "application/pdf" = ["okular.desktop"];
+  #       "text/*" = ["nvim.desktop"];
+  #     };
+  #   };
+  # };
 
   services = {
     gvfs = enabled;

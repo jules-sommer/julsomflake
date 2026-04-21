@@ -3,11 +3,13 @@
   lib,
   ...
 }: let
-  inherit (lib) enabled;
+  inherit (lib) enabled';
 in {
   environment.systemPackages = with pkgs; [wl-clipboard];
   local = {
-    home.services.cliphist = enabled;
+    home.services.cliphist = enabled' {
+      allowImages = true;
+    };
     shells.settings.abbreviations = {
       yank = "wl-copy";
       put = "wl-paste";

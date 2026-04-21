@@ -1,7 +1,7 @@
 {lib, ...}: let
-  inherit (lib) enabled';
+  inherit (lib) disabled';
 in {
-  services.monero = enabled' {
+  services.monero = disabled' {
     prune = true;
     limits = {
       download = 3000;

@@ -1,16 +1,32 @@
 {
   pkgs,
   lib,
+  config,
   ...
 }: let
-  inherit (lib) enabled' flatten genAttrs foldl' recursiveUpdate;
+  inherit (lib) enabled enabled' flatten genAttrs foldl' recursiveUpdate;
+  homeDir = config.home-manager.users.jules.home.homeDirectory;
 in {
-  local.home.xdg = {
+  xdg.menus = enabled;
+  local.home.xdg = enabled' {
     terminal-exec = enabled' {
       settings = {
         default = ["kitty.desktop"];
       };
     };
+
+    userDirs =
+      enabled' {
+        createDirectories = true;
+        documents = "~/010_documents";
+        download = "~/080_downloads";
+        pictures = "~/060_media";
+        music = "~/060_media/030_music";
+        videos = "~/060_media/020_videos";
+        setSessionVariables = false;
+      }
+      // (genAttrs ["desktop" "templates" "publicShare"] (_: null));
+
     mimeApps = enabled' {
       associations = {
         added = {

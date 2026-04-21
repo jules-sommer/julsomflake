@@ -1,10 +1,10 @@
 {
   pkgs,
   inputs,
-  system,
   ...
 }: let
   inherit (pkgs.lib) foldl' concat;
+  inherit (pkgs.stdenv.hostPlatform) system;
 in {
   default = pkgs.mkShell {
     nativeBuildInputs = foldl' concat [] [

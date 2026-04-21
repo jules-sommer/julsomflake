@@ -6,7 +6,6 @@
   nix = {
     settings = {
       download-buffer-size = 524288000;
-      cores = 12;
       warn-dirty = false;
       experimental-features = ["nix-command" "flakes" "pipe-operators"];
       auto-optimise-store = true;
@@ -26,6 +25,7 @@
 
       allowed-users = ["@users"];
     };
+
     gc = {
       automatic = true;
       dates = "daily";

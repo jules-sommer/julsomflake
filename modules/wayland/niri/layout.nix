@@ -3,6 +3,7 @@
   config,
   ...
 }: let
+  inherit (builtins) toString;
   inherit (lib) enabled' genAttrs disabled';
   theme = config.lib.stylix.colors.withHashtag;
 in {
@@ -33,27 +34,8 @@ in {
 
       border = {
         width = 4;
-        active = {
-          color = "oklch(65.05904516611996 10.991750441472847 327.99999999999983)";
-          # gradient = {
-          #   from = "oklch(0.8501 0.1385 299.07 / 95%)";
-          #   to = "oklch(0.8918 0.2364 329.26 / 95%)";
-          #   angle = 45;
-          #   in' = "oklch shorter hue";
-          #   relative-to = "workspace-view";
-          # };
-        };
-        inactive = {
-          color = "oklch(74.45374586335245 13.45550627732625 320.99999999999983)";
-
-          # gradient = {
-          #   from = "oklch(0.9501 0.1039 299.07 / 65%)";
-          #   to = "oklch(0.9618 0.1773 329.26 / 65%)";
-          #   angle = 45;
-          #   in' = "oklch shorter hue";
-          #   relative-to = "workspace-view";
-          # };
-        };
+        inactive.color = "oklch(${toString (65.05904516611996 / 100)} ${toString (13.991750441472847 / 100)} 328 / 97%)";
+        active.color = "oklch(${toString (74.45374586335245 / 100)} ${toString (10.45550627732625 / 100)} 321 / 100%)";
       };
 
       shadow = enabled' {
@@ -119,7 +101,7 @@ in {
     window-rules = [
       {
         draw-border-with-background = false;
-        geometry-corner-radius = genAttrs ["bottom-left" "bottom-right" "top-left" "top-right"] (_: 8.0);
+        geometry-corner-radius = genAttrs ["bottom-left" "bottom-right" "top-left" "top-right"] (_: 6.0);
         clip-to-geometry = true;
         opacity = 1.0;
       }
@@ -128,6 +110,10 @@ in {
           {
             app-id = "org.inkscape.Inkscape";
             title = "^Inkscape ";
+            is-floating = true;
+          }
+          {
+            app-id = "gimp";
             is-floating = true;
           }
         ];

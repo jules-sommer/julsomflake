@@ -108,12 +108,14 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    nixpkgs-main.url = "github:nixos/nixpkgs/master";
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-25.11-small";
 
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
     helium = {
       url = "github:FKouhai/helium2nix/main";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -124,6 +126,7 @@
       inputs = {
         nixpkgs.follows = "nixpkgs";
         darwin.follows = "";
+        home-manager.follows = "home-manager";
       };
     };
 
@@ -132,10 +135,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    utils = {
-      url = "github:numtide/flake-utils";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    utils.url = "github:numtide/flake-utils";
 
     helpers = {
       url = "/home/jules/000_dev/000_nix/flake-helpers";
@@ -163,10 +163,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    neovim = {
-      url = "git+https://git.nixfox.ca/Jules/julsomvim";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    neovim.url = "git+file:///home/jules/000_dev/000_nix/newsomvim";
 
     zig = {
       url = "github:silversquirl/zig-flake/compat";
@@ -177,7 +174,6 @@
       url = "github:zigtools/zls";
       inputs = {
         nixpkgs.follows = "nixpkgs";
-        zig-overlay.follows = "zig";
       };
     };
   };

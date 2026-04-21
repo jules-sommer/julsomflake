@@ -1,9 +1,13 @@
 let
   inherit (flake) inputs lib;
-  inherit (builtins) currentSystem getFlake toString;
+  inherit (builtins) getFlake toString;
   inherit (lib) foldl' recursiveUpdate attrValues importJSON mapAttrs removeAttrs isAttrs attrNames hasAttr all;
+  inherit (pkgs.stdenv.hostPlatform) system;
 
-  system = currentSystem;
+  pkgs = import inputs.nixpkgs {
+    config.allowUnfree = true;
+    overlays = attrValues flake.overlays;
+  };
 
   helpers = inputs.helpers.lib;
 
@@ -15,11 +19,6 @@ let
   unfree = inputs.unfree.legacyPackages.${system};
 
   packages = flake.outputs.packages.${system};
-
-  pkgs = import inputs.nixpkgs {
-    config.allowUnfree = true;
-    overlays = attrValues flake.overlays;
-  };
 
   validSystems = inputs.utils.lib.system;
 

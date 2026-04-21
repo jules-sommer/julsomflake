@@ -25,13 +25,17 @@ in {
           ];
         };
       };
+
+      delta = enabled' {
+        enableGitIntegration = true;
+      };
+
       git = enabled' {
         settings.user = {
           name = "jules-sommer";
           email = "jsomme@pm.me";
         };
 
-        delta = enabled;
         ignores = [
           "*~"
           "~*"
@@ -43,8 +47,10 @@ in {
         signing = {
           key = "~/.ssh/id_ed25519";
           signByDefault = true;
+          format = null;
         };
-        extraConfig.gpg.format = "ssh";
+
+        settings.gpg.format = "ssh";
 
         includes = [
           {

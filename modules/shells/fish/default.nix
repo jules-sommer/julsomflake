@@ -14,6 +14,7 @@ in {
     local = {
       shells.aliases = {
         nfr = "nix-flake-repl";
+        j = "just";
       };
 
       home.programs.fish = enabled' {
@@ -32,6 +33,7 @@ in {
             src = pkgs.fishPlugins.pure;
           }
         ];
+
         functions = {
           fish_greeting.body = "";
           nix-flake-repl.body = ''

@@ -5,9 +5,8 @@ in {
   services.evremap = enabled' {
     devices = [
       {
-        device_name = "SEMICO   USB Gaming Keyboard";
-        device_path = "";
-        phys = "usb-0000:10:00.0-2/input0";
+        device_name = "SEMICO   USB Gaming Keyboard ";
+        device_path = "/dev/input/by-id/usb-SEMICO_USB_Gaming_Keyboard-event-kbd";
         remap = with keys; [
           {
             input = [KEY_CAPSLOCK];
