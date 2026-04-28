@@ -5,7 +5,7 @@
 }: let
   inherit (lib) enabled' enableShellIntegrations foldl' recursiveUpdate;
 in {
-  environment.systemPackages = with pkgs; [zoxide];
+  environment.systemPackages = with pkgs; [zoxide ripgrep fzf];
   local.home.programs = {
     ripgrep = enabled' {
       arguments = [

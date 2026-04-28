@@ -1,6 +1,11 @@
-{lib, ...}: let
+{
+  lib,
+  pkgs,
+  ...
+}: let
   inherit (lib) enabled';
 in {
+  environment.systemPackages = with pkgs; [jq];
   local.home.programs.jq = enabled' {
     colors = {
       null = "1;30";

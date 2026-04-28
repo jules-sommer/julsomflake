@@ -5,43 +5,52 @@
   ...
 }: let
   inherit (helpers) enabled enabled';
+  inherit (lib) concatLists types mkOption genAttrs;
 in {
-  fonts = {
-    fontDir = enabled;
-    enableDefaultPackages = true;
-    fontconfig = enabled' {
-      subpixel.rgba = "rgb";
-      includeUserConf = true;
-      antialias = true;
-      hinting = enabled' {
-        style = "slight";
-      };
-    };
-
-    packages =
+  local.ui.fonts = {
+    packages = concatLists [
       (with pkgs.nerd-fonts; [
         jetbrains-mono
         fira-code
         zed-mono
-        iosevka
         victor-mono
         sauce-code-pro
         open-dyslexic
         lilex
+        iosevka
+        iosevka-term
+        iosevka-term-slab
         hack
       ])
-      ++ (with pkgs; [google-fonts]);
-  };
-
-  # INFO: test if setting fonts via stylix is enough to remove
-  # this additional config.
-
-  home-manager.users.jules.fonts.fontconfig = enabled' {
-    defaultFonts = {
-      emoji = ["Noto Color Emoji"];
-      monospace = ["JetBrainsMono Nerd Font"];
-      sansSerif = ["NotoSans Nerd Font"];
-      serif = ["NotoSans Nerd Font"];
+      (with pkgs; [
+        google-fonts
+        maple-mono.NF
+        iosevka
+      ])
+    ];
+    defaults = {
+      monospace = {
+        name = "JetBrainsMono Nerd Font";
+        package = pkgs.nerd-fonts.jetbrains-mono;
+      };
+      emoji = {
+        name = "Noto Color Emoji";
+        package = pkgs.noto-fonts-color-emoji;
+      };
+      serif = {
+        name = "IosevkaSlab Nerd Font";
+        package = pkgs.nerd-fonts.iosevka-term-slab;
+      };
+      sans-serif = {
+        name = "NotoSans Nerd Font";
+        package = pkgs.nerd-fonts.noto;
+      };
+    };
+    sizes = {
+      applications = 16;
+      popups = 16;
+      terminal = 16;
+      desktop = 16;
     };
   };
 }

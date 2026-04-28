@@ -5,7 +5,6 @@
   ...
 }: let
   inherit (lib) enabled enabled' flatten genAttrs foldl' recursiveUpdate;
-  homeDir = config.home-manager.users.jules.home.homeDirectory;
 in {
   xdg.menus = enabled;
   local.home.xdg = enabled' {
@@ -18,12 +17,12 @@ in {
     userDirs =
       enabled' {
         createDirectories = true;
-        documents = "~/010_documents";
-        download = "~/080_downloads";
-        pictures = "~/060_media";
-        music = "~/060_media/030_music";
-        videos = "~/060_media/020_videos";
-        setSessionVariables = false;
+        documents = "/home/jules/010_documents";
+        download = "/home/jules/080_downloads";
+        pictures = "/home/jules/060_media";
+        music = "/home/jules/060_media/030_music";
+        videos = "/home/jules/060_media/020_videos";
+        setSessionVariables = true;
       }
       // (genAttrs ["desktop" "templates" "publicShare"] (_: null));
 

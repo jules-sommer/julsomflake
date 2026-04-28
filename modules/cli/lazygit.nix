@@ -9,6 +9,7 @@ in {
   local = {
     shells.aliases = {
       lg = "lazygit";
+      gg = "lazygit";
     };
     home.programs.lazygit = enabled' {
       settings = {};

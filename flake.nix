@@ -148,12 +148,12 @@
     };
 
     niri = {
-      url = "github:YaLTeR/niri";
+      url = "github:niri-wm/niri";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     niri-flake = {
-      url = "git+file:///home/jules/000_dev/000_nix/niri-flake";
+      url = "/home/jules/000_dev/000_nix/niri-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -163,7 +163,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    neovim.url = "git+file:///home/jules/000_dev/000_nix/newsomvim";
+    neovim.url = "git+https://git.nixfox.ca/Jules/newsomvim.git";
 
     zig = {
       url = "github:silversquirl/zig-flake/compat";

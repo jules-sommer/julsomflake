@@ -1,22 +1,17 @@
 {
   config,
-  packages,
   lib,
   ...
 }: let
   cfg = config.local.cli.starship;
-  inherit (packages) themes_rose-pine_starship;
-  inherit (lib) concatStrings mkIf foldl' recursiveUpdate mkEnableOpt enabled';
+  inherit (lib) concatStrings mkIf foldl' recursiveUpdate mkEnableOpt enabled' defaultShellIntegrations;
 in {
   options.local.cli.starship = mkEnableOpt "Enable starship shell prompt.";
 
-  config.local.home.programs.starship = mkIf cfg.enable (enabled' {
-    enableFishIntegration = true;
-    enableTransience = true;
-    settings =
-      # theme = builtins.fromTOML (builtins.readFile "${themes_rose-pine_starship}/rose-pine.toml");
-      foldl' recursiveUpdate {} [
-        # theme
+  config.local.home.programs.starship =
+    mkIf cfg.enable (enabled' {
+      enableTransience = true;
+      settings = foldl' recursiveUpdate {} [
         {
           format = concatStrings [
             "[╭─](#ff2199)"
@@ -97,5 +92,6 @@ in {
           };
         }
       ];
-  });
+    })
+    // defaultShellIntegrations;
 }

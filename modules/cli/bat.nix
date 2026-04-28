@@ -7,6 +7,7 @@
   inherit (lib) enabled' enabled;
 in {
   programs.bat = enabled;
+
   local = {
     home = {
       programs.bat = enabled' {

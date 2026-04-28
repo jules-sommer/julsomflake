@@ -4,29 +4,32 @@
   config,
   pkgs,
   ...
-}:
-let
-  inherit (lib)
+}: let
+  inherit
+    (lib)
     types
     mkIf
     ;
-  inherit (helpers)
+  inherit
+    (helpers)
     enabledPred
     ;
 
   cfg = config.local.terminal.kitty;
-in
-{
+  notify-send = lib.getExe' pkgs.libnotify "notify-send";
+  wl-copy = lib.getExe' pkgs.wl-clipboard "wl-copy";
+in {
   local.home.programs.kitty = enabledPred cfg.enable {
     package = pkgs.kitty;
-    font = lib.mkDefault {
-      name = "JetBrainsMono Nerd Font";
-      package = pkgs.nerd-fonts.jetbrains-mono;
-      size = 11;
-    };
+    # font = lib.mkDefault {
+    #   name = config.local.ui.fonts.defaults.monospace.name;
+    #   package = config.local.ui.fonts.defaults.monospace.package;
+    #   size = config.local.ui.fonts.sizes.terminal;
+    # };
     environment = {
       KITTY_ENABLE_WAYLAND = "1";
     };
+    enableGitIntegration = true;
     shellIntegration = {
       mode = "enabled";
       enableFishIntegration = true;
@@ -49,7 +52,10 @@ in
 
       "ctrl+o" = "scroll_to_prompt 0"; # jump to last visited
 
-      "ctrl+y" = "launch --stdin-source @last_cmd_output wl-copy";
+      "ctrl+equal" = "change_font_size all +2.0";
+      "ctrl+minus" = "change_font_size all -2.0";
+
+      "kitty_mod+y" = "launch --type=background --stdin-source=@last_cmd_output ${wl-copy} && ${notify-send} -t 1000 \"kitty\" \"Yanked last output.\"";
     };
     settings = {
       disable_ligatures = "never";
@@ -63,10 +69,10 @@ in
       mouse_hide_wait = 60;
       tab_bar_edge = "bottom";
       allow_remote_control = "yes";
+      listen_on = "unix:/tmp/kitty";
       tab_bar_style = "slant";
       tab_bar_margin_width = 1;
       tab_bar_margin_height = "1.0 1.0";
-      transparent = lib.mkForce true;
       scrollback_lines = 15000;
       copy_on_select = "yes";
       background_blur = lib.mkForce 50;

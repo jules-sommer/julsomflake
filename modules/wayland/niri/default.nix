@@ -7,15 +7,12 @@
   inherit
     (lib)
     enabled'
-    cmdList
     disabled
     cmd
     mkBefore
     getExe
     ;
 
-  cfg = config.local.wayland;
-  isNiriActiveCompositor = cfg.activeCompositor == "niri";
   niri-session-init = pkgs.writeShellScriptBin "niri-session-init" ''
     ${pkgs.dbus}/bin/dbus-update-activation-environment --systemd --all
     ${pkgs.systemd}/bin/systemctl --user import-environment PATH
@@ -86,7 +83,7 @@ in {
           {sh = cmd [legcord];}
           {sh = cmd [signal];}
           {sh = cmd [helium];}
-          {sh = cmd [wbg "-s" "$WALLPAPER"];}
+          {sh = cmd [fish "-c" wbg "-s" "$WALLPAPER"];}
           {sh = cmd [waybar];}
         ];
 

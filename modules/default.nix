@@ -12,7 +12,7 @@
   inherit (builtins) toString;
 in {
   imports =
-    getModulesRecursive ./. {max-depth = 1;};
+    getModulesRecursive ./. {max-depth = 1;} ++ [./fonts];
 
   options = {
     home = lib.mkOption {

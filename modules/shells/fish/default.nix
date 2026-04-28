@@ -24,14 +24,6 @@ in {
             name = "fish-you-should-use";
             src = pkgs.fishPlugins.fish-you-should-use;
           }
-          {
-            name = "done";
-            src = pkgs.fishPlugins.done;
-          }
-          {
-            name = "pure";
-            src = pkgs.fishPlugins.pure;
-          }
         ];
 
         functions = {

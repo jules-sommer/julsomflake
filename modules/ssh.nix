@@ -18,11 +18,13 @@ in {
   };
 
   users.users.jules.openssh.authorizedKeys.keyFiles = [
-    ./keys/jules.pub
   ];
 
   age = {
-    identityPaths = ["/etc/ssh/ssh_host_ed25519_key"];
+    identityPaths = [
+      "/etc/ssh/ssh_host_ed25519_key"
+    ];
+
     secrets.ssh-key = {
       file = lib.path.append src "secrets/id_ed25519.age";
       path = "/home/jules/.ssh/id_ed25519";
@@ -43,18 +45,15 @@ in {
     };
 
     programs = {
-      git.settings = {
+      git.extraConfig = {
         gpg.format = "ssh";
         user.signingKey = "~/.ssh/id_ed25519.pub";
         commit.gpgsign = true;
       };
 
       ssh = enabled' {
-        enableDefaultConfig = false;
-        matchBlocks."*" = {
-          addKeysToAgent = "yes";
-          identityFile = ["~/.ssh/id_ed25519"];
-        };
+        addKeysToAgent = "yes";
+        matchBlocks."*".identityFile = ["~/.ssh/id_ed25519"];
       };
     };
   };

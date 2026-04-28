@@ -29,6 +29,7 @@ in {
       shells.aliases = {
         v = "nvim";
         vv = "vimv";
+        vtest = "nix run /home/jules/000_dev/000_nix/newsomvim";
       };
 
       home.xdg.desktopEntries.nvim = {

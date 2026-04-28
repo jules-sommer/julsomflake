@@ -1,4 +1,8 @@
-{lib, ...}: let
+{
+  lib,
+  pkgs,
+  ...
+}: let
   inherit (lib) enabled' enabled defaultShellIntegrations mkMerge;
 in {
   users.users.atuin = {
@@ -18,6 +22,8 @@ in {
     openRegistration = false;
     openFirewall = true;
   };
+
+  environment.systemPackages = with pkgs; [atuin];
 
   local.home.programs.atuin = mkMerge [
     enabled
