@@ -33,7 +33,7 @@ in {
       (_: prev: {
         helium = helium.defaultPackage.${prev.stdenv.hostPlatform.system};
         neovim = neovim.packages.${prev.stdenv.hostPlatform.system}.default;
-        zen-browser = julespkgs.packages.${prev.stdenv.hostPlatform.system}.zen-browser__default;
+        zen-browser = zen-browser.packages.${prev.stdenv.hostPlatform.system}.default;
         jan = julespkgs.packages.${prev.stdenv.hostPlatform.system}.jan;
       })
     ]

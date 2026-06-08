@@ -13,6 +13,7 @@ in {
       PasswordAuthentication = false;
       KbdInteractiveAuthentication = false;
       PermitRootLogin = "no";
+      AllowUsers = ["jules" "forgejo"];
       PubkeyAuthentication = true;
     };
   };
@@ -23,6 +24,7 @@ in {
   age = {
     identityPaths = [
       "/etc/ssh/ssh_host_ed25519_key"
+      "/home/jules/.ssh/id_ed25519"
     ];
 
     secrets.ssh-key = {
@@ -36,6 +38,8 @@ in {
 
   environment.systemPackages = [pkgs.wayprompt];
 
+  programs.ssh.knownHosts."*".publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKa+NotW65h3HVyXzHAjrwxixpRUPi2uUmCQLMlr/98O";
+
   local.home = {
     services.ssh-agent.enable = true;
 
@@ -47,13 +51,13 @@ in {
     programs = {
       git.extraConfig = {
         gpg.format = "ssh";
-        user.signingKey = "~/.ssh/id_ed25519.pub";
+        user.signingKey = "/home/jules/.ssh/id_ed25519.pub";
         commit.gpgsign = true;
       };
 
       ssh = enabled' {
         addKeysToAgent = "yes";
-        matchBlocks."*".identityFile = ["~/.ssh/id_ed25519"];
+        matchBlocks."*".identityFile = ["/home/jules/.ssh/id_ed25519"];
       };
     };
   };

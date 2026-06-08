@@ -17,8 +17,8 @@ in {
     # Configuration written to $XDG_CONFIG_HOME/ghostty/config.
     # See https://ghostty.org/docs/config/reference for more information.
     settings = {
-      theme = "catppuccin-mocha";
-      font-size = 10;
+      # theme = "catppuccin-mocha";
+      # font-size = 10;
       keybind = [
         "ctrl+h=goto_split:left"
         "ctrl+l=goto_split:right"

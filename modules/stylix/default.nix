@@ -10,21 +10,11 @@
     enabled
     disabled
     enabled'
-    optionalAttrs
     mkMerge
-    foldl'
-    recursiveUpdate
     genAttrs
     concatLists
-    mkDefault
     mkForce
     ;
-
-  font = name: package: {
-    inherit name package;
-  };
-
-  cfg = config.local.stylix;
 in {
   options.local.stylix = mkEnableOpt "Enable theming via stylix.";
 
@@ -34,6 +24,7 @@ in {
       stylix = enabled' {
         autoEnable = true;
         base16Scheme = "${pkgs.base16-schemes}/share/themes/rose-pine.yaml";
+        image = ./wallpapers/rose_pine_contourline.png;
         polarity = "dark";
         cursor = {
           name = "BreezeX-RosePineDawn-Linux";
@@ -59,16 +50,7 @@ in {
           };
         };
 
-        opacity = genAttrs ["terminal" "popups" "applications" "desktop"] (_: 0.9);
-
-        # fonts = foldl' recursiveUpdate {} [
-        #   {
-        #     sizes = genAttrs ["applications" "terminal" "desktop" "popups"] (_: 14);
-        #     monospace = font "JetBrainsMono Nerd Font" pkgs.nerd-fonts.jetbrains-mono;
-        #     emoji = font "Noto Color Emoji" pkgs.noto-fonts-color-emoji;
-        #   }
-        #   (genAttrs ["sansSerif" "serif"] (_: font "NotoSans Nerd font" pkgs.nerd-fonts.noto))
-        # ];
+        opacity = genAttrs ["terminal" "popups" "applications" "desktop"] (_: 0.7);
       };
     }
 
@@ -80,8 +62,10 @@ in {
           fuzzel = disabled;
           swaylock = disabled;
           gtk = enabled;
+          zen-browser.profileNames = ["jules-debug"];
           qt = enabled' {
             platform = mkForce "qtct";
+            standardDialogs = "xdgdesktopportal";
           };
         };
       };
@@ -103,11 +87,16 @@ in {
 
       local.home = {
         gtk = enabled' {
-          gtk4.theme = null;
+          colorScheme = "dark";
           theme = mkForce {
             name = "Breeze-Dark";
             package = pkgs.kdePackages.breeze-gtk;
           };
+
+          # theme = mkForce {
+          #   name = "oomox-rose-pine-moon";
+          #   package = pkgs.rose-pine-gtk-theme;
+          # };
           iconTheme = mkForce {
             name = "breeze-dark";
             package = pkgs.kdePackages.breeze-icons;
@@ -135,12 +124,12 @@ in {
         (with pkgs.kdePackages; [
           qt6ct
           breeze
+          breeze-icons
           breeze.qt5
         ])
         (with pkgs.libsForQt5; [
           qt5ct
           qtstyleplugins
-          breeze-icons
         ])
       ];
 

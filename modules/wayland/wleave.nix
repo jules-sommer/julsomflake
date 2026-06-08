@@ -3,7 +3,7 @@
   pkgs,
   ...
 }: let
-  inherit (lib) cmd getExe getExe' enabled' getBinary;
+  inherit (lib) cmd getExe getExe' enabled';
   loginctl = getExe' pkgs.systemd "loginctl";
   systemctl = getExe' pkgs.systemd "systemctl";
   swaylock = getExe pkgs.swaylock-effects;

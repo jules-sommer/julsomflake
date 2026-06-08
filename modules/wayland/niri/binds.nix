@@ -5,14 +5,19 @@
     ...
   }: let
     inherit (builtins) toString;
-    inherit (lib) range listToAttrs foldl' recursiveUpdate cmd getExe;
-    wleave = getExe pkgs.wleave;
-    fuzzel = getExe pkgs.fuzzel;
-    zen = getExe pkgs.zen-browser;
-    kcalc = getExe pkgs.kdePackages.kcalc;
-    kitty = getExe pkgs.kitty;
-    screenshot = getExe pkgs.julespkgs.screenshot;
-    emoji-picker = getExe pkgs.julespkgs.emoji-picker;
+    inherit (lib) range listToAttrs foldl' recursiveUpdate cmd getExe getExe' mkListCmd mkCmd;
+
+    playerctl = mkListCmd [(getExe pkgs.playerctl)];
+    wleave = mkCmd [(getExe pkgs.wleave)];
+    fuzzel = mkCmd [(getExe pkgs.fuzzel)];
+    zen = mkCmd [(getExe pkgs.zen-browser)];
+    kcalc = mkCmd [(getExe pkgs.kdePackages.kcalc)];
+    kitty = mkCmd [(getExe pkgs.kitty)];
+    screenshot = mkCmd [(getExe pkgs.julespkgs.screenshot)];
+    emoji-picker = mkCmd ["EMOJI_PICKER_MODE=type;" (getExe pkgs.julespkgs.emoji-picker)];
+    brightnessctl = mkCmd [(getExe pkgs.brightnessctl)];
+    makoctl = mkCmd [(getExe' pkgs.mako "makoctl")];
+    wpctl = mkCmd [(getExe' pkgs.wireplumber "wpctl")];
   in {
     programs.niri.settings.binds = foldl' recursiveUpdate {} [
       # focus-workspace 0 <-> 9
@@ -33,25 +38,29 @@
 
       # program/app launch shortcut bindings
       {
-        "Mod+Z".action.spawn-sh = cmd [zen];
-        "Mod+Shift+Return".action.spawn-sh = cmd [fuzzel];
-        "Mod+Return".action.spawn-sh = cmd [kitty];
+        "Mod+Z".action.spawn-sh = zen [];
+        "Mod+Shift+Return".action.spawn-sh = fuzzel [];
+        "Mod+Return".action.spawn-sh = kitty [];
 
-        "Alt+E".action.spawn-sh = cmd [
-          "EMOJI_PICKER_MODE=type;"
-          emoji-picker
-        ];
+        "Alt+E".action.spawn-sh = emoji-picker [];
 
-        "XF86Calculator".action.spawn-sh = cmd ["kcalc"];
-        "F12".action.spawn-sh = cmd ["kcalc"];
+        "XF86Calculator".action.spawn-sh = kcalc [];
+        "F12".action.spawn-sh = kcalc [];
       }
 
       # screenshot related binds
       {
-        "Mod+S".action.spawn-sh = cmd [screenshot];
+        # screenshot related binds
+        "Mod+S".action.spawn-sh = screenshot [];
+        "Mod+Shift+S".action.spawn-sh = screenshot ["--edit"];
         "Mod+Print".action.screenshot = [];
         "Ctrl+Print".action.screenshot-screen = [];
         "Alt+Print".action.screenshot-window = [];
+      }
+
+      # notifications
+      {
+        "Mod+N".action.spawn-sh = makoctl ["dismiss" "--all"];
       }
 
       {
@@ -62,11 +71,12 @@
 
         "Mod+E" = {
           allow-inhibiting = false;
-          action.spawn-sh = cmd [
+          action.spawn-sh =
             wleave
-            "-p"
-            "layer-shell"
-          ];
+            [
+              "-p"
+              "layer-shell"
+            ];
         };
 
         "Mod+Shift+E" = {
@@ -74,8 +84,8 @@
           action.quit = [];
         };
 
-        "XF86MonBrightnessUp".action.spawn-sh = cmd ["brightnessctl" "set" "10%+"];
-        "XF86MonBrightnessDown".action.spawn-sh = cmd ["brightnessctl" "set" "10%-"];
+        "XF86MonBrightnessUp".action.spawn-sh = brightnessctl ["set" "10%+"];
+        "XF86MonBrightnessDown".action.spawn-sh = brightnessctl ["set" "10%-"];
 
         "Mod+Shift+Slash".action.show-hotkey-overlay = [];
 
@@ -165,19 +175,21 @@
 
       # Volume/player controls
       {
-        "XF86AudioRaiseVolume".action.spawn-sh = cmd ["wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.01+"];
-        "XF86AudioLowerVolume".action.spawn-sh = cmd ["wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.01-"];
-        "XF86AudioMute".action.spawn-sh = cmd ["wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"];
+        "Mod+XF86AudioRaiseVolume".action.spawn-sh = wpctl ["set-volume" "@DEFAULT_AUDIO_SINK@" "0.05+"];
+        "Mod+XF86AudioLowerVolume".action.spawn-sh = wpctl ["set-volume" "@DEFAULT_AUDIO_SINK@" "0.05-"];
+        "XF86AudioRaiseVolume".action.spawn-sh = wpctl ["set-volume" "@DEFAULT_AUDIO_SINK@" "0.02+"];
+        "XF86AudioLowerVolume".action.spawn-sh = wpctl ["set-volume" "@DEFAULT_AUDIO_SINK@" "0.02-"];
+        "XF86AudioMute".action.spawn-sh = wpctl ["set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"];
 
-        "F3".action.spawn-sh = cmd ["wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.01+"];
-        "F2".action.spawn-sh = cmd ["wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.01-"];
-        "F4".action.spawn-sh = cmd ["wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"];
+        "F3".action.spawn-sh = wpctl ["set-volume" "@DEFAULT_AUDIO_SINK@" "0.02+"];
+        "F2".action.spawn-sh = wpctl ["set-volume" "@DEFAULT_AUDIO_SINK@" "0.02-"];
+        "F4".action.spawn-sh = wpctl ["set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"];
 
-        "XF86AudioPlay".action.spawn = ["playerctl" "play-pause"];
-        "XF86AudioPause".action.spawn = ["playerctl" "pause"];
-        "XF86AudioNext".action.spawn = ["playerctl" "next"];
-        "XF86AudioPrev".action.spawn = ["playerctl" "previous"];
-        "XF86AudioStop".action.spawn = ["playerctl" "stop"];
+        "XF86AudioPlay".action.spawn = playerctl ["play-pause"];
+        "XF86AudioPause".action.spawn = playerctl ["pause"];
+        "XF86AudioNext".action.spawn = playerctl ["next"];
+        "XF86AudioPrev".action.spawn = playerctl ["previous"];
+        "XF86AudioStop".action.spawn = playerctl ["stop"];
       }
     ];
   };

@@ -1,6 +1,6 @@
 {lib, ...}: let
-  inherit (lib) types mkOption mkOpt';
-  inherit (types) nullOr str submodule package number listOf;
+  inherit (lib) types mkOption mkOpt' mkOpt mkEnableOption;
+  inherit (types) nullOr str submodule package number listOf enum;
 
   fontModule = submodule {
     options = {
@@ -14,7 +14,17 @@
   };
 in {
   options.local.ui.fonts = {
+    antialias = mkEnableOption true;
+
+    subpixel = mkOpt (nullOr (enum ["none" "rgb" "bgr" "vertical-rgb" "vertical-bgr"])) "none" "Ordering of subpixels for your display. Vast majority of display's are \"rgb\" when in their normal orientation.";
+
+    hinting = {
+      enable = mkEnableOption false;
+      style = mkOpt (nullOr (enum ["none" "slight" "medium" "full"])) "none" "Hinting style is the amount of font reshaping done to line up to the grid.";
+    };
+
     packages = mkOpt' (listOf package) [];
+
     defaults = {
       monospace = mkOption {
         type = nullOr fontModule;

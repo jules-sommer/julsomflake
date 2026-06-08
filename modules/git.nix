@@ -5,6 +5,16 @@
 }: let
   inherit (lib) enabled' enabled;
 in {
+  environment = {
+    systemPackages = [pkgs.git];
+    etc.gitconfig.text = ''
+      [safe]
+          directory = /home/jules/000_dev/000_nix/julsomflake
+          directory = /home/jules/000_dev/000_nix/newsomvim
+          directory = /home/jules/000_dev/000_nix/packages
+          directory = /home/jules/000_dev/000_nix/nvf-source
+    '';
+  };
   local = {
     home.programs = {
       gh = enabled' {
@@ -16,12 +26,16 @@ in {
           "git.nixfox.ca" = {
             user = "Jules";
           };
+          "git.estradiol.ca" = {
+            user = "jules";
+          };
         };
         gitCredentialHelper = enabled' {
           hosts = [
             "https://github.com"
             "https://gist.github.com"
             "https://git.nixfox.ca"
+            "https://git.estradiol.ca"
           ];
         };
       };
@@ -45,9 +59,9 @@ in {
         ];
 
         signing = {
-          key = "~/.ssh/id_ed25519";
+          key = "/home/jules/.ssh/id_ed25519.pub";
           signByDefault = true;
-          format = null;
+          format = "ssh";
         };
 
         settings.gpg.format = "ssh";
@@ -62,7 +76,7 @@ in {
               };
               commit.gpgsign = true;
               gpg.format = "ssh";
-              user.signingkey = "~/.ssh/id_ed25519";
+              user.signingkey = "/home/jules/.ssh/id_ed25519.pub";
             };
           }
           {
@@ -74,7 +88,7 @@ in {
               };
               commit.gpgsign = true;
               gpg.format = "ssh";
-              user.signingkey = "~/.ssh/id_ed25519";
+              user.signingkey = "/home/jules/.ssh/id_ed25519.pub";
             };
           }
         ];

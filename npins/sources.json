@@ -9,9 +9,9 @@
       },
       "branch": "main",
       "submodules": false,
-      "revision": "c03051f67e84110fbae91ab7cbc377b3460f035c",
-      "url": "https://github.com/eza-community/eza-themes/archive/c03051f67e84110fbae91ab7cbc377b3460f035c.tar.gz",
-      "hash": "1kd60fnwd8vh6jvkyz48rk5bs12a2g7yy6b3qbj7i1p0vwgvnh58"
+      "revision": "add4c72c546992b8db674d6d3eea315bf2111b9a",
+      "url": "https://github.com/eza-community/eza-themes/archive/add4c72c546992b8db674d6d3eea315bf2111b9a.tar.gz",
+      "hash": "sha256-toqj3bv2kCC2FHbGfeFpS3g9DoxQeZ7cwPYVpD8cfgg="
     },
     "fish_rose-pine": {
       "type": "Git",
@@ -22,9 +22,9 @@
       },
       "branch": "main",
       "submodules": false,
-      "revision": "0749331afd4be6bc8035a812a20e489efe1d616f",
-      "url": "https://github.com/rose-pine/fish/archive/0749331afd4be6bc8035a812a20e489efe1d616f.tar.gz",
-      "hash": "0gda1vf18ba0qxv42sqwf7azqkd0ksdg7baddgsqach8vld2rrw4"
+      "revision": "127a990e5ad4688118c950123787fb0686afa4c8",
+      "url": "https://github.com/rose-pine/fish/archive/127a990e5ad4688118c950123787fb0686afa4c8.tar.gz",
+      "hash": "sha256-3heI6nhItw5WfKGQT1FRQKfv+lONyn+DzwYjYqJjzLE="
     },
     "mako_rose-pine": {
       "type": "Git",
@@ -37,7 +37,7 @@
       "submodules": false,
       "revision": "12f7814de6a485ecc373933cc04bb2b13b23e491",
       "url": "https://github.com/rose-pine/mako/archive/12f7814de6a485ecc373933cc04bb2b13b23e491.tar.gz",
-      "hash": "1k6l1kdrzv7dpcwfrkcjj8c8kfwcfjc0w754lvxan2436fbiac70"
+      "hash": "sha256-4DAVlzODCKv6pqQcDph0jLuJGJKSzew4u+3sn9sM1Mw="
     },
     "rose-pine-fuzzel": {
       "type": "Git",
@@ -50,7 +50,7 @@
       "submodules": false,
       "revision": "4f6702c5e6922743be1c979cd3f4e55c7d8f6a8f",
       "url": "https://github.com/bomgar/rose-pine-fuzzel/archive/4f6702c5e6922743be1c979cd3f4e55c7d8f6a8f.tar.gz",
-      "hash": "0mvapdry6d6zbn782xlqlk3lrz7wxax4nh01zli9hj2nrm8a1f1r"
+      "hash": "sha256-ObigUM1WSJgi/QFAS7rq/PxMx6SYdoGOXd8043O7alc="
     },
     "starship_catppuccin": {
       "type": "Git",
@@ -63,7 +63,7 @@
       "submodules": false,
       "revision": "5906cc369dd8207e063c0e6e2d27bd0c0b567cb8",
       "url": "https://github.com/catppuccin/starship/archive/5906cc369dd8207e063c0e6e2d27bd0c0b567cb8.tar.gz",
-      "hash": "0j3bc9caf6ayg7m8s0hshypgqiiy8bm9kakxwa5ackk955nf7c8l"
+      "hash": "sha256-FLHjbClpTqaK4n2qmepCPkb8rocaAo3qeV4Zp1hia0g="
     },
     "starship_rose-pine": {
       "type": "Git",
@@ -76,8 +76,8 @@
       "submodules": false,
       "revision": "0edc3c781f219565453bbb8e8e7af56ebc2a0d8a",
       "url": "https://github.com/rose-pine/starship/archive/0edc3c781f219565453bbb8e8e7af56ebc2a0d8a.tar.gz",
-      "hash": "1v6l3cpxq0avyzc31vplahy2fh5jvkjsqsimawq26p4g46gvpfmg"
+      "hash": "sha256-r7q7nyGPXCMwVzVqrOXcskAnPFT07jDY91sB3C8b1Ow="
     }
   },
-  "version": 5
+  "version": 8
 }

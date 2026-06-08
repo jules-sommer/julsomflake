@@ -3,11 +3,11 @@
   pkgs,
   ...
 }: let
-  inherit (lib) enableShellIntegrations enabled' getBinary;
+  inherit (lib) enableShellIntegrations enabled' getExe;
 
-  eww-niri-workspaces = getBinary pkgs.julespkgs.eww-niri-workspaces;
-  jq = getBinary pkgs.jq;
-  bash = getBinary pkgs.bash;
+  eww-niri-workspaces = getExe pkgs.julespkgs.eww-niri-workspaces;
+  jq = getExe pkgs.jq;
+  bash = getExe pkgs.bash;
 
   configDir = pkgs.runCommand "eww-config" {} ''
     mkdir -p $out/scripts

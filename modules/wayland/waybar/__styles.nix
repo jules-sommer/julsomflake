@@ -3,24 +3,14 @@
   theme,
   config,
 }: let
-  inherit (lib) concatStringsSep mkAfter mapAttrsToList;
+  inherit (lib) concatStringsSep mkAfter;
   makeBackgroundRgba = values: "rgba(${concatStringsSep "," (values |> map (i: toString i))})";
-
-  niriNamedWorkspaces = config.home.programs.niri.settings.workspaces;
-  namedWorkspaceHideIndexRules = workspaces:
-    workspaces
-    |> mapAttrsToList (name: _: ''
-      #workspaces button#niri-workspace-${name} span.index {
-        display: none;
-      }
-    '')
-    |> concatStringsSep "\n";
 in
   {
     font-family ? "JetBrainsMono Nerd Font",
     font-size ? "14px",
     font-weight ? 600,
-    background ? [17 17 26 0.95],
+    background ? [17 17 26 0.6],
     shadow ? [
       "rgba(100, 100, 111, 0.2) 0px 7px 29px 0px"
     ],

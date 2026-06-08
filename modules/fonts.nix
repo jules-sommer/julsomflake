@@ -8,6 +8,10 @@
   inherit (lib) concatLists types mkOption genAttrs;
 in {
   local.ui.fonts = {
+    subpixel = "bgr";
+    hinting = enabled' {
+      style = "full";
+    };
     packages = concatLists [
       (with pkgs.nerd-fonts; [
         jetbrains-mono
@@ -49,7 +53,7 @@ in {
     sizes = {
       applications = 16;
       popups = 16;
-      terminal = 16;
+      terminal = 14;
       desktop = 16;
     };
   };

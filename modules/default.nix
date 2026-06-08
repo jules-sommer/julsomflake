@@ -91,6 +91,7 @@ in {
     home-manager = {
       sharedModules = with inputs;
         [
+          noctalia.homeModules.default
           agenix.homeManagerModules.default
         ]
         ++ config.local.homePackages

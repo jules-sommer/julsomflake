@@ -4,7 +4,7 @@
   packages,
   ...
 }: let
-  inherit (lib) mkForce concatStringsSep getBinary enabled';
+  inherit (lib) mkForce concatStringsSep getExe enabled';
   inherit (builtins) readFile;
   inherit (packages) themes_rose-pine_mako;
 
@@ -24,7 +24,7 @@ in {
       border-radius = 4;
 
       on-notify = "exec ${pkgs.mpv}/bin/mpv ${pkgs.kdePackages.ocean-sound-theme}/share/sounds/ocean/stereo/message-highlight.oga";
-      # on-button-left = "exec ${getBinary focus-notification-source-script} $id";
+      # on-button-left = "exec ${getExe focus-notification-source-script} $id";
     };
 
     extraConfig = concatStringsSep "\n" [

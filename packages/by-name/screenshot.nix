@@ -11,11 +11,13 @@ writeShellApplication {
     coreutils
     libnotify
     xdg-user-dirs
+    satty
   ];
   text = ''
     set -euo pipefail
 
     dir="''${SCREENSHOT_DIR:-}"
+    edit=0
 
     while [ $# -gt 0 ]; do
       case "$1" in
@@ -24,8 +26,12 @@ writeShellApplication {
           dir="''${1:-}"
           shift || true
           ;;
+        --edit)
+          edit=1
+          shift
+          ;;
         *)
-          echo "usage: screenshot [--dir DIR]" >&2
+          echo "usage: screenshot [--dir DIR] [--edit]" >&2
           exit 2
           ;;
       esac
@@ -42,7 +48,20 @@ writeShellApplication {
     mkdir -p "$dir"
     file="$dir/$(date +%Y-%m-%d_%H-%M-%S).png"
 
-    grim -g "$(slurp -d)" - | tee "$file" | wl-copy -t image/png
-    notify-send "Saved screenshot to $file"
+    if [ "$edit" -eq 1 ]; then
+      grim -g "$(slurp -d)" - \
+        | satty \
+            --filename - \
+            --output-filename "$file" \
+            --copy-command "wl-copy -t image/png" \
+            --actions-on-enter save-to-file,save-to-clipboard \
+            --early-exit
+      if [ -f "$file" ]; then
+        notify-send "Saved screenshot to $file"
+      fi
+    else
+      grim -g "$(slurp -d)" - | tee "$file" | wl-copy -t image/png
+      notify-send "Saved screenshot to $file"
+    fi
   '';
 }

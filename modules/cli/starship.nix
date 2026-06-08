@@ -6,7 +6,7 @@
   cfg = config.local.cli.starship;
   inherit (lib) concatStrings mkIf foldl' recursiveUpdate mkEnableOpt enabled' defaultShellIntegrations;
 in {
-  options.local.cli.starship = mkEnableOpt "Enable starship shell prompt.";
+  options.local.cli.starship = mkEnableOpt "starship";
 
   config.local.home.programs.starship =
     mkIf cfg.enable (enabled' {

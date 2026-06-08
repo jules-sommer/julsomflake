@@ -18,23 +18,44 @@
   cfg = config.local.terminal.kitty;
   notify-send = lib.getExe' pkgs.libnotify "notify-send";
   wl-copy = lib.getExe' pkgs.wl-clipboard "wl-copy";
+
+  yank-last-output = pkgs.writeShellScriptBin "yank-last-output" ''
+    content=$(cat)
+    if [ -z "$content" ]; then
+      content=$(${lib.getExe' pkgs.wl-clipboard "wl-paste"} --primary --no-newline)
+    fi
+    printf '%s' "$content" | ${wl-copy}
+    preview=$(printf '%s' "$content" | head -c 120 | tr '\n' ' ')
+    ${notify-send} -t 2000 "kitty" "Yanked: $preview"
+  '';
+
+  fzf-yank-scrollback = pkgs.writeShellScriptBin "fzf-yank-scrollback" ''
+    content=$(${lib.getExe pkgs.kitty} @ --to "$KITTY_LISTEN_ON" get-text \
+      --match "id:$KITTY_WINDOW_ID" \
+      --extent all)
+
+    selected=$(printf '%s' "$content" \
+      | ${lib.getExe' pkgs.gawk "awk"} \
+          '/❯/{if(block)printf "%s\0",block; block=$0; next} {block=block"\n"$0} END{if(block)printf "%s\0",block}' \
+      | ${lib.getExe pkgs.fzf} --read0 --print0 --tac --no-multi \
+      | tr -d '\0')
+
+    if [ -n "$selected" ]; then
+      printf '%s' "$selected" | ${wl-copy}
+      preview=$(printf '%s' "$selected" | head -c 120 | tr '\n' ' ')
+      ${notify-send} -t 2000 "kitty" "Yanked: $preview"
+    fi
+  '';
 in {
   local.home.programs.kitty = enabledPred cfg.enable {
     package = pkgs.kitty;
-    # font = lib.mkDefault {
-    #   name = config.local.ui.fonts.defaults.monospace.name;
-    #   package = config.local.ui.fonts.defaults.monospace.package;
-    #   size = config.local.ui.fonts.sizes.terminal;
-    # };
-    environment = {
-      KITTY_ENABLE_WAYLAND = "1";
-    };
+    environment.KITTY_ENABLE_WAYLAND = "1";
     enableGitIntegration = true;
-    shellIntegration = {
-      mode = "enabled";
-      enableFishIntegration = true;
-      enableZshIntegration = true;
-    };
+    shellIntegration =
+      {
+        mode = "enabled";
+      }
+      // lib.defaultShellIntegrations;
     keybindings = {
       "alt+1" = "goto_tab 1";
       "alt+2" = "goto_tab 2";
@@ -55,7 +76,8 @@ in {
       "ctrl+equal" = "change_font_size all +2.0";
       "ctrl+minus" = "change_font_size all -2.0";
 
-      "kitty_mod+y" = "launch --type=background --stdin-source=@last_cmd_output ${wl-copy} && ${notify-send} -t 1000 \"kitty\" \"Yanked last output.\"";
+      "ctrl+y" = "launch --type=background --stdin-source=@last_cmd_output ${lib.getExe yank-last-output}";
+      "ctrl+shift+y" = "launch --type=background ${lib.getExe fzf-yank-scrollback}";
     };
     settings = {
       disable_ligatures = "never";
@@ -69,14 +91,14 @@ in {
       mouse_hide_wait = 60;
       tab_bar_edge = "bottom";
       allow_remote_control = "yes";
-      listen_on = "unix:/tmp/kitty";
+      listen_on = "unix:/tmp/kitty-{kitty_pid}";
       tab_bar_style = "slant";
       tab_bar_margin_width = 1;
       tab_bar_margin_height = "1.0 1.0";
       scrollback_lines = 15000;
       copy_on_select = "yes";
-      background_blur = lib.mkForce 50;
-      background_opacity = lib.mkForce 0.9;
+      background_blur = lib.mkForce 20;
+      # background_opacity = lib.mkForce 0.9;
     };
   };
 }

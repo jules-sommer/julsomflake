@@ -1,128 +1,66 @@
 {lib, ...}: let
-  inherit (lib) typeOf replaceStrings stringLength concatMap concatStringsSep attrNames isString isList mapAttrsToList foldl';
-  strings = import ./strings.nix {inherit lib;};
-  inherit (strings) splitOnWhitespace;
-
-  dashify = k: replaceStrings ["_"] ["-"] k;
-
-  flagTokens = k: v: let
-    name = dashify k;
-    flag =
-      (
-        if stringLength name == 1
-        then "-"
-        else "--"
-      )
-      + name;
-    vt = typeOf v;
-  in
-    if vt == "null" || (vt == "bool" && v == false)
-    then []
-    else if vt == "bool" && v == true
-    then [flag]
-    else if vt == "list"
-    then
-      concatMap (
-        vv: let
-          vvt = typeOf vv;
-        in
-          if vvt == "null" || (vvt == "bool" && vv == false)
-          then []
-          else if vvt == "bool" && vv == true
-          then [flag]
-          else [flag] ++ [(toString vv)]
-      )
-      v
-    else [flag] ++ [(toString v)];
+  inherit (lib) typeOf concatMap concatStringsSep mapAttrsToList;
 
   flatten = x: let
     t = typeOf x;
   in
     if t == "list"
     then concatMap flatten x
-    else if t == "set"
-    then concatMap (k: flagTokens k x.${k}) (attrNames x)
     else if t == "null"
     then []
     else [(toString x)];
-
-  cmdList = parts: flatten parts;
-  cmd = parts: concatStringsSep " " (cmdList parts);
 in rec {
-  inherit cmd cmdList;
+  /**
+  Flattens a nested list/string/null structure into a flat list of string tokens.
+  Nulls are dropped; all other values are coerced to strings.
+  */
+  cmdList = parts: flatten parts;
 
-  spawn = spawnWithOptions {};
+  /**
+  Like `cmdList` but joins the tokens into a single space-separated command string.
+  */
+  cmdString = parts: concatStringsSep " " (cmdList parts);
+  cmd = cmdString;
 
-  spawnWithoutShell = spawnWithOptions {use-shell = false;};
+  /**
+  Creates a curried command builder with pre-applied fixed tokens.
+  `fixed` is a list of the binary and any arguments that are always present.
+  The returned function accepts a list of additional arguments and returns a string.
 
-  # builds a command string using `cmd` to spawn the provided
-  # command/binary, optionally passes the provided command through
-  # a shell, i.e `fish -c`, for cmd substitution and such. The
-  # option `use-shell` configures this behaviour.
-  spawnWithOptions = {
-    use-shell ? true,
-    shell ? ["fish" "-c"],
+  Example:
+    sudoLs = mkCmd [(getExe pkgs.sudo) "ls"];
+    sudoLs ["-la" "/etc"]  =>  "sudo ls -la /etc"
+  */
+  mkCmd = fixed: args: cmdString (fixed ++ args);
+
+  /**
+  Like `mkCmd` but returns a token list instead of a string.
+  Use for compositors that accept commands as lists (e.g. niri `action.spawn`).
+  */
+  mkListCmd = fixed: args: cmdList (fixed ++ args);
+
+  /**
+  Wraps a command in a shell invocation, defaulting to `fish -c`.
+  Useful when shell features like env var substitution are needed
+  and the consumer doesn't provide its own shell execution.
+  */
+  withShell = {shell ? ["fish" "-c"]}: parts:
+    cmdString (shell ++ [cmdString parts]);
+
+  /**
+  Produces a quoted spawn command for compositors that require it (e.g. river).
+  `prefix` controls the leading tokens; `env` injects `KEY=value` pairs before the command.
+
+  Default:            spawn "bin arg..."
+  prefix-riverctl:    riverctl spawn "bin arg..."
+  with env:           spawn "KEY=val bin arg..."
+  */
+  quotedSpawn = {
     env ? {},
-    as-list ? false,
-  }: command: let
-    commandIsString = isString command;
-    commandIsList = isList command;
-    shellCmd =
-      if use-shell
-      then shell
-      else [];
-
-    envVars = env |> mapAttrsToList (k: v: ["${k}=${toString v}"]);
-
-    parts = foldl' (acc: elem: acc ++ elem) [] [
-      envVars
-      shellCmd
-      (
-        if commandIsString
-        then (splitOnWhitespace command)
-        else if commandIsList
-        then command
-        else throw "`spawn` only accepts commands of type `string` or `list`, instead got: ${typeOf command}."
-      )
-    ];
+    prefix ? ["spawn"],
+  }: parts: let
+    envTokens = env |> mapAttrsToList (k: v: "${k}=${toString v}");
+    inner = cmdString (envTokens ++ flatten parts);
   in
-    if as-list
-    then cmdList parts
-    else cmd parts;
-
-  niriSpawn = cmd-list:
-    spawnWithOptions {as-list = true;} cmd-list;
-
-  niriSpawnWithOptions = opts: cmd-list:
-    spawnWithOptions (opts // {as-list = true;}) cmd-list;
-
-  riverSpawnDefault = riverSpawnWithOptions {};
-  riverSpawnWithEnv = env: riverSpawnWithOptions {inherit env;};
-  riverSpawnWithOptions = {
-    prefix-riverctl ? false,
-    env ? {},
-  }: command: let
-    commandIsString = isString command;
-    commandIsList = isList command;
-    envVars = env |> mapAttrsToList (k: v: ["${k}=${toString v}"]);
-    prefix =
-      if prefix-riverctl
-      then ["riverctl" "spawn"]
-      else ["spawn"];
-  in
-    cmd (foldl' (acc: elem: acc ++ elem) [] [
-      prefix
-      [
-        "\""
-        envVars
-        (
-          if commandIsString
-          then (splitOnWhitespace command)
-          else if commandIsList
-          then command
-          else throw "`spawn` only accepts commands of type `string` or `list`, instead got: ${typeOf command}."
-        )
-        "\""
-      ]
-    ]);
+    cmdString (prefix ++ ["\"${inner}\""]);
 }

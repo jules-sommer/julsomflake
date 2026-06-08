@@ -12,9 +12,9 @@
   cfg = config.local.programs;
 in {
   options.local.programs = {
-    okular = mkEnableOpt "Enable Okular PDF editor.";
-    masterpdf = mkEnableOpt "Enable Master PDF Editor, supports XFA forms.";
-    libreoffice = mkEnableOpt "Enable LibreOffice.";
+    okular = mkEnableOpt "okular";
+    masterpdf = mkEnableOpt "masterpdfeditor";
+    libreoffice = mkEnableOpt "libreoffice";
   };
 
   config = mkIf (cfg.okular.enable || cfg.libreoffice.enable) {

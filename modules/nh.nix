@@ -3,7 +3,7 @@
   src,
   ...
 }: let
-  inherit (lib) enabled' cmd;
+  inherit (lib) enabled';
   inherit (builtins) toString;
 in {
   local.home.programs.nh = enabled' {
@@ -11,10 +11,7 @@ in {
     clean = {
       enable = true;
       dates = "weekly";
-      extraArgs = cmd {
-        keep = 5;
-        keep-since = "3d";
-      };
+      extraArgs = "--keep 5 --keep-since 3d";
     };
   };
 }

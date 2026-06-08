@@ -19,7 +19,10 @@
     then lib.strings.hasPrefix prefix str
     else throw "str param, `${str}`, must be string-like, either a path or string.";
 
+  hasExcludePrefix = x: hasDotPrefix x || hasTildePrefix x || hasUnderscorePrefix x;
+
   hasUnderscorePrefix = stringLikeHasPrefix "_";
+  hasTildePrefix = stringLikeHasPrefix "~";
   hasDotPrefix = stringLikeHasPrefix ".";
 in
   dir: {
@@ -70,8 +73,7 @@ in
           # don't include the default.nix that is calling this function @ depth == 0
           (n == "default.nix" && kind == "regular" && depth == 0)
           # underscore prefix excludes files
-          || hasDotPrefix n
-          || hasUnderscorePrefix n
+          || hasExcludePrefix n
           # ignore non .nix files
           || (kind == "regular" && !(hasSuffix ".nix" n))
           || listContainsEntry blacklist depth n kind

@@ -3,4 +3,6 @@
 in {
   splitOnWhitespace = str:
     replaceStrings ["\n" "\r" "\t"] [" " " " " "] str |> splitString " " |> filter (x: x != "");
+
+  concatStringsNewline = lib.concatStringsSep "\n";
 }

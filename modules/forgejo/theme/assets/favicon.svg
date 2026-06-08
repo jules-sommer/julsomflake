@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="27.736666mm"
+   height="27.73667mm"
+   viewBox="0 0 27.736666 27.73667"
+   version="1.1"
+   id="svg1"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1">
+    <mask
+       maskUnits="userSpaceOnUse"
+       id="mask-powermask-path-effect18">
+      <path
+         id="mask-powermask-path-effect18_box"
+         style="fill:#ffffff;fill-opacity:1"
+         d="m 56.466437,100.34627 h 29.736666 v 29.73667 H 56.466437 Z" />
+      <path
+         style="font-weight:bold;font-size:223.867px;line-height:1.5em;font-family:Viga;-inkscape-font-specification:'Viga Bold';text-align:center;letter-spacing:0px;text-anchor:middle;white-space:pre;fill:#000000;stroke-width:0.464712;stroke-opacity:0.630326"
+         d="m 77.808054,115.98857 h -9.372186 q 0,2.19529 0.675471,3.2085 0.70362,1.0132 2.786327,1.0132 1.350944,0 1.998274,-0.84434 0.647329,-0.87248 0.647329,-1.66053 h 3.292928 q 0,3.01148 -1.632392,4.41871 -1.604248,1.40724 -4.277995,1.40724 -2.645601,0 -4.109125,-0.75991 -3.011482,-1.54796 -3.011482,-8.21825 0,-3.9684 1.716825,-5.79781 1.716829,-1.85755 5.234914,-1.85755 6.107399,0 6.107399,6.78288 0,0.73176 -0.05629,2.30786 z m -9.287752,-2.50488 h 6.022967 q 0,-1.85755 -0.70362,-2.70189 -0.703617,-0.84434 -2.167141,-0.84434 -1.43538,0 -2.307865,0.87249 -0.844341,0.84434 -0.844341,2.67374 z"
+         id="path18"
+         aria-label="e"
+         display="block" />
+    </mask>
+  </defs>
+  <g
+     id="layer3"
+     transform="translate(-7.652271,-104.84564)">
+    <path
+       id="path8"
+       transform="translate(-49.814166,3.4993726)"
+       clip-path="none"
+       mask="url(#mask-powermask-path-effect18)"
+       d="M 85.203103,115.21461 A 13.868333,13.868333 0 0 1 71.33477,129.08294 13.868333,13.868333 0 0 1 57.466437,115.21461 13.868333,13.868333 0 0 1 71.33477,101.34627 13.868333,13.868333 0 0 1 85.203103,115.21461 Z"
+       style="display:inline;fill:#fa00bb;fill-opacity:1;stroke-width:4.52108;stroke-opacity:0.630326" />
+  </g>
+</svg>

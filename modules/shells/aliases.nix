@@ -84,8 +84,8 @@
     };
   };
 
-  aliases = config.local.shells.settings.aliases;
-  abbrs = config.local.shells.settings.abbreviations;
+  shellAliases = config.local.shells.settings.aliases;
+  shellAbbrs = config.local.shells.settings.abbreviations;
 
   strOnlyAbbrs = mapAttrs (abbr: expansion: (
     if isString expansion
@@ -121,14 +121,11 @@ in {
 
   config.local.home = {
     programs.zsh = {
+      inherit shellAliases;
       zsh-abbr.abbreviations =
-        abbrs
+        shellAbbrs
         |> strOnlyAbbrs;
-      shellAliases = aliases;
     };
-    programs.fish = {
-      shellAbbrs = abbrs;
-      shellAliases = aliases;
-    };
+    programs.fish = {inherit shellAbbrs shellAliases;};
   };
 }

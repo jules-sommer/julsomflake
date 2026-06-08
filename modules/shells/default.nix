@@ -16,8 +16,8 @@ in {
   ];
 
   options.local.shells = {
-    fish = mkEnableOpt "Enable Fish shell.";
-    zsh = mkEnableOpt "Enable Zsh shell.";
+    fish = mkEnableOpt "fish";
+    zsh = mkEnableOpt "zsh";
   };
   config = {
     environment.systemPackages = with pkgs; [

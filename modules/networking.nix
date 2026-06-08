@@ -17,6 +17,11 @@ in {
     group = "root";
   };
 
+  environment.systemPackages = with pkgs; [
+    nmap
+    nmap-formatter
+  ];
+
   local.home.home.packages = with pkgs; [
     protonvpn-gui
   ];
@@ -26,11 +31,15 @@ in {
   };
 
   networking = {
-    firewall = enabled;
+    firewall = enabled' {
+      allowedTCPPorts = [80 443 52371];
+      allowedUDPPorts = [52371];
+    };
     nftables = enabled;
 
     networkmanager = enabled' {
       ensureProfiles = {
+        environmentFiles = [config.age.secrets.wifi-rcmp-surveillance.path];
         profiles = {
           rcmp_surveillance = {
             connection = {
@@ -43,7 +52,7 @@ in {
             };
             wifi-sec = {
               key-mgmt = "sae";
-              psk = "$(<${config.age.secrets.wifi-rcmp-surveillance.path})";
+              psk = "$WIFI_PSK";
             };
             ipv4.method = "auto";
             ipv6.method = "auto";

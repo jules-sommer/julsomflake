@@ -19,12 +19,6 @@ in {
 
       home.programs.fish = enabled' {
         package = pkgs.fish;
-        plugins = [
-          {
-            name = "fish-you-should-use";
-            src = pkgs.fishPlugins.fish-you-should-use;
-          }
-        ];
 
         functions = {
           fish_greeting.body = "";

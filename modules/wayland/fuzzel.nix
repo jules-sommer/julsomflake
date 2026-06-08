@@ -4,7 +4,7 @@
   lib,
   ...
 }: let
-  inherit (lib) enabled' mkForce getBinary;
+  inherit (lib) enabled' mkForce getExe;
 in {
   local.home = {
     home.packages = with pkgs.kdePackages; [breeze-icons];
@@ -23,7 +23,7 @@ in {
           vertical-pad = 20;
           horizontal-pad = 32;
           dpi-aware = "no";
-          terminal = getBinary pkgs.kitty;
+          terminal = getExe pkgs.kitty;
           layer = "overlay";
         };
 

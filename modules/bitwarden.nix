@@ -8,14 +8,15 @@
   cfg = config.local.bitwarden;
 in {
   options.local.bitwarden =
-    mkEnableOpt "Enable Bitwarden with desktop, CLI, and rofi integration.";
+    mkEnableOpt "bitwarden";
 
   config = mkIf cfg.enable {
+    nixpkgs.config.permittedInsecurePackages = ["electron-39.8.10"];
     environment.systemPackages = with pkgs; [bitwarden-cli];
     local.home = {
       programs.rbw = enabled' {
         settings = {
-          email = "rcsrc@pm.me";
+          email = "jsomme@pm.me";
         };
       };
       home.packages = with pkgs; [

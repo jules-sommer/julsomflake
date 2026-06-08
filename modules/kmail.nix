@@ -7,7 +7,7 @@
   inherit (lib) mkEnableOpt mkIf;
   cfg = config.local.programs.kmail;
 in {
-  options.local.programs.kmail = mkEnableOpt "Enable KMail from kdePackages.";
+  options.local.programs.kmail = mkEnableOpt "kmail";
 
   config.environment.systemPackages = with pkgs.kdePackages; (mkIf cfg.enable [
     kmail

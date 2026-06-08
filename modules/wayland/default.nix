@@ -24,12 +24,12 @@
   cfg = config.local.wayland;
 
   mkSessionCommand = compositor:
-    writeShellScriptBin "wayland-session-${compositor}" ''
+    getExe (writeShellScriptBin "wayland-session-${compositor}" ''
       export XDG_SESSION_TYPE=wayland
       export XDG_CURRENT_DESKTOP=${compositor}
 
       exec ${compositor}
-    '';
+    '');
 
   niriSession = writeShellScriptBin "wayland-session-niri" ''
     export XDG_SESSION_TYPE=wayland
@@ -38,7 +38,7 @@
 
   defaultSession =
     if cfg.activeCompositor == "niri"
-    then niriSession
+    then getExe' pkgs.niri "niri-session"
     else if cfg.activeCompositor == "river"
     then mkSessionCommand "river"
     else if cfg.activeCompositor == "plasma"
@@ -53,6 +53,10 @@ in {
         name = "keys.nix";
         kind = "regular";
         depth = 1;
+      }
+      {
+        name = "eww";
+        kind = "directory";
       }
     ];
   };
@@ -102,7 +106,7 @@ in {
       security.pam.services.greetd.enableGnomeKeyring = true;
       services.greetd = {
         inherit (cfg.login.greetd) enable;
-        settings.default_session.command = "${pkgs.tuigreet}/bin/tuigreet --cmd ${getExe defaultSession}";
+        settings.default_session.command = "${pkgs.tuigreet}/bin/tuigreet --cmd ${defaultSession}";
       };
     }
     {

@@ -111,6 +111,11 @@
     nixpkgs-main.url = "github:nixos/nixpkgs/master";
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-25.11-small";
 
+    noctalia = {
+      url = "github:noctalia-dev/noctalia-shell";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -138,7 +143,7 @@
     utils.url = "github:numtide/flake-utils";
 
     helpers = {
-      url = "/home/jules/000_dev/000_nix/flake-helpers";
+      url = "git+https://git.nixfox.ca/Jules/flake-helpers";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -153,7 +158,14 @@
     };
 
     niri-flake = {
-      url = "/home/jules/000_dev/000_nix/niri-flake";
+      url = "github:jules-sommer/niri-flake/niri-26.04";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.niri-unstable.follows = "niri";
+      inputs.niri-stable.follows = "niri";
+    };
+
+    zen-browser = {
+      url = "github:jules-sommer/zen-flake-version-bump";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

@@ -1,6 +1,7 @@
 {inputs}: let
   inherit (builtins) isFunction;
   getModulesRecursive = import ./getModulesRecursive.nix {inherit (inputs.nixpkgs) lib;};
+  helpers = inputs.helpers.lib;
 
   inherit
     (inputs.nixpkgs.lib)
@@ -16,7 +17,7 @@ in
           [{__extended = true;}]
 
           (with inputs; [
-            helpers
+            {helpers = helpers.lib;}
             {utils = utils.lib;}
             home-manager.lib
             {niri = niri-flake.lib;}
@@ -26,7 +27,11 @@ in
             getModulesRecursive ./. {
               returnNameValuePairs = true;
               importNixFiles = true;
-              importFunction = depth: name: kind: path: import path {inherit (inputs.nixpkgs) lib;};
+              importFunction = depth: name: kind: path:
+                import path {
+                  inherit (inputs.nixpkgs) lib;
+                  inherit helpers;
+                };
             }
             |> map (
               {

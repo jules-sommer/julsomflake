@@ -36,7 +36,8 @@ in {
     };
 
     programs = {
-      kmail = disabled;
+      # kmail = disabled;
+      kmail = enabled;
       libreoffice = enabled;
       masterpdf = enabled;
       okular = enabled;
@@ -48,7 +49,6 @@ in {
     };
 
     stylix = enabled;
-    gaming = enabled;
     development = enabled;
     bitwarden = enabled;
 
@@ -57,20 +57,14 @@ in {
       signal = true;
     };
 
-    kernel.xanmod = enabled' {
-      zfs.enable = false;
+    gaming = enabled' {
+      steam = enabled' {
+        proton = enabled;
+      };
     };
 
-    home = {
-      programs = {
-        rbw = enabled' {
-          settings = {
-            email = "rcsrc@pm.me";
-          };
-        };
-      };
-
-      home.sessionVariables = {
+    home.home = {
+      sessionVariables = {
         NIXOS_FLAKE_DIR = "/home/jules/000_dev/000_nix/julsomflake";
         QMK_HOME = "/home/jules/000_dev/090_qmk/qmk_firmware";
         EDITOR = "nvim";
@@ -81,10 +75,10 @@ in {
         TERMINAL = "kitty";
       };
 
-      home.stateVersion = "24.11";
-
-      home.packages = with pkgs; [
+      stateVersion = "24.11";
+      packages = with pkgs; [
         helium
+        oklch-color-picker
         gimp-with-plugins
         julespkgs.screenshot
       ];
@@ -127,28 +121,8 @@ in {
     };
   };
 
-  # xdg = {
-  #   icons = enabled;
-  #   mime = enabled' {
-  #     defaultApplications = {
-  #       "x-scheme-handler/http" = ["zen.desktop"];
-  #       "x-scheme-handler/https" = ["zen.desktop"];
-  #       "image/*" = ["imv.desktop"];
-  #       "video/*" = ["mpv.desktop"];
-  #       "application/pdf" = ["okular.desktop"];
-  #       "text/*" = ["nvim.desktop"];
-  #     };
-  #   };
-  # };
-
   services = {
     gvfs = enabled;
-    protonmail-bridge = {
-      enable = true;
-      path = with pkgs; [
-        pass
-      ];
-    };
   };
 
   networking = {

@@ -96,6 +96,12 @@ in {
         matches = [{namespace = "^wallpaper$";}];
         place-within-backdrop = true;
       }
+      {
+        matches = [{namespace = "^waybar$";}];
+        background-effect = {
+          blur = true;
+        };
+      }
     ];
 
     window-rules = [
@@ -104,6 +110,17 @@ in {
         geometry-corner-radius = genAttrs ["bottom-left" "bottom-right" "top-left" "top-right"] (_: 6.0);
         clip-to-geometry = true;
         opacity = 1.0;
+        background-effect = {
+          blur = true;
+        };
+      }
+      {
+        matches = [
+          {
+            app-id = "org.kde.plasma.emojier";
+          }
+        ];
+        open-floating = true;
       }
       {
         matches = [
@@ -168,6 +185,9 @@ in {
         matches = [{is-focused = false;}];
         excludes = [{is-active-in-column = true;}];
         opacity = 0.80;
+        background-effect = {
+          blur = true;
+        };
       }
 
       {

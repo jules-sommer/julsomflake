@@ -9,9 +9,9 @@
   cfg = config.local.kernel.xanmod;
 in {
   options.local.kernel.xanmod = {
-    enable = mkEnableOption "Enable xanmod kernel configuration module.";
-    zfs = mkEnableOpt "Enable ZFS kernel modules.";
-    btrfs = mkEnableOpt "Enable btrfs kernel modules.";
+    enable = mkEnableOption "xanmod kernel";
+    zfs = mkEnableOpt "zfs kernel modules";
+    btrfs = mkEnableOpt "btrfs kernel modules";
   };
 
   config = {

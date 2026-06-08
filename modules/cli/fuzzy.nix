@@ -36,7 +36,7 @@ in {
           "--border"
         ];
       }
-      (enableShellIntegrations ["fish" "zsh" "bash"] true)
+      (enableShellIntegrations ["fish" "zsh" "bash"] false)
     ]);
   };
 }

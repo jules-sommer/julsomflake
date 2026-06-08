@@ -6,13 +6,23 @@
   ...
 }: let
   inherit (helpers) enabled';
-  inherit (lib) genAttrs spawn foldl' recursiveUpdate getBinary optionalAttrs optional concat optionals;
+  inherit
+    (lib)
+    genAttrs
+    foldl'
+    recursiveUpdate
+    getExe
+    cmdString
+    optionalAttrs
+    concat
+    optionals
+    ;
 
-  makoctl = getBinary pkgs.mako;
-  fuzzel = getBinary pkgs.fuzzel;
-  playerctl = getBinary pkgs.playerctl;
-  pwvucontrol = getBinary pkgs.pwvucontrol;
-  jq = getBinary pkgs.jq;
+  makoctl = pkgs.mako;
+  fuzzel = getExe pkgs.fuzzel;
+  playerctl = getExe pkgs.playerctl;
+  pwvucontrol = getExe pkgs.pwvucontrol;
+  jq = getExe pkgs.jq;
 
   activeCompositor = config.local.wayland.activeCompositor;
 
@@ -197,10 +207,9 @@ in {
             ];
 
             "custom/notifications" = {
-              exec-if = "command -v ${makoctl}";
-              exec = "makoctl count";
+              exec = cmdString [makoctl "list" "-j" "|" jq "'. | length'"];
               format = {};
-              on-click = "${makoctl} dismiss -a";
+              on-click = cmdString [makoctl "dismiss" "-a"];
               interval = 3;
             };
 
@@ -211,7 +220,7 @@ in {
               ];
               tooltip = false;
               interval = 1600;
-              exec = spawn "${pkgs.julespkgs.pretty-uptime}/bin/pretty-uptime";
+              exec = cmdString "${pkgs.julespkgs.pretty-uptime}/bin/pretty-uptime";
             };
 
             "custom/music" = {

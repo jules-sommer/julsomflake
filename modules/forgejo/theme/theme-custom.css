@@ -1,0 +1,11 @@
+.forgejo, body {
+  --color-body: #000000;
+  --color-box-body: #0a0a0a;
+  --color-nav-bg: #000000;
+  --color-sidebar-bg: #050505;
+  --color-card: #0d0d0d;
+  --color-menu: #000000;
+  --color-input-background: #111111;
+  --color-footer: #000000;
+  --color-timeline-border: #1a1a1a;
+}

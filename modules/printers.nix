@@ -1,13 +1,27 @@
-{lib, ...}: let
+{
+  lib,
+  pkgs,
+  ...
+}: let
   inherit (lib) enabled enabled';
 in {
   services = {
     printing = enabled;
+    saned = enabled;
     avahi = enabled' {
       nssmdns4 = true;
       openFirewall = true;
     };
   };
+
+  hardware.sane = {
+    enable = true;
+    extraBackends = with pkgs; [sane-airscan];
+    openFirewall = true;
+    netConf = lib.concatStringsNewline ["192.168.1.8"];
+  };
+
+  users.users.jules.extraGroups = ["scanner" "lp"];
 
   hardware.printers = {
     ensurePrinters = [

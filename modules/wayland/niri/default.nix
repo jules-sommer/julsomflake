@@ -9,8 +9,10 @@
     enabled'
     disabled
     cmd
+    mkCmd
     mkBefore
     getExe
+    getExe'
     ;
 
   niri-session-init = pkgs.writeShellScriptBin "niri-session-init" ''
@@ -24,7 +26,7 @@
   '';
 
   binaries = {
-    wbg = getExe pkgs.wbg;
+    wbg = mkCmd [(getExe pkgs.wbg)];
     fish = getExe pkgs.fish;
     kitty = getExe pkgs.kitty;
     zen = getExe pkgs.zen-browser;
@@ -36,6 +38,7 @@
     eww = getExe pkgs.eww;
     helium = getExe pkgs.helium;
     xwayland-satellite = getExe pkgs.xwayland-satellite;
+    notify-send = getExe' pkgs.libnotify "notify-send";
   };
 in {
   config = {
@@ -46,6 +49,12 @@ in {
     niri-flake.cache = disabled;
 
     environment.systemPackages = with pkgs; [xwayland-satellite nautilus];
+
+    # NixOS otherwise injects a stripped PATH via Environment= on the niri.service
+    # unit which shadows the imported user-manager PATH. Disabling the default
+    # lets niri inherit the full PATH set up by niri-session.
+    systemd.user.services.niri.enableDefaultPath = false;
+
     local.home.programs.niri = {
       package = pkgs.niri;
       settings = {
@@ -55,17 +64,24 @@ in {
           zoom = 0.5;
         };
 
-        recent-windows = enabled' {
-          binds = {
-            "Mod+Tab".action.next-window = {};
-            "Mod+Shift+Tab".action.previous-window = {};
-            "Mod+grave".action.next-window = {filter = "app-id";};
-            "Mod+Shift+grave".action.previous-window = {filter = "app-id";};
-          };
-        };
+        # recent-windows = enabled' {
+        #   binds = {
+        #     "Mod+Tab".action.next-window = {};
+        #     "Mod+Shift+Tab".action.previous-window = {};
+        #     "Mod+grave".action.next-window = {filter = "app-id";};
+        #     "Mod+Shift+grave".action.previous-window = {filter = "app-id";};
+        #   };
+        # };
 
-        gestures = {
-          hot-corners = disabled;
+        # gestures = {
+        #   hot-corners = disabled;
+        # };
+
+        blur = {
+          passes = 3;
+          offset = 2.0;
+          noise = 0.015;
+          saturation = 1.5;
         };
 
         cursor = {
@@ -83,7 +99,7 @@ in {
           {sh = cmd [legcord];}
           {sh = cmd [signal];}
           {sh = cmd [helium];}
-          {sh = cmd [fish "-c" wbg "-s" "$WALLPAPER"];}
+          {sh = wbg ["-s" "$WALLPAPER"];}
           {sh = cmd [waybar];}
         ];
 

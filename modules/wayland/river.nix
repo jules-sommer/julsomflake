@@ -5,13 +5,13 @@
   ...
 }: let
   inherit (lib.attrsets) recursiveUpdate;
-  inherit (lib) foldl' listToAttrs riverSpawnDefault riverSpawnWithEnv enabled' enabled;
+  inherit (lib) foldl' listToAttrs enabled' enabled mkCmd getExe;
 
   cfg = config.local.wayland;
 
-  home = "/home/jules";
-  wallpaperFile = "${home}/060_media/010_wallpapers/zoe-love-bg/zoe-love-4k.png";
-  screenshotDir = "${home}/060_media/005_screenshots";
+  zen = mkCmd [(getExe pkgs.zen-browser)];
+  screenshot = mkCmd [(getExe pkgs.julespkgs.screenshot)];
+  emoji-picker = mkCmd ["EMOJI_PICKER_MODE=type;" (getExe pkgs.julespkgs.emoji-picker)];
 in {
   config = {
     environment.systemPackages = with pkgs; [
@@ -69,19 +69,11 @@ in {
                 "Super Return" = "spawn ${pkgs.kitty}/bin/kitty";
                 "Super+Shift Return" = "spawn ${pkgs.fuzzel}/bin/fuzzel";
 
-                "Super Z" = riverSpawnDefault "${pkgs.zen-browser}/bin/zen";
+                "Super Z" = zen [];
 
-                "Super S" =
-                  riverSpawnWithEnv {
-                    SCREENSHOT_DIR = screenshotDir;
-                  }
-                  "${pkgs.julespkgs.screenshot}/bin/screenshot";
+                "Super S" = screenshot [];
 
-                "Alt E" =
-                  riverSpawnWithEnv {
-                    EMOJI_PICKER_MODE = "type";
-                  }
-                  "${pkgs.julespkgs.emoji-picker}/bin/emoji-picker";
+                "Alt E" = emoji-picker [];
 
                 "Super C" = "close";
                 "Super+Shift E" = "exit";
@@ -149,7 +141,7 @@ in {
             "${pkgs.kitty}/bin/kitty"
             "rivertile"
             "/home/jules/000_dev/010_zig/river-conf/zig-out/bin/river_conf"
-            "${pkgs.wbg}/bin/wbg \"${wallpaperFile}\""
+
             "river-bnf"
           ];
 
