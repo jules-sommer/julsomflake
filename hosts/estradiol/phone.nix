@@ -19,7 +19,7 @@ in {
         User = "jules";
         ExecStart = pkgs.writeShellScript "phone-backup" ''
           ${simple-mtpfs} /mnt/phone
-          ${rsync} -av --delete /mnt/phone/ /mnt/BACKUPS/jules-S26
+          ${rsync} -av --delete --dry-run --log-file=/home/jules/phone-backup.log /mnt/phone/ /mnt/BACKUPS/jules-S26
           fusermount -u /mnt/phone
         '';
       };

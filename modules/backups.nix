@@ -5,23 +5,16 @@
   src,
   ...
 }: let
-  inherit (lib) enabled' getExe;
+  inherit (lib) enabled' getExe getExe';
 
   rclone = getExe pkgs.rclone;
+  restic-bin = getExe pkgs.restic;
+  jq = getExe pkgs.jq;
+  systemd-inhibit = getExe' pkgs.systemd "systemd-inhibit";
+  sleep = getExe' pkgs.coreutils "sleep";
+  curl = getExe pkgs.curl;
 
   estradiol-backups-s3-bucket = "estradiol-backups-476443350685-ca-central-1-an";
-
-  backupCleanupCommand = restic-repo: s3-bucket:
-    (pkgs.writeShellScript "rclone-s3-mirror" ''
-      if [ "$SERVICE_RESULT" != "success" ]; then
-        echo "restic exited with $SERVICE_RESULT, skipping S3 mirror"
-        exit 0
-      fi
-      ${rclone} copy ${restic-repo} s3backup:${s3-bucket} \
-        --s3-storage-class DEEP_ARCHIVE \
-        --log-level INFO
-    '')
-    |> toString;
 
   commonExcludes = [
     "**/.cache/"
@@ -64,11 +57,102 @@ in {
     RESTIC_PASSWORD_FILE = config.age.secrets.restic-password.path;
   };
 
-  systemd.services."restic-backups-home" = {
-    serviceConfig.EnvironmentFile = config.age.secrets.rclone-s3.path;
+  users = {
+    groups.backup = {};
+    users.jules.extraGroups = ["backup"];
   };
 
-  environment.systemPackages = with pkgs; [restic restic-browser backrest];
+  systemd = {
+    tmpfiles.rules = [
+      "d /mnt/BACKUPS/restic-repo 2750 root backup -"
+    ];
+
+    timers.restic-staleness = {
+      wantedBy = ["timers.target"];
+      timerConfig = {
+        OnCalendar = "daily";
+        Persistent = true;
+      };
+    };
+
+    services = {
+      restic-s3-mirror = {
+        unitConfig.OnFailure = ["notify-failure@restic-s3-mirror.service"];
+        serviceConfig = {
+          Type = "oneshot";
+          EnvironmentFile = config.age.secrets.rclone-s3.path;
+          TimeoutStartSec = "infinity";
+        };
+        script = ''
+          ${systemd-inhibit} --what=sleep --who=restic \
+            --why="s3 mirror in progress" --mode=block \
+            ${rclone} copy /mnt/BACKUPS/restic-repo s3backup:${estradiol-backups-s3-bucket} \
+              --s3-storage-class DEEP_ARCHIVE \
+              --log-level INFO
+        '';
+      };
+
+      "notify-failure@" = {
+        serviceConfig = {
+          Type = "oneshot";
+          EnvironmentFile = config.age.secrets.ntfy-token.path;
+        };
+        scriptArgs = "%i";
+        script = ''
+          ${curl} -H "Authorization: Bearer $NTFY_TOKEN" \
+            -d "$1 failed on ${config.networking.hostName}" \
+            https://ntfy.julsom.link/backups
+        '';
+      };
+
+      restic-sleep-inhibit = {
+        description = "hold a sleep inhibitor while restic-backups-home runs";
+        bindsTo = ["restic-backups-home.service"];
+        before = ["restic-backups-home.service"];
+        serviceConfig = {
+          Type = "simple";
+          ExecStart = ''
+            ${systemd-inhibit} --what=sleep --who=restic \
+              --why="backup in progress" --mode=block \
+              ${sleep} infinity
+          '';
+        };
+      };
+
+      restic-backups-home = {
+        serviceConfig.UMask = "0027";
+        unitConfig = {
+          OnFailure = ["notify-failure@restic-backups-home.service"];
+          OnSuccess = ["restic-s3-mirror.service"];
+        };
+      };
+
+      restic-staleness = {
+        serviceConfig.Type = "oneshot";
+        serviceConfig.User = "jules";
+        environment = {
+          RESTIC_REPOSITORY = "/mnt/BACKUPS/restic-repo";
+          RESTIC_PASSWORD_FILE = config.age.secrets.restic-password.path;
+        };
+        script = ''
+          latest=$(${restic-bin} snapshots --json --latest 1 \
+            | ${jq} -r '.[0].time // empty')
+          if [ -z "$latest" ]; then
+            ${curl} -d "no restic snapshots on ${config.networking.hostName}" \
+              https://ntfy.julsom.link/backups
+            exit 0
+          fi
+          age=$(( ($(date +%s) - $(date -d "$latest" +%s)) / 86400 ))
+          if [ "$age" -gt 20 ]; then
+            ${curl} -d "restic backup is $age days old on ${config.networking.hostName}" \
+              https://ntfy.julsom.link/backups
+          fi
+        '';
+      };
+    };
+  };
+
+  environment.systemPackages = with pkgs; [restic restic-browser backrest awscli2];
 
   services.restic = {
     server = enabled' {
@@ -83,7 +167,7 @@ in {
         passwordFile = config.age.secrets.restic-password.path;
 
         timerConfig = {
-          OnUnitActiveSec = "14d";
+          OnCalendar = "*-*-01,15 03:00:00";
           Persistent = true;
         };
 
@@ -92,8 +176,6 @@ in {
           "--keep-weekly 4"
           "--keep-monthly 6"
         ];
-
-        backupCleanupCommand = backupCleanupCommand repository estradiol-backups-s3-bucket;
 
         exclude =
           [

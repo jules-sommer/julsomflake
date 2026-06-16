@@ -3,7 +3,7 @@
   pkgs,
   ...
 }: let
-  inherit (lib) enableShellIntegrations enabled' foldl' recursiveUpdate enabled;
+  inherit (lib) enableShellIntegrations enabled' foldl' recursiveUpdate enabled getExe;
 in {
   local = {
     shells.aliases = {
@@ -11,7 +11,10 @@ in {
       brw = "broot -whips";
     };
 
-    home.programs.broot = foldl' recursiveUpdate {} [
+    home.programs.broot = let
+      tar = getExe pkgs.gnutar;
+      nvim = getExe pkgs.neovim;
+    in (foldl' recursiveUpdate {} [
       enabled
       (enableShellIntegrations ["bash" "fish" "zsh"] true)
       {
@@ -22,7 +25,13 @@ in {
               invocation = "nvim";
               shortcut = "e";
               key = "ctrl-e";
-              execution = "${pkgs.neovim}/bin/nvim {file}";
+              execution = "${nvim} {file}";
+            }
+            {
+              invocation = "list";
+              shortcut = "ls";
+              execution = "${tar} -tvf {file-name}";
+              from_shell = true;
             }
             {
               invocation = "archive_named {name}";
@@ -72,6 +81,6 @@ in {
           ];
         };
       }
-    ];
+    ]);
   };
 }

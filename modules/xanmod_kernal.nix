@@ -75,6 +75,7 @@ in {
 
         kernel = enabled' {
           sysctl = {
+            "fs.inotify.max_user_watches" = 2097152; # 2 million file watchers in userspace
             "vm.max_map_count" = 2147483642; # Needed For Some Steam Games
             "kernel.perf_event_paranoid" = -1; # needed for tracing/debugging programs like rr
             "kernel.kptr_restrict" = lib.mkForce 0; # transparent ptr addresses for kernel memory

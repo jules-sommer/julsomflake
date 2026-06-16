@@ -34,5 +34,8 @@ in {
   # filebrowser-quantum
   "secrets/filebrowser-quantum.env.age".publicKeys = all;
 
+  # ntfy-sh
+  "secrets/ntfy-token-env.age".publicKeys = all;
+
   "secrets/id_ed25519.age".publicKeys = systems;
 }

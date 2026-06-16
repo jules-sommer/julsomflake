@@ -4,7 +4,9 @@
   config,
   ...
 }: let
-  inherit (lib) enabled' getExe' getExe;
+  inherit (lib) enabled' getExe;
+  swaylock-pkg = config.home.programs.swaylock.package;
+  niri-pkg = config.home.programs.niri.package;
 in {
   security.pam.services.swaylock = {};
   local.home = {
@@ -49,25 +51,39 @@ in {
         separator-color = "eb6f92ff";
       };
     };
+    services.swayidle = let
+      lock = "${getExe swaylock-pkg} --daemonize";
+      display = status: "${getExe niri-pkg} msg action power-${status}-monitors";
 
-    services.swayidle = enabled' {
-      systemdTargets = [config.home.wayland.systemd.target];
-      events = {
-        before-sleep = "${getExe' pkgs.systemd "loginctl"} lock-session";
-        lock = "${getExe' pkgs.systemd "loginctl"} lock-session";
+      minutes = min: min * lib.time.s_per_min;
+    in
+      enabled' {
+        timeouts = [
+          {
+            timeout = 60;
+            command = display "off";
+            resumeCommand = display "on";
+          }
+          {
+            timeout = minutes 15;
+            command = "${pkgs.libnotify}/bin/notify-send 'Locking in 5 seconds' -t ${5 * lib.time.ms_per_s |> toString}";
+          }
+          {
+            timeout = (minutes 15) + 5;
+            command = lock;
+          }
+          {
+            timeout = minutes 30;
+            command = "${pkgs.systemd}/bin/systemctl suspend --check-inhibitors";
+          }
+        ];
+        events = {
+          before-sleep = lock;
+          after-resume = "sleep 2; " + display "on";
+          lock = (display "off") + "; " + lock;
+          unlock = display "on";
+        };
       };
-      timeouts = [
-        {
-          timeout = 300;
-          command = "${getExe' pkgs.systemd "loginctl"} lock-session";
-        }
-        {
-          timeout = 600;
-          command = "${getExe pkgs.niri} msg action power-off-monitors";
-          resumeCommand = "${getExe pkgs.niri} msg action power-on-monitors";
-        }
-      ];
-    };
 
     systemd.user.services.swaylock = {
       Unit = {

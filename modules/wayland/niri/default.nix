@@ -8,6 +8,7 @@
     (lib)
     enabled'
     disabled
+    mkEnableOpt
     cmd
     mkCmd
     mkBefore
@@ -15,15 +16,18 @@
     getExe'
     ;
 
-  niri-session-init = pkgs.writeShellScriptBin "niri-session-init" ''
-    ${pkgs.dbus}/bin/dbus-update-activation-environment --systemd --all
-    ${pkgs.systemd}/bin/systemctl --user import-environment PATH
-    ${pkgs.systemd}/bin/systemctl --user restart xdg-desktop-portal.service \
-                                                  plasma-xdg-desktop-portal-kde.service \
-                                                  xdg-desktop-portal-gtk.service \
-                                                  xdg-document-portal.service \
-                                                  xdg-permission-store.service
-  '';
+  # niri-session-init = pkgs.writeShellScriptBin "niri-session-init" ''
+  #   ${pkgs.dbus}/bin/dbus-update-activation-environment --systemd --all
+  #   ${pkgs.systemd}/bin/systemctl --user import-environment PATH
+  #   ${pkgs.systemd}/bin/systemctl --user restart xdg-desktop-portal.service \
+  #                                                 plasma-xdg-desktop-portal-kde.service \
+  #                                                 xdg-desktop-portal-gtk.service \
+  #                                                 xdg-document-portal.service \
+  #                                                 xdg-permission-store.service
+  # '';
+
+  niri = getExe' pkgs.niri-unstable "niri-session";
+  tuigreet = getExe pkgs.tuigreet;
 
   binaries = {
     wbg = mkCmd [(getExe pkgs.wbg)];
@@ -41,28 +45,26 @@
     notify-send = getExe' pkgs.libnotify "notify-send";
   };
 in {
+  options.local.wayland.niri = mkEnableOpt "niri module";
   config = {
-    # install niri system wide.
-    programs.niri = enabled' {package = pkgs.niri;};
-
-    # disable niri-flake's binary cache, we provide our own niri package.
+    programs.niri = enabled' {package = pkgs.niri-unstable;};
     niri-flake.cache = disabled;
-
     environment.systemPackages = with pkgs; [xwayland-satellite nautilus];
-
-    # NixOS otherwise injects a stripped PATH via Environment= on the niri.service
-    # unit which shadows the imported user-manager PATH. Disabling the default
-    # lets niri inherit the full PATH set up by niri-session.
-    systemd.user.services.niri.enableDefaultPath = false;
-
+    services.greetd.settings.default_session.command = "${tuigreet} --cmd ${niri}";
     local.home.programs.niri = {
-      package = pkgs.niri;
+      package = pkgs.niri-unstable;
       settings = {
         screenshot-path = "/home/jules/060_media/005_screenshots";
         xwayland-satellite = enabled' {path = binaries.xwayland-satellite;};
-        overview = {
-          zoom = 0.5;
-        };
+
+        overview.zoom = 0.5;
+        gestures.hot-corners = disabled;
+        prefer-no-csd = true;
+
+        # TODO: This is commented out because the niri-flake we're using doesn't
+        #       support these options.
+
+        # hotkey-overlay.skip-at-startup = true;
 
         # recent-windows = enabled' {
         #   binds = {
@@ -71,10 +73,6 @@ in {
         #     "Mod+grave".action.next-window = {filter = "app-id";};
         #     "Mod+Shift+grave".action.previous-window = {filter = "app-id";};
         #   };
-        # };
-
-        # gestures = {
-        #   hot-corners = disabled;
         # };
 
         blur = {
@@ -92,19 +90,14 @@ in {
         };
 
         spawn-at-startup = with binaries; [
-          (mkBefore {sh = getExe niri-session-init;})
           (mkBefore {command = [kded6];})
           {sh = cmd [kitty];}
           {sh = cmd [zen];}
           {sh = cmd [legcord];}
           {sh = cmd [signal];}
           {sh = cmd [helium];}
-          {sh = wbg ["-s" "$WALLPAPER"];}
-          {sh = cmd [waybar];}
+          # {sh = wbg ["-s" "$WALLPAPER"];}
         ];
-
-        prefer-no-csd = true;
-        hotkey-overlay.skip-at-startup = true;
 
         environment = {
           NIXOS_OZONE_WL = "1";
@@ -123,21 +116,11 @@ in {
         };
 
         workspaces = {
-          media = {
-            open-on-output = "DP-1";
-          };
-          browser = {
-            open-on-output = "DP-1";
-          };
-          chat = {
-            open-on-output = "DP-1";
-          };
-          zig = {
-            open-on-output = "HDMI-A-1";
-          };
-          nix = {
-            open-on-output = "HDMI-A-1";
-          };
+          media.open-on-output = "DP-1";
+          browser.open-on-output = "DP-1";
+          chat.open-on-output = "DP-1";
+          zig.open-on-output = "HDMI-A-1";
+          nix.open-on-output = "HDMI-A-1";
         };
       };
     };

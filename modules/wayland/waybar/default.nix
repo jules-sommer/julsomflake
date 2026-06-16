@@ -11,20 +11,25 @@
     genAttrs
     foldl'
     recursiveUpdate
+    optional
     getExe
+    getExe'
     cmdString
     optionalAttrs
-    concat
+    concatLists
     optionals
     ;
 
-  makoctl = pkgs.mako;
+  makoctl = getExe' pkgs.mako "makoctl";
   fuzzel = getExe pkgs.fuzzel;
   playerctl = getExe pkgs.playerctl;
   pwvucontrol = getExe pkgs.pwvucontrol;
   jq = getExe pkgs.jq;
 
-  activeCompositor = config.local.wayland.activeCompositor;
+  cfg = config.local.wayland;
+  isNiriEnabled = cfg.niri.enable;
+  isRiverEnabled = cfg.river.enable;
+  isPlasmaEnabled = cfg.river.enable;
 
   genMargins = sides: val: genAttrs (map (side: "margin-${side}") sides) (_: val);
 
@@ -98,15 +103,19 @@ in {
     };
 
     programs.waybar = enabled' {
+      systemd =
+        enabled' {
+        };
       style = makeStyle {
         font-family = "JetBrainsMono Nerd Font";
         font-size = "14px";
+        background = [16 0 24 208];
         shadow = [
           "rgba(100, 100, 111, 0.2) 0px 7px 29px 0px"
         ];
-        spacing = "5px";
-        spacing-small = "3px";
-        radius = "9999px";
+        spacing = 8;
+        spacing-small = 4;
+        radius = 9999; # basically fully rounded corners
       };
       settings = {
         mainbar = foldl' recursiveUpdate {} [
@@ -119,7 +128,7 @@ in {
           (genMargins ["top" "left" "right"] 8)
           {margin-bottom = 8;}
 
-          (optionalAttrs (activeCompositor == "river") {
+          (optionalAttrs isRiverEnabled {
             "river/mode" = {
               format = " {}";
             };
@@ -140,7 +149,7 @@ in {
             };
           })
 
-          (optionalAttrs (activeCompositor == "niri") {
+          (optionalAttrs isNiriEnabled {
             "niri/workspaces" = {
               format = ''<span size="small">{icon}</span><span size="small">{index}</span>'';
               format-icons = {
@@ -155,6 +164,7 @@ in {
 
             "niri/window" = {
               format = "{}";
+              max-length = 65;
               rewrite = {
                 "\\(.*\\) (.*) - YouTube — Zen Browser" = " $1";
                 "(.*) -- Zen Browser" = "󰾔 $1";
@@ -170,41 +180,45 @@ in {
           })
 
           {
-            modules-left = foldl' concat [] [
-              (optionals (activeCompositor == "river") [
-                "river/tags"
-                "river/window"
-              ])
-              (optionals (activeCompositor == "niri") [
-                "niri/workspaces"
-                "niri/window"
-              ])
+            modules-left = concatLists [
+              (optional isRiverEnabled "river/tags")
+              (optional isNiriEnabled "niri/workspaces")
+              ["tray"]
+              (optional isRiverEnabled "river/window")
+              (optional isNiriEnabled "niri/window")
             ];
           }
           {
-            modules-right = foldl' concat [] [
+            modules-right = concatLists [
               [
-                "tray"
                 "wireplumber"
                 "network"
                 "wireplumber#source"
                 "idle_inhibitor"
               ]
-              (optionals (activeCompositor == "river") [
+              (optionals isRiverEnabled [
                 "river/mode"
               ])
               [
                 "custom/notifications"
+                "systemd-failed-units"
                 "custom/uptime"
                 "custom/music"
               ]
             ];
           }
-
           {
             modules-center = [
               "clock"
             ];
+
+            systemd-failed-units = {
+              "hide-on-ok" = true; # Do not hide if there is zero failed units.
+              "format" = "✗ {nr_failed}";
+              "format-ok" = "✓";
+              "system" = true; # Monitor failed systemwide units.
+              "user" = false; # Ignore failed user units.
+            };
 
             "custom/notifications" = {
               exec = cmdString [makoctl "list" "-j" "|" jq "'. | length'"];
@@ -234,7 +248,8 @@ in {
             };
 
             tray = {
-              tooltip = false;
+              spacing = 16;
+              show-passive-items = true;
             };
 
             clock = {
@@ -283,7 +298,7 @@ in {
             };
 
             idle_inhibitor = {
-              format = "{icon}";
+              format = "{icon} {status}";
               format-icons = {
                 activated = icons.idle.on;
                 deactivated = icons.idle.off;

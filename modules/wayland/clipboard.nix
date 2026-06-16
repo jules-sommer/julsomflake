@@ -6,6 +6,7 @@
   inherit (lib) enabled';
 in {
   environment.systemPackages = with pkgs; [wl-clipboard];
+
   local = {
     home.services.cliphist = enabled' {
       allowImages = true;

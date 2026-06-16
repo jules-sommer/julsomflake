@@ -8,6 +8,8 @@
     mkAliasOptionModule
     types
     mkOption
+    filterAttrs
+    hasPrefix
     mkOpt
     mkOptWithExample
     mapAttrs
@@ -118,14 +120,23 @@ in {
         in this option) to command strings or directly to build outputs.
       '';
   };
-
-  config.local.home = {
-    programs.zsh = {
+  config = {
+    programs.fish = {
       inherit shellAliases;
-      zsh-abbr.abbreviations =
+      shellAbbrs =
         shellAbbrs
-        |> strOnlyAbbrs;
+        |> strOnlyAbbrs
+        |> filterAttrs (n: _: !(hasPrefix "-" n));
     };
-    programs.fish = {inherit shellAbbrs shellAliases;};
+    programs.zsh = {inherit shellAliases;};
+    local.home = {
+      programs.zsh = {
+        inherit shellAliases;
+        zsh-abbr.abbreviations =
+          shellAbbrs
+          |> strOnlyAbbrs;
+      };
+      programs.fish = {inherit shellAbbrs shellAliases;};
+    };
   };
 }

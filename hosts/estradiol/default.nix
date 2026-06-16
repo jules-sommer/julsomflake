@@ -23,7 +23,8 @@ in {
 
     wayland = enabled' {
       portals = true;
-      activeCompositor = "niri";
+      niri.enable = true;
+      wpaperd.enable = true;
       login.greetd = enabled;
     };
 
@@ -105,6 +106,7 @@ in {
     systemPackages = with pkgs; [
       zen-browser
       masterpdfeditor4
+      drawy
       inkscape-with-extensions
       btop
       mpv

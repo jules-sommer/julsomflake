@@ -41,21 +41,50 @@ in {
       ensureProfiles = {
         environmentFiles = [config.age.secrets.wifi-rcmp-surveillance.path];
         profiles = {
-          rcmp_surveillance = {
+          rcmp_surveillance_5ghz = {
             connection = {
-              id = "RCMP Surveillance 1";
+              id = "RCMP Surveillance 5GHz";
+              interface-name = "wlp15s0";
               type = "wifi";
+              uuid = "9fa178a4-ca78-4404-81f4-260c65e257e5";
             };
+            ipv4 = {method = "auto";};
+            ipv6 = {
+              addr-gen-mode = "default";
+              method = "auto";
+            };
+            proxy = {};
             wifi = {
-              ssid = "RCMP Surveillance";
               mode = "infrastructure";
+              ssid = "RCMP Surveillance 5GHz";
             };
-            wifi-sec = {
+            wifi-security = {
               key-mgmt = "sae";
               psk = "$WIFI_PSK";
             };
-            ipv4.method = "auto";
-            ipv6.method = "auto";
+          };
+          rcmp_surveillance = {
+            connection = {
+              id = "RCMP Surveillance";
+              permissions = "user:jules:;";
+              timestamp = "1777408539";
+              type = "wifi";
+              uuid = "de31260e-ddb8-41c5-a60e-03d76a379417";
+            };
+            ipv4 = {method = "auto";};
+            ipv6 = {
+              addr-gen-mode = "stable-privacy";
+              method = "auto";
+            };
+            proxy = {};
+            wifi = {
+              mode = "infrastructure";
+              ssid = "RCMP Surveillance";
+            };
+            wifi-security = {
+              key-mgmt = "wpa-psk";
+              psk = "$WIFI_PSK";
+            };
           };
         };
       };

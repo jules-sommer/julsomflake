@@ -42,13 +42,6 @@ in {
       (lib.hiPrio uutils-diffutils)
       file
     ];
-    local.home = {
-      programs.claude-code = enabled;
-      home.packages = foldl' concat [] [
-        (with pkgs.kdePackages; [
-          ark
-        ])
-      ];
-    };
+    local.home.programs.claude-code = enabled;
   };
 }

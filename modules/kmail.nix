@@ -4,15 +4,22 @@
   pkgs,
   ...
 }: let
-  inherit (lib) mkEnableOpt mkIf;
+  inherit (lib) mkEnableOpt optionals;
   cfg = config.local.programs.kmail;
 in {
   options.local.programs.kmail = mkEnableOpt "kmail";
-
-  config.environment.systemPackages = with pkgs.kdePackages; (mkIf cfg.enable [
-    kmail
-    kmail-account-wizard
-    kmailtransport
-    kdepim-addons # for addressbook and other plugins
-  ]);
+  config = {
+    environment = {
+      pathsToLink = ["/share"];
+      systemPackages = optionals cfg.enable (with pkgs.kdePackages; [
+        kmail
+        kmail-account-wizard
+        kmailtransport
+        kdepim-addons # for addressbook and other plugins
+        kdepim-runtime
+        akonadi
+        kwalletmanager
+      ]);
+    };
+  };
 }

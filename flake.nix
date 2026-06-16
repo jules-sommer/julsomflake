@@ -29,6 +29,7 @@
     eachDefaultSystemPassThrough (
       system: let
         helpers = inputs.helpers.lib;
+        wallpapers = import ./wallpapers {inherit lib pkgs;};
 
         _module.args = {
           inherit
@@ -36,6 +37,7 @@
             lib
             self
             inputs
+            wallpapers
             src
             ;
           packages = self.packages.${system};
@@ -161,7 +163,6 @@
       url = "github:jules-sommer/niri-flake/niri-26.04";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.niri-unstable.follows = "niri";
-      inputs.niri-stable.follows = "niri";
     };
 
     zen-browser = {

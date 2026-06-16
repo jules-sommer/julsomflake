@@ -93,14 +93,15 @@ in {
 
     layer-rules = [
       {
-        matches = [{namespace = "^wallpaper$";}];
+        matches = [
+          {namespace = "^wpaperd";}
+          {namespace = "^wallpaper$";}
+        ];
         place-within-backdrop = true;
       }
       {
         matches = [{namespace = "^waybar$";}];
-        background-effect = {
-          blur = true;
-        };
+        background-effect.blur = false;
       }
     ];
 

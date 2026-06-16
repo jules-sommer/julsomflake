@@ -42,6 +42,7 @@ in {
       "vault.estradiol.ca"
       "julsom.link"
       "pics.julsom.link"
+      "ntfy.julsom.link"
       "docs.julsom.link"
     ];
   };

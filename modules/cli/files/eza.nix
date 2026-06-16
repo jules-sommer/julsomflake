@@ -3,7 +3,7 @@
   packages,
   ...
 }: let
-  inherit (lib) enableShellIntegrations enabled';
+  inherit (lib) defaultShellIntegrations enabled';
 in {
   local = {
     home.programs.eza =
@@ -12,14 +12,19 @@ in {
         theme = "${packages.themes_eza}/themes/rose-pine.yml";
         git = true;
         icons = "auto";
+        extraOptions = [
+          "--group-directories-first"
+          "--header"
+          "--git-ignore"
+          "--hyperlink"
+        ];
       }
-      // enableShellIntegrations ["bash" "fish" "zsh"] true
-      // enableShellIntegrations ["ion" "nushell"] false;
+      // defaultShellIntegrations;
 
     shells.aliases = {
-      ls = "eza --icons=always --hyperlink --color=always --color-scale=all --git-ignore";
-      lst = "eza --icons=always --hyperlink --color=always --color-scale=all --git-ignore --tree";
-      lsa = "eza --icons=always --hyperlink --color=always --color-scale=all --git-ignore --tree -la";
+      ls = "eza";
+      lst = "eza -T";
+      lsa = "eza -la";
     };
   };
 }

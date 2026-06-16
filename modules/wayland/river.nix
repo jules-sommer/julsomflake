@@ -5,18 +5,19 @@
   ...
 }: let
   inherit (lib.attrsets) recursiveUpdate;
-  inherit (lib) foldl' listToAttrs enabled' enabled mkCmd getExe;
+  inherit (lib) foldl' listToAttrs enabled' enabled mkCmd getExe getExe' mkEnableOpt mkIf;
 
-  cfg = config.local.wayland;
+  cfg = config.local.wayland.river;
 
   zen = mkCmd [(getExe pkgs.zen-browser)];
   screenshot = mkCmd [(getExe pkgs.julespkgs.screenshot)];
   emoji-picker = mkCmd ["EMOJI_PICKER_MODE=type;" (getExe pkgs.julespkgs.emoji-picker)];
 in {
-  config = {
-    environment.systemPackages = with pkgs; [
-      river-bnf
-    ];
+  options.local.wayland.river = mkEnableOpt "river module";
+  config = mkIf cfg.enable {
+    environment.systemPackages = with pkgs; [river-bnf];
+
+    services.greetd.settings.default_session.command = "${pkgs.tuigreet}/bin/tuigreet --cmd ${getExe' pkgs.niri-unstable "niri-session"}";
 
     programs.river-classic = enabled' {
       package = null;

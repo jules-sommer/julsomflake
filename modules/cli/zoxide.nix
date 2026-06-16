@@ -1,9 +1,10 @@
 {
   lib,
   pkgs,
+  config,
   ...
 }: let
-  inherit (lib) enabled' enableShellIntegrations foldl' recursiveUpdate;
+  inherit (lib) enabled' defaultShellIntegrations foldl' recursiveUpdate;
 in {
   environment.systemPackages = with pkgs; [zoxide];
   local = {
@@ -13,10 +14,16 @@ in {
       zd = "zoxide"; # edit the zoxide database
     };
     home.programs.zoxide = enabled' (foldl' recursiveUpdate {} [
-      (enableShellIntegrations ["fish" "zsh" "bash"] true)
+      defaultShellIntegrations
       {
         options = ["--no-cmd"];
       }
     ]);
   };
+  programs.zoxide =
+    {
+      enable = true;
+      flags = config.home.programs.zoxide.options;
+    }
+    // defaultShellIntegrations;
 }

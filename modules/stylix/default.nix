@@ -1,6 +1,7 @@
 {
   lib,
   pkgs,
+  wallpapers,
   config,
   ...
 }: let
@@ -15,16 +16,18 @@
     concatLists
     mkForce
     ;
+  cfg = config.local.stylix;
 in {
   options.local.stylix = mkEnableOpt "Enable theming via stylix.";
 
   config = mkMerge [
     # Stylix system targets and config
     {
-      stylix = enabled' {
+      stylix = {
+        inherit (cfg) enable;
         autoEnable = true;
         base16Scheme = "${pkgs.base16-schemes}/share/themes/rose-pine.yaml";
-        image = ./wallpapers/rose_pine_contourline.png;
+        image = wallpapers.named.rose_pine_contourline;
         polarity = "dark";
         cursor = {
           name = "BreezeX-RosePineDawn-Linux";
@@ -60,6 +63,17 @@ in {
         autoEnable = true;
         targets = {
           fuzzel = disabled;
+
+          /**
+          * ERROR:  enabling kitty stylix theme causes it to inject an include referencing a /nix/store path
+          *         into kitty.conf. This has the consequence of triggering kitty to watch for changes in the
+          *         entire /nix/store, thus opening hundreds of thousands or millions of inotify file watchers
+          *         this is a known issue (see link below).
+          *
+          *         [kitty issue](https://github.com/kovidgoyal/kitty/issues/10102)
+          */
+          kitty = disabled;
+
           swaylock = disabled;
           gtk = enabled;
           zen-browser.profileNames = ["jules-debug"];
@@ -92,11 +106,6 @@ in {
             name = "Breeze-Dark";
             package = pkgs.kdePackages.breeze-gtk;
           };
-
-          # theme = mkForce {
-          #   name = "oomox-rose-pine-moon";
-          #   package = pkgs.rose-pine-gtk-theme;
-          # };
           iconTheme = mkForce {
             name = "breeze-dark";
             package = pkgs.kdePackages.breeze-icons;

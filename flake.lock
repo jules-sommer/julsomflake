@@ -504,9 +504,7 @@
     },
     "niri-flake": {
       "inputs": {
-        "niri-stable": [
-          "niri"
-        ],
+        "niri-stable": "niri-stable",
         "niri-unstable": [
           "niri"
         ],
@@ -529,6 +527,23 @@
         "owner": "jules-sommer",
         "ref": "niri-26.04",
         "repo": "niri-flake",
+        "type": "github"
+      }
+    },
+    "niri-stable": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1756556321,
+        "narHash": "sha256-RLD89dfjN0RVO86C/Mot0T7aduCygPGaYbog566F0Qo=",
+        "owner": "YaLTeR",
+        "repo": "niri",
+        "rev": "01be0e65f4eb91a9cd624ac0b76aaeab765c7294",
+        "type": "github"
+      },
+      "original": {
+        "owner": "YaLTeR",
+        "ref": "v25.08",
+        "repo": "niri",
         "type": "github"
       }
     },
