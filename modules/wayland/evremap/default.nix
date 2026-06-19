@@ -5,6 +5,7 @@
   ...
 }: let
   cfg = config.services.evremap;
+  keys = import ./__keys.nix;
   format = pkgs.formats.toml {};
 
   key =
@@ -74,9 +75,9 @@
         default = [];
         example = [
           {
-            input = "KEY_CAPSLOCK";
-            hold = ["KEY_LEFTCTRL"];
-            tap = ["KEY_ESC"];
+            input = keys.CAPSLOCK;
+            hold = [keys.LEFTCTRL];
+            tap = [keys.ESC];
           }
         ];
         description = ''
@@ -91,10 +92,10 @@
         example = [
           {
             input = [
-              "KEY_LEFTALT"
-              "KEY_UP"
+              keys.LEFTALT
+              keys.UP
             ];
-            output = ["KEY_PAGEUP"];
+            output = [keys.PAGEUP];
           }
         ];
         description = ''
@@ -124,8 +125,8 @@ in {
           device_name = "AT Translated Set 2 keyboard";
           remap = [
             {
-              input = ["KEY_CAPSLOCK"];
-              output = ["KEY_ESC"];
+              input = [keys.CAPSLOCK];
+              output = [keys.ESC];
             }
           ];
         }
@@ -134,8 +135,8 @@ in {
           phys = "usb-0000:10:00.0-2/input1";
           remap = [
             {
-              input = ["KEY_CAPSLOCK"];
-              output = ["KEY_LEFTCTRL"];
+              input = [keys.CAPSLOCK];
+              output = [keys.LEFTCTRL];
             }
           ];
         }

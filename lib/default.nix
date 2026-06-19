@@ -29,6 +29,7 @@ in
               importNixFiles = true;
               importFunction = depth: name: kind: path:
                 import path {
+                  pkgs = inputs.nixpkgs.legacyPackages.${builtins.currentSystem};
                   inherit (inputs.nixpkgs) lib;
                   inherit helpers;
                 };

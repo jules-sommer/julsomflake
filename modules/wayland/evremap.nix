@@ -1,6 +1,6 @@
 {lib, ...}: let
   inherit (lib) enabled';
-  keys = import ./evremap/keys.nix {};
+  keys = import ./evremap/__keys.nix;
 in {
   services.evremap = enabled' {
     devices = [

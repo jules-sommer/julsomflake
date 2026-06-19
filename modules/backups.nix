@@ -84,11 +84,9 @@ in {
           TimeoutStartSec = "infinity";
         };
         script = ''
-          ${systemd-inhibit} --what=sleep --who=restic \
-            --why="s3 mirror in progress" --mode=block \
-            ${rclone} copy /mnt/BACKUPS/restic-repo s3backup:${estradiol-backups-s3-bucket} \
-              --s3-storage-class DEEP_ARCHIVE \
-              --log-level INFO
+          ${rclone} copy /mnt/BACKUPS/restic-repo s3backup:${estradiol-backups-s3-bucket} \
+            --s3-storage-class DEEP_ARCHIVE \
+            --log-level INFO
         '';
       };
 

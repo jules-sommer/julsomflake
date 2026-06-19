@@ -1,4 +1,8 @@
-{lib, ...}: let
+{
+  lib,
+  pkgs,
+  ...
+}: let
   inherit (lib) typeOf concatMap concatStringsSep mapAttrsToList;
 
   flatten = x: let
@@ -33,19 +37,17 @@ in rec {
   */
   mkCmd = fixed: args: cmdString (fixed ++ args);
 
+  mkShellCmd = {
+    package ? pkgs.bash,
+    args ? ["-c"],
+  }: cmd:
+    mkCmd ([(lib.getExe package)] ++ args) cmd;
+
   /**
   Like `mkCmd` but returns a token list instead of a string.
   Use for compositors that accept commands as lists (e.g. niri `action.spawn`).
   */
   mkListCmd = fixed: args: cmdList (fixed ++ args);
-
-  /**
-  Wraps a command in a shell invocation, defaulting to `fish -c`.
-  Useful when shell features like env var substitution are needed
-  and the consumer doesn't provide its own shell execution.
-  */
-  withShell = {shell ? ["fish" "-c"]}: parts:
-    cmdString (shell ++ [cmdString parts]);
 
   /**
   Produces a quoted spawn command for compositors that require it (e.g. river).

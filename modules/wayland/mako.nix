@@ -4,11 +4,7 @@
   packages,
   ...
 }: let
-  inherit (lib) mkForce concatStringsSep getExe enabled';
-  inherit (builtins) readFile;
-  inherit (packages) themes_rose-pine_mako;
-
-  focus-notification-source-script = pkgs.writeShellScriptBin "focus-notification-source" (readFile ./mako/focus-notification-source.sh);
+  inherit (lib) mkForce getExe enabled';
 in {
   environment.systemPackages = with pkgs; [libnotify];
   local.home.services.mako = enabled' {
@@ -23,13 +19,12 @@ in {
       actions = true;
       border-radius = 4;
 
-      on-notify = "exec ${pkgs.mpv}/bin/mpv ${pkgs.kdePackages.ocean-sound-theme}/share/sounds/ocean/stereo/message-highlight.oga";
-      # on-button-left = "exec ${getExe focus-notification-source-script} $id";
+      on-notify = "exec ${getExe pkgs.mpv} ${pkgs.kdePackages.ocean-sound-theme}/share/sounds/ocean/stereo/message-highlight.oga";
+      on-button-left = "exec ${getExe packages.focus-notification-source} $id";
     };
 
-    extraConfig = concatStringsSep "\n" [
-      (readFile "${themes_rose-pine_mako}/theme/rose-pine.theme")
-      "on-notify=exec mpv ${pkgs.kdePackages.ocean-sound-theme}share/sounds/ocean/stereo/message-highlight.oga"
-    ];
+    # extraConfig = concatStringsSep "\n" [
+    #   (readFile "${themes_rose-pine_mako}/theme/rose-pine.theme")
+    # ];
   };
 }

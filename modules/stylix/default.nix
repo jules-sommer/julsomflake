@@ -73,8 +73,9 @@ in {
           *         [kitty issue](https://github.com/kovidgoyal/kitty/issues/10102)
           */
           kitty = disabled;
-
+          mako = enabled;
           swaylock = disabled;
+          hyprlock = disabled;
           gtk = enabled;
           zen-browser.profileNames = ["jules-debug"];
           qt = enabled' {

@@ -4,11 +4,12 @@
   config,
   ...
 }: let
-  inherit (lib) cmd getExe getExe' enabled';
-  loginctl = getExe' pkgs.systemd "loginctl";
-  systemctl = getExe' pkgs.systemd "systemctl";
-  swaylock = getExe pkgs.swaylock-effects;
-  niri = getExe config.home.programs.niri.package;
+  inherit (lib) getExe getExe' enabled' mkCmd;
+  loginctl = mkCmd [(getExe' pkgs.systemd "loginctl")];
+  systemctl = mkCmd [(getExe' pkgs.systemd "systemctl")];
+
+  hyprlock = getExe pkgs.hyprlock;
+  niri = mkCmd [(getExe config.home.programs.niri.package)];
 
   icon = name: "${pkgs.wleave}/share/wleave/icons/${name}.svg";
 in {
@@ -22,38 +23,45 @@ in {
       buttons = [
         {
           label = "lock";
-          action = swaylock;
+          action = hyprlock;
           text = "Lock";
           keybind = "l";
           icon = icon "lock";
         }
         {
           label = "logout";
-          action = cmd [loginctl "terminate-user" "$USER"];
+          action = loginctl ["terminate-user" "$USER"];
           text = "Logout";
           keybind = "e";
           icon = icon "logout";
         }
         {
           label = "shutdown";
-          action = cmd [systemctl "poweroff"];
+          action = systemctl ["poweroff"];
           text = "Shutdown";
           keybind = "s";
           icon = icon "shutdown";
         }
         {
           label = "lock-monitors";
-          action = "sh -c '${swaylock} & sleep 0.5 && ${niri} msg action power-off-monitors'";
+          action = "${hyprlock} & sleep 0.5 && ${niri ["msg" "action" "power-off-monitors"]}";
           text = "Lock + Monitors Off";
           keybind = "L";
           icon = icon "lock";
         }
         {
           label = "reboot";
-          action = cmd [systemctl "reboot"];
+          action = systemctl ["reboot"];
           text = "Reboot";
           keybind = "r";
           icon = icon "reboot";
+        }
+        {
+          label = "sleep";
+          action = "${loginctl ["lock-sessions"]}; sleep 1; ${systemctl ["suspend"]}";
+          text = "Sleep";
+          keybind = "z";
+          icon = icon "suspend";
         }
       ];
     };

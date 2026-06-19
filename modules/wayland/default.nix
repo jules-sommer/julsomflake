@@ -13,21 +13,7 @@
     ;
   cfg = config.local.wayland;
 in {
-  imports = getModulesRecursive ./. {
-    max-depth = 1;
-    blacklist = [
-      {
-        # exclude evremap/keys.nix since it is itself not a nixos module
-        name = "keys.nix";
-        kind = "regular";
-        depth = 1;
-      }
-      {
-        name = "eww";
-        kind = "directory";
-      }
-    ];
-  };
+  imports = getModulesRecursive ./. {max-depth = 1;};
 
   options.local.wayland = {
     enable = mkEnableOption "wayland utilities and config module";
@@ -48,13 +34,9 @@ in {
       mpv
       wev
       wshowkeys
-      cliphist
       wlrctl
-      waylock
-      wbg
       brightnessctl
       playerctl
-      imv
     ];
 
     security.pam.services.greetd = {
